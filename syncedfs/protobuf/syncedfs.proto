@@ -1,0 +1,87 @@
+message OperationsChunk {
+	required string relpath = 1;
+	repeated GenericOperation ops = 2;
+}
+
+message FileOperation {
+	required string relpath = 1;
+	required GenericOperation op = 2;
+}
+
+message GenericOperation {
+	optional int32 id = 1;
+
+	enum OperationType {
+		MKNOD = 3;
+		MKDIR = 4;
+		SYMLINK = 5;
+		UNLINK = 6;
+		RMDIR = 7;
+		RENAME = 8;
+		LINK = 9;
+		CHMOD = 10;
+		CHOWN = 11;
+		TRUNCATE = 12;
+		WRITE = 13;
+	}
+
+	optional OperationType type = 2;
+
+	optional MknodOperation mknodop = 3;
+	optional MkdirOperation mkdirop = 4;
+	optional SymlinkOperation symlinkop = 5;
+	optional UnlinkOperation unlinkop = 6;
+	optional RmdirOperation rmdirop = 7;
+	optional RenameOperation renameop = 8;
+	optional LinkOperation linkop = 9;
+	optional ChmodOperation chmodop = 10;
+	optional ChownOperation chownop = 11;
+	optional TruncateOperation truncateop = 12;
+	optional WriteOperation writeop = 13;
+}
+
+message MknodOperation {
+	optional int32 dummy = 3;
+}
+
+message MkdirOperation {
+	optional int32 dummy = 4;
+}
+
+message SymlinkOperation {
+	optional int32 dummy = 5;
+}
+
+message UnlinkOperation {
+	optional int32 dummy = 6;
+}
+
+message RmdirOperation {
+	optional int32 dummy = 7;
+}
+
+message RenameOperation {
+	optional int32 dummy = 8;
+}
+
+message LinkOperation {
+	optional int32 dummy = 9;
+}
+
+message ChmodOperation {
+	optional int32 dummy = 10;
+}
+
+message ChownOperation {
+	optional int32 dummy = 11;
+}
+
+message TruncateOperation {
+	optional int32 dummy = 12;
+}
+
+message WriteOperation {
+	required int64 offset = 1;
+	required int32 size = 2;
+	optional bytes data = 3;
+}
