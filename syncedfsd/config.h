@@ -12,7 +12,8 @@
 #include <limits.h>
 
 #define MAX_HEADER_LEN 4096 /*file name etc.*/
-#define MAX_RESNAME_LEN 32
+#define RESNAME_MAX 32
+#define SYNCID_MAX 64
 #define MAX_WRITE_LEN 4096
 #define MESSAGE_MAX 524288
 
@@ -23,11 +24,13 @@
 char c_port[NI_MAXSERV];
 char c_host[NI_MAXHOST];
 
-char c_resource[MAX_RESNAME_LEN];
+char c_resource[RESNAME_MAX];
 char c_mountpoint[PATH_MAX];
 char c_rootdir[PATH_MAX];
 
 void parseConfig(char *host, char* port);
+
+const char *getSyncId(void);
 
 #endif	/* CONFIG_H */
 

@@ -11,47 +11,12 @@
 #include "client.h"
 #include "lib/inet_sockets.h"
 #include "lib/uthash.h"
+#include "protobuf/sugar.h"
+#include "lib/tlpi_hdr.h"
 #include <stdio.h>
+#include <bits/errno.h>
+#include <sys/time.h>
 
-/*void test(const char *relpath, off_t offset, size_t size) {
-    FILE *f;
-    uint32_t msglen;
-    uint32_t writelen;
-    uint8_t *buf;
-    uint32_t *bufbegin;
-    FileOperation fileop = FILE_OPERATION__INIT;
-    FileOperation *fileop2;
-    GenericOperation genop = GENERIC_OPERATION__INIT;
-    WriteOperation writeop = WRITE_OPERATION__INIT;
-
-    f = fopen("/home/lukes/twrite.log", "wb");
-    writeop.offset = (int64_t) offset;
-    writeop.size = (int32_t) size;
-
-    genop.has_type = 1;
-    genop.type = GENERIC_OPERATION__OPERATION_TYPE__WRITE;
-    genop.writeop = &writeop;
-
-    fileop.relpath = relpath;
-    fileop.op = &genop;
-
-    msglen = (uint32_t) file_operation__get_packed_size(&fileop);
-    writelen = msglen + sizeof (uint32_t);
-    bufbegin = malloc(writelen);
-    if (bufbegin == NULL) {
-        return;
-    }
- *bufbegin = htonl(msglen);
-    buf = (uint8_t *) (bufbegin + 1);
-    file_operation__pack(&fileop, buf);
-
-    fileop2 = file_operation__unpack(NULL, msglen, buf);
-
-    return;
-
-    //if (fwrite(bufbegin, writelen, 1, f) != 1)
-    //    return; //error
-}*/
 
 fileop_t *files = NULL;
 
@@ -75,9 +40,10 @@ void transfer(char *host, char *port) {
     uint8_t *wdata;
     FILE *f;
     GenericOperation **opstart;
-    int nops = 0;       // how many GenericOperations are in the message
-    int nbytes = 0;     // how many data bytes (coming from write) are in
-                        // the message
+    int nchunks; // how many chunks for one file we have
+    int nops; // how many GenericOperations are in the message
+    int nbytes; // how many data bytes (coming from write) are in
+    // the message
 
     wdata = malloc(MESSAGE_MAX * sizeof (uint8_t));
     if (wdata == NULL)
@@ -85,77 +51,105 @@ void transfer(char *host, char *port) {
 
     cfd = inetConnect(host, port, SOCK_STREAM);
 
+    // initiate sync (sync-id, resource, number of files)
+    initiateSync(cfd, HASH_COUNT(files));
+
     // iterate over files in correct order
     HASH_SORT(files, sortByOrder);
     for (fileop = files; fileop != NULL; fileop = (fileop_t*) (fileop->hh.next)) {
+        nops = 0;
+        nbytes = 0;
         opstart = fileop->operations;
-        optimizeOperations(fileop);
+
+        nchunks = optimizeOperations(fileop);
 
         f = fopen(getAbsolutePath(fileop->filename), "rb");
 
         for (int i = 0; i < fileop->nelem; i++) {
-            // 1. Fetch next operation
+            // Fetch next operation
             op = *(fileop->operations + i);
 
-            // 2. If it is a write operation, we must fiddle around with wdata 
+            // If it is a write operation, we must fiddle around with wdata 
             // buffer
             if (op->type == GENERIC_OPERATION__OPERATION_TYPE__WRITE) {
                 // TODO: handle big single writes?
-                if (nbytes + op->writeop->size > MESSAGE_MAX) {
+                if (nbytes + op->write_op->size > MESSAGE_MAX) {
                     // create & transfer message
-                    transferChunk(cfd, fileop, opstart, nops);
+                    transferChunk(cfd, fileop, opstart, nops, nchunks--);
 
                     // reset counters & pointers
                     opstart = fileop->operations + i;
                     nops = 0;
                     nbytes = 0;
                 }
-                nbytes += op->writeop->size;
+                nbytes += op->write_op->size;
             }
             nops++;
 
-            // 3. load data in operation message
+            // Load data in operation message
             if (op->type == GENERIC_OPERATION__OPERATION_TYPE__WRITE) {
-                ProtobufCBinaryData data = {op->writeop->size, wdata + nbytes};
-                if (fread(wdata + nbytes, op->writeop->size, 1, f) != 1)
+                ProtobufCBinaryData data = {op->write_op->size, wdata + nbytes};
+                if (fread(wdata + nbytes, op->write_op->size, 1, f) != 1)
                     perror("read");
-                op->writeop->data = data;
+                op->write_op->data = data;
             }
 
         }
-        //transfer rest
+        // Transfer rest
+        if (nops > 0) {
+            transferChunk(cfd, fileop, opstart, nops, nchunks--);
+        }
 
         fclose(f);
     }
 }
 
 void transferChunk(int cfd, fileop_t *fileop, GenericOperation **opstart,
-        int nops) {
-    OperationsChunk opchunk = OPERATIONS_CHUNK__INIT;
-    uint32_t msglen;
-    uint32_t writelen;
+        int nops, int remchunks) {
+    FileChunk opchunk = FILE_CHUNK__INIT;
     uint8_t *buf;
-    uint32_t *bufbegin;
+    uint32_t msglen;
 
+    opchunk.relative_path = fileop->filename;
+    opchunk.remaining_chunks = remchunks;
     opchunk.n_ops = nops;
     opchunk.ops = opstart;
-    opchunk.relpath = fileop->filename;
 
-    msglen = (uint32_t) operations_chunk__get_packed_size(&opchunk);
-    writelen = msglen + sizeof (uint32_t);
-    bufbegin = malloc(writelen);
-    if (bufbegin == NULL) {
-        return;
+    getPackedMessage(FileChunkType, &opchunk, &buf, &msglen);
+
+    if (send(cfd, buf, msglen, MSG_NOSIGNAL) == -1) {
+        perror("send chunk");
     }
-    *bufbegin = htonl(msglen);
-    buf = (uint8_t *) (bufbegin + 1);
-    operations_chunk__pack(&opchunk, buf);
+    // wait for ACK?
 
-    send(cfd, buf, writelen);
+    freePackedMessage(buf);
+}
+
+void initiateSync(int cfd, int numfiles) {
+    SyncInitialization syncinit = SYNC_INITIALIZATION__INIT;
+    uint8_t *buf;
+    uint32_t msglen;
+
+    syncinit.number_files = numfiles;
+    syncinit.sync_id = getSyncId();
+    syncinit.resource = c_resource;
+
+    getPackedMessage(SyncInitializationType, &syncinit, &buf, &msglen);
+
+    if (send(cfd, buf, msglen, MSG_NOSIGNAL) == -1) {
+        perror("send init");
+    }
+
+    freePackedMessage(buf);
+    
+    // wait for response
+    // TODO
 }
 
 void sync(void) {
     // force syncedfs to switch to a new log file
+
+    // new sync or resume?
 
     //test("/test.txt", 0, 4096);
     readLog("/home/lukes/writes.log");
@@ -183,7 +177,7 @@ void readLog(char *logpath) {
 
         fileop = file_operation__unpack(NULL, msglen, buf);
 
-        addOperation(fileop->relpath, fileop->op);
+        addOperation(fileop->relative_path, fileop->op);
 
         //file_operation__free_unpacked(fileop, NULL);
         free(buf);
@@ -234,9 +228,9 @@ void printLog(void) {
         for (int i = 0; i < f->nelem; i++) {
             op = *(f->operations + i);
             printf("Operation %d, type: %d, offset: %d, size: %d\n",
-                    i, (int) op->type, (int) op->writeop->offset, (int) op->writeop->size);
+                    i, (int) op->type, (int) op->write_op->offset,
+                    (int) op->write_op->size);
         }
-
     }
 
 }
@@ -245,7 +239,7 @@ int optimizeOperations(fileop_t *fileop) {
     // TODO: Interval tree algorithm
     // Detect deletions
     // etc.
-    
+
     // number of messages need to transfer all file operations
     int nbytes = 0;
     int nops = 0;
@@ -257,18 +251,18 @@ int optimizeOperations(fileop_t *fileop) {
 
         if (op->type == GENERIC_OPERATION__OPERATION_TYPE__WRITE) {
             // TODO: handle big single writes?
-            if (nbytes + op->writeop->size > MESSAGE_MAX) {
+            if (nbytes + op->write_op->size > MESSAGE_MAX) {
                 nops = 0;
                 nbytes = 0;
                 nmessages++;
             }
-            nbytes += op->writeop->size;
+            nbytes += op->write_op->size;
         }
         nops++;
     }
-    
+
     if (nops > 0)
         nmessages++;
-    
+
     return nmessages;
 }

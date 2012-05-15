@@ -6,47 +6,90 @@
 #endif
 
 #include "syncedfs.pb-c.h"
-void   operations_chunk__init
-                     (OperationsChunk         *message)
+void   sync_initialization__init
+                     (SyncInitialization         *message)
 {
-  static OperationsChunk init_value = OPERATIONS_CHUNK__INIT;
+  static SyncInitialization init_value = SYNC_INITIALIZATION__INIT;
   *message = init_value;
 }
-size_t operations_chunk__get_packed_size
-                     (const OperationsChunk *message)
+size_t sync_initialization__get_packed_size
+                     (const SyncInitialization *message)
 {
-  PROTOBUF_C_ASSERT (message->base.descriptor == &operations_chunk__descriptor);
+  PROTOBUF_C_ASSERT (message->base.descriptor == &sync_initialization__descriptor);
   return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
-size_t operations_chunk__pack
-                     (const OperationsChunk *message,
+size_t sync_initialization__pack
+                     (const SyncInitialization *message,
                       uint8_t       *out)
 {
-  PROTOBUF_C_ASSERT (message->base.descriptor == &operations_chunk__descriptor);
+  PROTOBUF_C_ASSERT (message->base.descriptor == &sync_initialization__descriptor);
   return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
-size_t operations_chunk__pack_to_buffer
-                     (const OperationsChunk *message,
+size_t sync_initialization__pack_to_buffer
+                     (const SyncInitialization *message,
                       ProtobufCBuffer *buffer)
 {
-  PROTOBUF_C_ASSERT (message->base.descriptor == &operations_chunk__descriptor);
+  PROTOBUF_C_ASSERT (message->base.descriptor == &sync_initialization__descriptor);
   return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
-OperationsChunk *
-       operations_chunk__unpack
+SyncInitialization *
+       sync_initialization__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data)
 {
-  return (OperationsChunk *)
-     protobuf_c_message_unpack (&operations_chunk__descriptor,
+  return (SyncInitialization *)
+     protobuf_c_message_unpack (&sync_initialization__descriptor,
                                 allocator, len, data);
 }
-void   operations_chunk__free_unpacked
-                     (OperationsChunk *message,
+void   sync_initialization__free_unpacked
+                     (SyncInitialization *message,
                       ProtobufCAllocator *allocator)
 {
-  PROTOBUF_C_ASSERT (message->base.descriptor == &operations_chunk__descriptor);
+  PROTOBUF_C_ASSERT (message->base.descriptor == &sync_initialization__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   file_chunk__init
+                     (FileChunk         *message)
+{
+  static FileChunk init_value = FILE_CHUNK__INIT;
+  *message = init_value;
+}
+size_t file_chunk__get_packed_size
+                     (const FileChunk *message)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &file_chunk__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t file_chunk__pack
+                     (const FileChunk *message,
+                      uint8_t       *out)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &file_chunk__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t file_chunk__pack_to_buffer
+                     (const FileChunk *message,
+                      ProtobufCBuffer *buffer)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &file_chunk__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+FileChunk *
+       file_chunk__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (FileChunk *)
+     protobuf_c_message_unpack (&file_chunk__descriptor,
+                                allocator, len, data);
+}
+void   file_chunk__free_unpacked
+                     (FileChunk *message,
+                      ProtobufCAllocator *allocator)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &file_chunk__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 void   file_operation__init
@@ -608,15 +651,91 @@ void   write_operation__free_unpacked
   PROTOBUF_C_ASSERT (message->base.descriptor == &write_operation__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-static const ProtobufCFieldDescriptor operations_chunk__field_descriptors[2] =
+static const ProtobufCFieldDescriptor sync_initialization__field_descriptors[3] =
 {
   {
-    "relpath",
+    "sync_id",
     1,
     PROTOBUF_C_LABEL_REQUIRED,
     PROTOBUF_C_TYPE_STRING,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(OperationsChunk, relpath),
+    PROTOBUF_C_OFFSETOF(SyncInitialization, sync_id),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "resource",
+    2,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(SyncInitialization, resource),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "number_files",
+    3,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(SyncInitialization, number_files),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned sync_initialization__field_indices_by_name[] = {
+  2,   /* field[2] = number_files */
+  1,   /* field[1] = resource */
+  0,   /* field[0] = sync_id */
+};
+static const ProtobufCIntRange sync_initialization__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 3 }
+};
+const ProtobufCMessageDescriptor sync_initialization__descriptor =
+{
+  PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
+  "SyncInitialization",
+  "SyncInitialization",
+  "SyncInitialization",
+  "",
+  sizeof(SyncInitialization),
+  3,
+  sync_initialization__field_descriptors,
+  sync_initialization__field_indices_by_name,
+  1,  sync_initialization__number_ranges,
+  (ProtobufCMessageInit) sync_initialization__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor file_chunk__field_descriptors[3] =
+{
+  {
+    "relative_path",
+    1,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(FileChunk, relative_path),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "remaining_chunks",
+    2,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(FileChunk, remaining_chunks),
     NULL,
     NULL,
     0,            /* packed */
@@ -624,50 +743,51 @@ static const ProtobufCFieldDescriptor operations_chunk__field_descriptors[2] =
   },
   {
     "ops",
-    2,
+    3,
     PROTOBUF_C_LABEL_REPEATED,
     PROTOBUF_C_TYPE_MESSAGE,
-    PROTOBUF_C_OFFSETOF(OperationsChunk, n_ops),
-    PROTOBUF_C_OFFSETOF(OperationsChunk, ops),
+    PROTOBUF_C_OFFSETOF(FileChunk, n_ops),
+    PROTOBUF_C_OFFSETOF(FileChunk, ops),
     &generic_operation__descriptor,
     NULL,
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
 };
-static const unsigned operations_chunk__field_indices_by_name[] = {
-  1,   /* field[1] = ops */
-  0,   /* field[0] = relpath */
+static const unsigned file_chunk__field_indices_by_name[] = {
+  2,   /* field[2] = ops */
+  0,   /* field[0] = relative_path */
+  1,   /* field[1] = remaining_chunks */
 };
-static const ProtobufCIntRange operations_chunk__number_ranges[1 + 1] =
+static const ProtobufCIntRange file_chunk__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 2 }
+  { 0, 3 }
 };
-const ProtobufCMessageDescriptor operations_chunk__descriptor =
+const ProtobufCMessageDescriptor file_chunk__descriptor =
 {
   PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
-  "OperationsChunk",
-  "OperationsChunk",
-  "OperationsChunk",
+  "FileChunk",
+  "FileChunk",
+  "FileChunk",
   "",
-  sizeof(OperationsChunk),
-  2,
-  operations_chunk__field_descriptors,
-  operations_chunk__field_indices_by_name,
-  1,  operations_chunk__number_ranges,
-  (ProtobufCMessageInit) operations_chunk__init,
+  sizeof(FileChunk),
+  3,
+  file_chunk__field_descriptors,
+  file_chunk__field_indices_by_name,
+  1,  file_chunk__number_ranges,
+  (ProtobufCMessageInit) file_chunk__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
 static const ProtobufCFieldDescriptor file_operation__field_descriptors[2] =
 {
   {
-    "relpath",
+    "relative_path",
     1,
     PROTOBUF_C_LABEL_REQUIRED,
     PROTOBUF_C_TYPE_STRING,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(FileOperation, relpath),
+    PROTOBUF_C_OFFSETOF(FileOperation, relative_path),
     NULL,
     NULL,
     0,            /* packed */
@@ -688,7 +808,7 @@ static const ProtobufCFieldDescriptor file_operation__field_descriptors[2] =
 };
 static const unsigned file_operation__field_indices_by_name[] = {
   1,   /* field[1] = op */
-  0,   /* field[0] = relpath */
+  0,   /* field[0] = relative_path */
 };
 static const ProtobufCIntRange file_operation__number_ranges[1 + 1] =
 {
@@ -783,132 +903,132 @@ static const ProtobufCFieldDescriptor generic_operation__field_descriptors[13] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "mknodop",
+    "mknod_op",
     3,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, mknodop),
+    PROTOBUF_C_OFFSETOF(GenericOperation, mknod_op),
     &mknod_operation__descriptor,
     NULL,
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "mkdirop",
+    "mkdir_op",
     4,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, mkdirop),
+    PROTOBUF_C_OFFSETOF(GenericOperation, mkdir_op),
     &mkdir_operation__descriptor,
     NULL,
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "symlinkop",
+    "symlink_op",
     5,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, symlinkop),
+    PROTOBUF_C_OFFSETOF(GenericOperation, symlink_op),
     &symlink_operation__descriptor,
     NULL,
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "unlinkop",
+    "unlink_op",
     6,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, unlinkop),
+    PROTOBUF_C_OFFSETOF(GenericOperation, unlink_op),
     &unlink_operation__descriptor,
     NULL,
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "rmdirop",
+    "rmdir_op",
     7,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, rmdirop),
+    PROTOBUF_C_OFFSETOF(GenericOperation, rmdir_op),
     &rmdir_operation__descriptor,
     NULL,
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "renameop",
+    "rename_op",
     8,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, renameop),
+    PROTOBUF_C_OFFSETOF(GenericOperation, rename_op),
     &rename_operation__descriptor,
     NULL,
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "linkop",
+    "link_op",
     9,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, linkop),
+    PROTOBUF_C_OFFSETOF(GenericOperation, link_op),
     &link_operation__descriptor,
     NULL,
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "chmodop",
+    "chmod_op",
     10,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, chmodop),
+    PROTOBUF_C_OFFSETOF(GenericOperation, chmod_op),
     &chmod_operation__descriptor,
     NULL,
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "chownop",
+    "chown_op",
     11,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, chownop),
+    PROTOBUF_C_OFFSETOF(GenericOperation, chown_op),
     &chown_operation__descriptor,
     NULL,
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "truncateop",
+    "truncate_op",
     12,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, truncateop),
+    PROTOBUF_C_OFFSETOF(GenericOperation, truncate_op),
     &truncate_operation__descriptor,
     NULL,
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "writeop",
+    "write_op",
     13,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, writeop),
+    PROTOBUF_C_OFFSETOF(GenericOperation, write_op),
     &write_operation__descriptor,
     NULL,
     0,            /* packed */
@@ -916,19 +1036,19 @@ static const ProtobufCFieldDescriptor generic_operation__field_descriptors[13] =
   },
 };
 static const unsigned generic_operation__field_indices_by_name[] = {
-  9,   /* field[9] = chmodop */
-  10,   /* field[10] = chownop */
+  9,   /* field[9] = chmod_op */
+  10,   /* field[10] = chown_op */
   0,   /* field[0] = id */
-  8,   /* field[8] = linkop */
-  3,   /* field[3] = mkdirop */
-  2,   /* field[2] = mknodop */
-  7,   /* field[7] = renameop */
-  6,   /* field[6] = rmdirop */
-  4,   /* field[4] = symlinkop */
-  11,   /* field[11] = truncateop */
+  8,   /* field[8] = link_op */
+  3,   /* field[3] = mkdir_op */
+  2,   /* field[2] = mknod_op */
+  7,   /* field[7] = rename_op */
+  6,   /* field[6] = rmdir_op */
+  4,   /* field[4] = symlink_op */
+  11,   /* field[11] = truncate_op */
   1,   /* field[1] = type */
-  5,   /* field[5] = unlinkop */
-  12,   /* field[12] = writeop */
+  5,   /* field[5] = unlink_op */
+  12,   /* field[12] = write_op */
 };
 static const ProtobufCIntRange generic_operation__number_ranges[1 + 1] =
 {

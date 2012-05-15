@@ -1,10 +1,17 @@
-message OperationsChunk {
-	required string relpath = 1;
-	repeated GenericOperation ops = 2;
+message SyncInitialization {
+	required string sync_id = 1;
+	required string resource = 2;
+	required int32 number_files = 3;
+}
+
+message FileChunk {
+	required string relative_path = 1;
+	required int32 remaining_chunks = 2;
+	repeated GenericOperation ops = 3;
 }
 
 message FileOperation {
-	required string relpath = 1;
+	required string relative_path = 1;
 	required GenericOperation op = 2;
 }
 
@@ -27,17 +34,17 @@ message GenericOperation {
 
 	optional OperationType type = 2;
 
-	optional MknodOperation mknodop = 3;
-	optional MkdirOperation mkdirop = 4;
-	optional SymlinkOperation symlinkop = 5;
-	optional UnlinkOperation unlinkop = 6;
-	optional RmdirOperation rmdirop = 7;
-	optional RenameOperation renameop = 8;
-	optional LinkOperation linkop = 9;
-	optional ChmodOperation chmodop = 10;
-	optional ChownOperation chownop = 11;
-	optional TruncateOperation truncateop = 12;
-	optional WriteOperation writeop = 13;
+	optional MknodOperation mknod_op = 3;
+	optional MkdirOperation mkdir_op = 4;
+	optional SymlinkOperation symlink_op = 5;
+	optional UnlinkOperation unlink_op = 6;
+	optional RmdirOperation rmdir_op = 7;
+	optional RenameOperation rename_op = 8;
+	optional LinkOperation link_op = 9;
+	optional ChmodOperation chmod_op = 10;
+	optional ChownOperation chown_op = 11;
+	optional TruncateOperation truncate_op = 12;
+	optional WriteOperation write_op = 13;
 }
 
 message MknodOperation {

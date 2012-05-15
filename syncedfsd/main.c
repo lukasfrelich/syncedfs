@@ -21,7 +21,7 @@ void usage(void) {
     abort();
 }
 
-void log_write(const char *relpath, off_t offset, size_t size) {
+/*void log_write(const char *relpath, off_t offset, size_t size) {
     FILE *log;
     log = fopen("/home/lfr/writes.log", "ab");
     if (log == NULL)
@@ -39,9 +39,9 @@ void log_write(const char *relpath, off_t offset, size_t size) {
     writeop.size = (int32_t) size;
 
     genop.type = GENERIC_OPERATION__OPERATION_TYPE__WRITE;
-    genop.writeop = &writeop;
+    genop.write_op = &writeop;
 
-    fileop.relpath = relpath;
+    fileop.relative_path = relpath;
     fileop.op = &genop;
 
     msglen = (uint32_t) file_operation__get_packed_size(&fileop);
@@ -57,7 +57,7 @@ void log_write(const char *relpath, off_t offset, size_t size) {
     if (fwrite(buf_p, writelen, 1, log) != 1)
         return; //error
     fclose(log);
-}
+}*/
 
 /*
  * 

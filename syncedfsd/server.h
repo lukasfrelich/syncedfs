@@ -8,18 +8,18 @@
 #ifndef SERVER_H
 #define	SERVER_H
 
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include "lib/inet_sockets.h"
-#include "lib/read_line.h"
-#include "lib/tlpi_hdr.h"
+#include <inttypes.h>
+#include "protobuf/syncedfs.pb-c.h"
 
 void startServer(void);
 void handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen);
 int createSnapshot(void);
-int parseSyncStart(char *header, char *resname, int *numoper);
+int getMessage(int cfd, uint8_t **buffer, uint32_t *length);
+
+
+/*int parseSyncStart(char *header, char *resname, int *numoper);
 int parseOperation(char *header, char *operation, long long *datalength,
                    char *filename);
-int handleWrite(int cfd, long long datalength, char *filename);
+int handleWrite(int cfd, long long datalength, char *filename);*/
 
 #endif	/* SERVER_H */

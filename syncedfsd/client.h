@@ -9,7 +9,6 @@
 #define	CLIENT_H
 
 #include "config.h"
-#include "lib/tlpi_hdr.h"
 #include "lib/uthash.h"
 #include "protobuf/syncedfs.pb-c.h"
 
@@ -29,8 +28,9 @@ void readLog(char *logpath);
 void addOperation(char *relpath, GenericOperation *op);
 void printLog(void);
 int optimizeOperations(fileop_t *fileop);
+void initiateSync(int cfd, int numfiles);
 void transferChunk(int cfd, fileop_t *fileop, GenericOperation **opstart,
-        int nops);
+        int nops, int remchunks);
 
 
 #endif	/* CLIENT_H */
