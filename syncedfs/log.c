@@ -52,6 +52,8 @@ void log_msg(const char *format, ...) {
 }
 
 void log_write(const char *relpath, off_t offset, size_t size) {
+    // TODO: change to use getPackedMessage
+    
     uint32_t msglen;
     uint32_t writelen;
     uint8_t *buf;
@@ -65,9 +67,9 @@ void log_write(const char *relpath, off_t offset, size_t size) {
 
     genop.has_type = 1;
     genop.type = GENERIC_OPERATION__OPERATION_TYPE__WRITE;
-    genop.writeop = &writeop;
+    genop.write_op = &writeop;
 
-    fileop.relpath = relpath;
+    fileop.relative_path = relpath;
     fileop.op = &genop;
 
     msglen = (uint32_t) file_operation__get_packed_size(&fileop);

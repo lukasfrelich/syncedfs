@@ -8,7 +8,8 @@
 PROTOBUF_C_BEGIN_DECLS
 
 
-typedef struct _OperationsChunk OperationsChunk;
+typedef struct _SyncInitialization SyncInitialization;
+typedef struct _FileChunk FileChunk;
 typedef struct _FileOperation FileOperation;
 typedef struct _GenericOperation GenericOperation;
 typedef struct _MknodOperation MknodOperation;
@@ -42,22 +43,35 @@ typedef enum _GenericOperation__OperationType {
 
 /* --- messages --- */
 
-struct  _OperationsChunk
+struct  _SyncInitialization
 {
   ProtobufCMessage base;
-  char *relpath;
+  char *sync_id;
+  char *resource;
+  int32_t number_files;
+};
+#define SYNC_INITIALIZATION__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&sync_initialization__descriptor) \
+    , NULL, NULL, 0 }
+
+
+struct  _FileChunk
+{
+  ProtobufCMessage base;
+  char *relative_path;
+  int32_t number_chunks;
   size_t n_ops;
   GenericOperation **ops;
 };
-#define OPERATIONS_CHUNK__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&operations_chunk__descriptor) \
-    , NULL, 0,NULL }
+#define FILE_CHUNK__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&file_chunk__descriptor) \
+    , NULL, 0, 0,NULL }
 
 
 struct  _FileOperation
 {
   ProtobufCMessage base;
-  char *relpath;
+  char *relative_path;
   GenericOperation *op;
 };
 #define FILE_OPERATION__INIT \
@@ -72,17 +86,17 @@ struct  _GenericOperation
   int32_t id;
   protobuf_c_boolean has_type;
   GenericOperation__OperationType type;
-  MknodOperation *mknodop;
-  MkdirOperation *mkdirop;
-  SymlinkOperation *symlinkop;
-  UnlinkOperation *unlinkop;
-  RmdirOperation *rmdirop;
-  RenameOperation *renameop;
-  LinkOperation *linkop;
-  ChmodOperation *chmodop;
-  ChownOperation *chownop;
-  TruncateOperation *truncateop;
-  WriteOperation *writeop;
+  MknodOperation *mknod_op;
+  MkdirOperation *mkdir_op;
+  SymlinkOperation *symlink_op;
+  UnlinkOperation *unlink_op;
+  RmdirOperation *rmdir_op;
+  RenameOperation *rename_op;
+  LinkOperation *link_op;
+  ChmodOperation *chmod_op;
+  ChownOperation *chown_op;
+  TruncateOperation *truncate_op;
+  WriteOperation *write_op;
 };
 #define GENERIC_OPERATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&generic_operation__descriptor) \
@@ -212,24 +226,43 @@ struct  _WriteOperation
     , 0, 0, 0,{0,NULL} }
 
 
-/* OperationsChunk methods */
-void   operations_chunk__init
-                     (OperationsChunk         *message);
-size_t operations_chunk__get_packed_size
-                     (const OperationsChunk   *message);
-size_t operations_chunk__pack
-                     (const OperationsChunk   *message,
+/* SyncInitialization methods */
+void   sync_initialization__init
+                     (SyncInitialization         *message);
+size_t sync_initialization__get_packed_size
+                     (const SyncInitialization   *message);
+size_t sync_initialization__pack
+                     (const SyncInitialization   *message,
                       uint8_t             *out);
-size_t operations_chunk__pack_to_buffer
-                     (const OperationsChunk   *message,
+size_t sync_initialization__pack_to_buffer
+                     (const SyncInitialization   *message,
                       ProtobufCBuffer     *buffer);
-OperationsChunk *
-       operations_chunk__unpack
+SyncInitialization *
+       sync_initialization__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data);
-void   operations_chunk__free_unpacked
-                     (OperationsChunk *message,
+void   sync_initialization__free_unpacked
+                     (SyncInitialization *message,
+                      ProtobufCAllocator *allocator);
+/* FileChunk methods */
+void   file_chunk__init
+                     (FileChunk         *message);
+size_t file_chunk__get_packed_size
+                     (const FileChunk   *message);
+size_t file_chunk__pack
+                     (const FileChunk   *message,
+                      uint8_t             *out);
+size_t file_chunk__pack_to_buffer
+                     (const FileChunk   *message,
+                      ProtobufCBuffer     *buffer);
+FileChunk *
+       file_chunk__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   file_chunk__free_unpacked
+                     (FileChunk *message,
                       ProtobufCAllocator *allocator);
 /* FileOperation methods */
 void   file_operation__init
@@ -480,8 +513,11 @@ void   write_operation__free_unpacked
                       ProtobufCAllocator *allocator);
 /* --- per-message closures --- */
 
-typedef void (*OperationsChunk_Closure)
-                 (const OperationsChunk *message,
+typedef void (*SyncInitialization_Closure)
+                 (const SyncInitialization *message,
+                  void *closure_data);
+typedef void (*FileChunk_Closure)
+                 (const FileChunk *message,
                   void *closure_data);
 typedef void (*FileOperation_Closure)
                  (const FileOperation *message,
@@ -528,7 +564,8 @@ typedef void (*WriteOperation_Closure)
 
 /* --- descriptors --- */
 
-extern const ProtobufCMessageDescriptor operations_chunk__descriptor;
+extern const ProtobufCMessageDescriptor sync_initialization__descriptor;
+extern const ProtobufCMessageDescriptor file_chunk__descriptor;
 extern const ProtobufCMessageDescriptor file_operation__descriptor;
 extern const ProtobufCMessageDescriptor generic_operation__descriptor;
 extern const ProtobufCEnumDescriptor    generic_operation__operation_type__descriptor;
