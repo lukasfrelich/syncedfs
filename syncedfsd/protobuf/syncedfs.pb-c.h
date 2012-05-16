@@ -59,7 +59,7 @@ struct  _FileChunk
 {
   ProtobufCMessage base;
   char *relative_path;
-  int32_t remaining_chunks;
+  int32_t number_chunks;
   size_t n_ops;
   GenericOperation **ops;
 };

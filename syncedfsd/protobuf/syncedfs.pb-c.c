@@ -730,12 +730,12 @@ static const ProtobufCFieldDescriptor file_chunk__field_descriptors[3] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "remaining_chunks",
+    "number_chunks",
     2,
     PROTOBUF_C_LABEL_REQUIRED,
     PROTOBUF_C_TYPE_INT32,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(FileChunk, remaining_chunks),
+    PROTOBUF_C_OFFSETOF(FileChunk, number_chunks),
     NULL,
     NULL,
     0,            /* packed */
@@ -755,9 +755,9 @@ static const ProtobufCFieldDescriptor file_chunk__field_descriptors[3] =
   },
 };
 static const unsigned file_chunk__field_indices_by_name[] = {
+  1,   /* field[1] = number_chunks */
   2,   /* field[2] = ops */
   0,   /* field[0] = relative_path */
-  1,   /* field[1] = remaining_chunks */
 };
 static const ProtobufCIntRange file_chunk__number_ranges[1 + 1] =
 {

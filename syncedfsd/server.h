@@ -17,6 +17,13 @@ int createSnapshot(void);
 int getMessage(int cfd, uint8_t **buffer, uint32_t *length);
 
 
+//------------------------------------------------------------------------------
+// Operation handlers
+//------------------------------------------------------------------------------
+int handleGenericOperation(int fd, GenericOperation *genop);
+int handleWrite(int fd, WriteOperation *writeop);
+
+
 /*int parseSyncStart(char *header, char *resname, int *numoper);
 int parseOperation(char *header, char *operation, long long *datalength,
                    char *filename);

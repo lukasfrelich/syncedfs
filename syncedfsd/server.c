@@ -14,6 +14,7 @@
 #include <sys/socket.h>
 #include "lib/inet_sockets.h"
 #include "lib/tlpi_hdr.h"
+#include "common.h"
 
 #include <fcntl.h>
 
@@ -38,9 +39,7 @@ void startServer(void) {
 
 void handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
     char addrstr[IS_ADDR_STR_LEN];
-    uint8_t *buf;
-    uint32_t msglen;
-
+    
     if (cfd == -1) {
         errMsg("accept");
         return;
@@ -50,50 +49,49 @@ void handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
 
     // sync-init
     SyncInitialization *syncinit;
-    getMessage(cfd, &buf, &msglen);
-    syncinit = sync_initialization__unpack(NULL, msglen, buf);
+    syncinit = (SyncInitialization *)
+            getMessageFromSocket(cfd, SyncInitializationType);
 
     // check sync-id
-    // check resource (must match
-    // send response
-    
-
-    // outer loop: files, inner loop: chunks
-    
-/*
-    
-    char header[MAX_HEADER_LEN];
-    char msg[MAX_HEADER_LEN];
-    char res[RESNAME_MAX];
-    int numoper;
-
-
-
-
-
-    char oper;
-    long long dlength;
-    char filename[PATH_MAX];
-    for (int i = 0; i < numoper; i++) {
-        if (readLine(cfd, header, MAX_HEADER_LEN) <= 0) {
-            close(cfd);
-            errMsg("read header, operation %d", (i + 1));
-            return;
-        }
-        if (parseOperation(header, &oper, &dlength, filename) != 0) {
-            close(cfd);
-            errMsg("incorrect header, operation %d", (i + 1));
-            return;
-        }
-
-        if (strcmp(&oper, "write") == 0) {
-            handleWrite(cfd, dlength, filename);
-        }
+    // check resource (must match)
+    if (strcmp(syncinit->resource, c_resource) != 0) {
+        // TODO: set fail flag
+        return;
     }
 
-    // TODO: send ack
-    snprintf(msg, MAX_HEADER_LEN, "ack\n");
-*/
+    int32_t nfiles;
+    nfiles = syncinit->number_files;
+    
+    // TODO: send response
+    
+    
+    sync_initialization__free_unpacked(syncinit, NULL);
+
+    // outer loop: files, inner loop: chunks
+    for (int i = 0; i < nfiles; i++) {
+        FileChunk *chunk;
+        int32_t nchunks;
+        int fd;
+        
+        fd = open(chunk->relative_path, O_WRONLY | O_CREAT);
+        if (fd == -1)
+            perror("open");
+
+        chunk = (FileChunk *) getMessageFromSocket(cfd, FileChunkType);
+        nchunks = chunk->number_chunks;
+        for (int j = 0; j < nchunks;
+                chunk = (FileChunk *) getMessageFromSocket(cfd, FileChunkType)) {
+
+            for (int k = 0; k < chunk->n_ops; k++) {
+                handleGenericOperation(fd, chunk->ops[k]);
+            }
+
+            file_chunk__free_unpacked(chunk, NULL);
+        }
+        
+        close(fd);
+
+    }
 
     if (close(cfd) == -1)
         errMsg("close");
@@ -105,7 +103,36 @@ int createSnapshot(void) {
     return 0;
 }
 
-int getMessage(int cfd, uint8_t **buffer, uint32_t *length) {
+//------------------------------------------------------------------------------
+// Operation handlers
+//------------------------------------------------------------------------------
+int handleGenericOperation(int fd, GenericOperation *genop) {
+    switch (genop->type) {
+        case GENERIC_OPERATION__OPERATION_TYPE__MKNOD:
+        case GENERIC_OPERATION__OPERATION_TYPE__MKDIR:
+        case GENERIC_OPERATION__OPERATION_TYPE__SYMLINK:
+        case GENERIC_OPERATION__OPERATION_TYPE__UNLINK:
+        case GENERIC_OPERATION__OPERATION_TYPE__RMDIR:
+        case GENERIC_OPERATION__OPERATION_TYPE__RENAME:
+        case GENERIC_OPERATION__OPERATION_TYPE__LINK:
+        case GENERIC_OPERATION__OPERATION_TYPE__CHMOD:
+        case GENERIC_OPERATION__OPERATION_TYPE__CHOWN:
+        case GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE:
+            break;
+        case GENERIC_OPERATION__OPERATION_TYPE__WRITE:
+            handleWrite(fd, genop->write_op);
+    }
+
+    return 0;
+}
+
+int handleWrite(int fd, WriteOperation *writeop) {
+    
+    return 0;
+}
+
+
+/*int getMessage(int cfd, uint8_t **buffer, uint32_t *length) {
     size_t s;
     uint8_t *buf;
     uint32_t msglen;
@@ -125,10 +152,10 @@ int getMessage(int cfd, uint8_t **buffer, uint32_t *length) {
     if (s != msglen)
         return -1;
     
-    *buffer = buf;
-    *length = msglen;
+ *buffer = buf;
+ *length = msglen;
     return 0;
-}
+}*/
 
 
 /*
@@ -152,7 +179,7 @@ int parseSyncStart(char *header, char *resname, int *numoper) {
     if (p_header == NULL)
         return -1;
     else
-        *numoper = atoi(p_header);
+ *numoper = atoi(p_header);
 
     return 0;
 }
@@ -173,7 +200,7 @@ int parseOperation(char *header, char *operation, long long *datalength,
     if (p_header == NULL)
         return -1;
     else
-        *datalength = atoll(p_header);
+ *datalength = atoll(p_header);
 
     // parse filename
     p_header = strtok(NULL, ";");
@@ -230,4 +257,4 @@ int handleWrite(int cfd, long long datalength, char *filename) {
 
     return 0;
 }
-*/
+ */

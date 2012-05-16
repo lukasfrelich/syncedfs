@@ -21,17 +21,34 @@ typedef struct fileop {
     UT_hash_handle hh;
 } fileop_t;
 
-void transfer(char *host, char *port);
 void sync(void);
-void processOperation(char *line);
-void readLog(char *logpath);
-void addOperation(char *relpath, GenericOperation *op);
+
+//------------------------------------------------------------------------------
+// Log processing
+//------------------------------------------------------------------------------
+void processLog(char *logpath);
 void printLog(void);
+void addOperation(char *relpath, GenericOperation *genop);
 int optimizeOperations(fileop_t *fileop);
+
+//------------------------------------------------------------------------------
+// Transfer
+//------------------------------------------------------------------------------
+void transfer(char *host, char *port);
 void initiateSync(int cfd, int numfiles);
 void transferChunk(int cfd, fileop_t *fileop, GenericOperation **opstart,
-        int nops, int remchunks);
+        int nops, int numchunks);
 
+//------------------------------------------------------------------------------
+// Operation handlers
+//------------------------------------------------------------------------------
+int handleGenericOperation(int fd, GenericOperation *genop);
+int handleWrite(int fd, WriteOperation *writeop);
+
+//------------------------------------------------------------------------------
+// Auxiliary functions
+//------------------------------------------------------------------------------
+int sortByOrder(fileop_t *a, fileop_t *b);
 
 #endif	/* CLIENT_H */
 
