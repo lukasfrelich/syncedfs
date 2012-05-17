@@ -30,7 +30,7 @@ char c_rootdir[PATH_MAX];
 
 void parseConfig(char *host, char* port);
 
-const char *getSyncId(void);
+char *getSyncId(void);
 
 #endif	/* CONFIG_H */
 

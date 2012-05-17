@@ -4,7 +4,6 @@
  *
  * Created on April 26, 2012, 9:54 AM
  */
-#define _BSD_SOURCE
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -63,7 +62,6 @@ void usage(void) {
  * 
  */
 int main(int argc, char** argv) {
-/*
     if (argc < 3)
         usage();
     
@@ -77,13 +75,11 @@ int main(int argc, char** argv) {
     }
     if (strcmp(argv[1], "client") == 0) {
         if (argc == 4) {
+            parseConfig(argv[2], argv[3]);
             sync();
-            parseConfig(argv[3], argv[2]);
         } else {
             usage();
         }
     }
     return (EXIT_SUCCESS);
-*/
-    sync();
 }

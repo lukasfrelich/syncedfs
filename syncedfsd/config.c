@@ -5,8 +5,6 @@
  * Created on May 2, 2012, 10:16 AM
  */
 
-#define _BSD_SOURCE
-
 #include "config.h"
 #include <string.h>
 #include "time.h"
@@ -17,12 +15,15 @@ void parseConfig(char *host, char* port) {
     (void) strcpy(c_host, host);
     (void) strcpy(c_port, port);
 
-    (void) strcpy(c_mountpoint, "/mnt/kvmstorage/");
-    (void) strcpy(c_rootdir, "/mnt/kvmstorage/machine1");
-    (void) strcpy(c_resource, "machine1");
+    (void) strcpy(c_mountpoint, "/mnt/kvmstorage");
+    if (strcmp(c_host, "") == 0)
+        (void) strcpy(c_rootdir, "/home/lukes/syncedfs/secondary/physical");      // server
+    else
+        (void) strcpy(c_rootdir, "/home/lukes/syncedfs/primary/physical");
+    (void) strcpy(c_resource, "r0");
 }
 
-const char *getSyncId(void) {
+char *getSyncId(void) {
     static char syncid[SYNCID_MAX];
 
     if (strlen(syncid) == 0) {

@@ -5,8 +5,6 @@
  * Created on May 2, 2012, 9:53 AM
  */
 
-#define _BSD_SOURCE
-
 #include "config.h"
 #include "client.h"
 #include "lib/inet_sockets.h"
@@ -27,13 +25,15 @@ void sync(void) {
     // new sync or resume?
 
     //test("/test.txt", 0, 4096);
-    processLog("/home/lukes/writes.log");
+    processLog("/home/lukes/syncedfs/primary/r0.log");
     //printLog();
+    transfer(c_host, c_port);
 }
 
 //------------------------------------------------------------------------------
 // Log processing
 //------------------------------------------------------------------------------
+
 void processLog(char *logpath) {
     FILE *log;
     uint8_t *buf;
@@ -148,8 +148,9 @@ int optimizeOperations(fileop_t *fileop) {
 //------------------------------------------------------------------------------
 // Transfer
 //------------------------------------------------------------------------------
+
 void transfer(char *host, char *port) {
-    int cfd;
+    int sfd;
     fileop_t *fileop;
     GenericOperation *genop;
     uint8_t *wdata;
@@ -164,10 +165,12 @@ void transfer(char *host, char *port) {
     if (wdata == NULL)
         perror("malloc");
 
-    cfd = inetConnect(host, port, SOCK_STREAM);
+    sfd = inetConnect(host, port, SOCK_STREAM);
+    if (sfd == -1)
+        fatal("unable to connect to the server");
 
     // initiate sync (sync-id, resource, number of files)
-    initiateSync(cfd, HASH_COUNT(files));
+    initiateSync(sfd, HASH_COUNT(files));
 
     // iterate over files in correct order
     HASH_SORT(files, sortByOrder);
@@ -190,7 +193,7 @@ void transfer(char *host, char *port) {
                 // TODO: handle big single writes?
                 if (nbytes + genop->write_op->size > MESSAGE_MAX) {
                     // create & transfer message
-                    transferChunk(cfd, fileop, opstart, nops, nchunks);
+                    transferChunk(sfd, fileop, opstart, nops, nchunks);
 
                     // reset counters & pointers
                     opstart = fileop->operations + i;
@@ -203,20 +206,21 @@ void transfer(char *host, char *port) {
 
             // Load data in operation message
             if (genop->type == GENERIC_OPERATION__OPERATION_TYPE__WRITE) {
-                ProtobufCBinaryData data =
-                        {genop->write_op->size, wdata + nbytes};
-                
                 if (pread(fd, wdata + nbytes, genop->write_op->size,
-                        genop->write_op->offset) != 1)
+                        genop->write_op->offset) != genop->write_op->size)
                     perror("pread");
-                
+
+                ProtobufCBinaryData data = {genop->write_op->size, 
+                                            wdata + nbytes};
+
+                genop->write_op->has_data = 1;
                 genop->write_op->data = data;
             }
 
         }
         // Transfer rest
         if (nops > 0) {
-            transferChunk(cfd, fileop, opstart, nops, nchunks);
+            transferChunk(sfd, fileop, opstart, nops, nchunks);
         }
 
         if (close(fd) == -1)
@@ -224,7 +228,7 @@ void transfer(char *host, char *port) {
     }
 }
 
-void initiateSync(int cfd, int numfiles) {
+void initiateSync(int sfd, int numfiles) {
     SyncInitialization syncinit = SYNC_INITIALIZATION__INIT;
     uint8_t *buf;
     uint32_t msglen;
@@ -235,17 +239,17 @@ void initiateSync(int cfd, int numfiles) {
 
     packMessage(SyncInitializationType, &syncinit, &buf, &msglen);
 
-    if (send(cfd, buf, msglen, MSG_NOSIGNAL) == -1) {
+    if (send(sfd, buf, msglen, MSG_NOSIGNAL) == -1) {
         perror("send init");
     }
 
     freePackedMessage(buf);
-    
+
     // wait for response
     // TODO
 }
 
-void transferChunk(int cfd, fileop_t *fileop, GenericOperation **opstart,
+void transferChunk(int sfd, fileop_t *fileop, GenericOperation **opstart,
         int nops, int numchunks) {
     FileChunk opchunk = FILE_CHUNK__INIT;
     uint8_t *buf;
@@ -258,7 +262,7 @@ void transferChunk(int cfd, fileop_t *fileop, GenericOperation **opstart,
 
     packMessage(FileChunkType, &opchunk, &buf, &msglen);
 
-    if (send(cfd, buf, msglen, MSG_NOSIGNAL) == -1) {
+    if (send(sfd, buf, msglen, MSG_NOSIGNAL) == -1) {
         perror("send chunk");
     }
     // wait for ACK?
@@ -269,6 +273,7 @@ void transferChunk(int cfd, fileop_t *fileop, GenericOperation **opstart,
 //------------------------------------------------------------------------------
 // Auxiliary functions
 //------------------------------------------------------------------------------
+
 int sortByOrder(fileop_t *a, fileop_t *b) {
     if (a->order == b->order)
         return 0;

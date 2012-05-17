@@ -20,7 +20,7 @@ char *getAbsolutePath(char *relpath);
 int packMessage(enum messagetype msgtype, void *message, uint8_t **buffer,
         uint32_t *length);
 void freePackedMessage(uint8_t *buffer);
-void *getMessageFromSocket(int cfd, enum messagetype msgtype);
+void *getMessageFromSocket(int cfd, enum messagetype msgtype, long long *bytesread);
 
 #endif	/* COMMON_H */
 

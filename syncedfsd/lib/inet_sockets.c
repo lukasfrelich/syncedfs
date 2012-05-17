@@ -12,8 +12,7 @@
 
    A package of useful routines for Internet domain sockets.
 */
-#define _BSD_SOURCE             /* To get NI_MAXHOST and NI_MAXSERV
-                                   definitions from <netdb.h> */
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>

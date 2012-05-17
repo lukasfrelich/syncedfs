@@ -11,11 +11,12 @@
 #include <limits.h>
 #include "string.h"
 #include <arpa/inet.h>
+#include "config.h"
 
 char *getAbsolutePath(char *relpath) {
     static char absolutepath[PATH_MAX];
-    (void) strcpy(absolutepath, "/home/lfr/test");
-    (void) strcpy(absolutepath, relpath);
+    (void) strcpy(absolutepath, c_rootdir);
+    (void) strcat(absolutepath, relpath);
 
     return absolutepath;
 }
@@ -29,6 +30,7 @@ int packMessage(enum messagetype msgtype, void *message, uint8_t **buffer,
 
     switch (msgtype) {
         case SyncInitializationType:
+            msglen = (uint32_t) sync_initialization__get_packed_size((SyncInitialization *) message);
             break;
         case FileChunkType:
             msglen = (uint32_t) file_chunk__get_packed_size((FileChunk *) message);
@@ -49,6 +51,7 @@ int packMessage(enum messagetype msgtype, void *message, uint8_t **buffer,
 
     switch (msgtype) {
         case SyncInitializationType:
+            (void) sync_initialization__pack((SyncInitialization *) message, buf);
             break;
         case FileChunkType:
             (void) file_chunk__pack((FileChunk *) message, buf);
@@ -67,7 +70,7 @@ void freePackedMessage(uint8_t *buffer) {
     free(buffer);
 }
 
-void *getMessageFromSocket(int cfd, enum messagetype msgtype) {
+void *getMessageFromSocket(int cfd, enum messagetype msgtype, long long *bytesread) {
     size_t s;
     uint8_t *buf;
     uint32_t msglen;
@@ -91,6 +94,7 @@ void *getMessageFromSocket(int cfd, enum messagetype msgtype) {
     switch (msgtype) {
         case SyncInitializationType:
             message = sync_initialization__unpack(NULL, msglen, buf);
+            break;
         case FileChunkType:
             message = file_chunk__unpack(NULL, msglen, buf);
             break;
@@ -99,5 +103,6 @@ void *getMessageFromSocket(int cfd, enum messagetype msgtype) {
     }
 
     free(buf);
-    return 0;
+    *bytesread = *bytesread + msglen + sizeof (uint32_t);
+    return message;
 }
