@@ -14,13 +14,12 @@
 void startServer(void);
 void handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen);
 int createSnapshot(void);
-int getMessage(int cfd, uint8_t **buffer, uint32_t *length);
 
 
 //------------------------------------------------------------------------------
 // Operation handlers
 //------------------------------------------------------------------------------
-int handleGenericOperation(int fd, GenericOperation *genop);
-int handleWrite(int fd, WriteOperation *writeop);
+int sHandleGenericOperation(int fd, GenericOperation *genop);
+int sHandleWrite(int fd, WriteOperation *writeop);
 
 #endif	/* SERVER_H */

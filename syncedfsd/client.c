@@ -25,7 +25,7 @@ void synchronize(void) {
     // new sync or resume?
 
     //test("/test.txt", 0, 4096);
-    processLog("/home/lukes/syncedfs/primary/r0.log");
+    processLog("/home/lfr/syncedfs/primary/r0.log");
     //printLog();
     transfer(c_host, c_port);
 }
@@ -41,8 +41,9 @@ void processLog(char *logpath) {
     FileOperation *fileop;
 
     log = fopen(logpath, "rb");
-    if (log == NULL)
-        errMsg("open");
+    if (log == NULL) {
+        errExit("%s", logpath);
+    }
 
     while (fread(&msglen, sizeof (uint32_t), 1, log) == 1) {
         msglen = ntohl(msglen);
@@ -113,36 +114,11 @@ void addOperation(char *relpath, GenericOperation *genop) {
     f->nelem++;
 }
 
-int optimizeOperations(fileop_t *fileop) {
+void optimizeOperations(fileop_t *fileop) {
     // TODO: Interval tree algorithm
     // Detect deletions
     // etc.
-
-    // number of messages need to transfer all file operations
-    int nbytes = 0;
-    int nops = 0;
-    int nmessages = 0;
-    GenericOperation *op;
-
-    for (int i = 0; i < fileop->nelem; i++) {
-        op = *(fileop->operations + i);
-
-        if (op->type == GENERIC_OPERATION__OPERATION_TYPE__WRITE) {
-            // TODO: handle big single writes?
-            if (nbytes + op->write_op->size > MESSAGE_MAX) {
-                nops = 0;
-                nbytes = 0;
-                nmessages++;
-            }
-            nbytes += op->write_op->size;
-        }
-        nops++;
-    }
-
-    if (nops > 0)
-        nmessages++;
-
-    return nmessages;
+    return;
 }
 
 //------------------------------------------------------------------------------
@@ -150,20 +126,21 @@ int optimizeOperations(fileop_t *fileop) {
 //------------------------------------------------------------------------------
 
 void transfer(char *host, char *port) {
-    int sfd;
-    fileop_t *fileop;
-    GenericOperation *genop;
-    uint8_t *wdata;
-    int fd;
-    GenericOperation **opstart;
-    int nchunks; // how many chunks for one file we have
-    int nops; // how many GenericOperations are in the message
-    int nbytes; // how many data bytes (coming from write) are in
-    // the message
+    int sfd;            // server socket
+    fileop_t *fileop;   // contains all operations for a file
+    GenericOperation *genop;    // current operation
+    int fd;             // descriptor for file we will process
+    
+    dyndata_t ddata = {0};// used for dynamically allocated data (to lower number
+                        // of malloc calls)
+    //int nbytes;         // how many bytes in ddata are used
+    GenericOperation **opstart; //first operation to be send in the message
+    int nops;           // how many GenericOperations are in the message
 
-    wdata = malloc(MESSAGE_MAX * sizeof (uint8_t));
-    if (wdata == NULL)
-        perror("malloc");
+    ddata.buf = malloc(MESSAGE_MAX * sizeof (uint8_t));
+    if (ddata.buf == NULL)
+        errExit("malloc");
+    ddata.size = MESSAGE_MAX;
 
     sfd = inetConnect(host, port, SOCK_STREAM);
     if (sfd == -1)
@@ -176,51 +153,43 @@ void transfer(char *host, char *port) {
     HASH_SORT(files, sortByOrder);
     for (fileop = files; fileop != NULL; fileop = (fileop_t*) (fileop->hh.next)) {
         nops = 0;
-        nbytes = 0;
+        ddata.size = 0;
+        ddata.offset = 0;
         opstart = fileop->operations;
 
-        nchunks = optimizeOperations(fileop);
+        optimizeOperations(fileop);
 
+        // TODO: what about deleted files
         fd = open(getAbsolutePath(fileop->filename), O_RDONLY);
+        if (fd == -1)
+            errExit("Couldn't open source file.\n");
 
         for (int i = 0; i < fileop->nelem; i++) {
             // Fetch next operation
             genop = *(fileop->operations + i);
 
-            // If it is a write operation, we must fiddle around with wdata 
-            // buffer
-            if (genop->type == GENERIC_OPERATION__OPERATION_TYPE__WRITE) {
-                // TODO: handle big single writes?
-                if (nbytes + genop->write_op->size > MESSAGE_MAX) {
-                    // create & transfer message
-                    transferChunk(sfd, fileop, opstart, nops, nchunks);
-
-                    // reset counters & pointers
-                    opstart = fileop->operations + i;
-                    nops = 0;
-                    nbytes = 0;
-                }
-                nbytes += genop->write_op->size;
-            }
+            // load data for the operation
+            if (cHandleGenericOperation(fd, genop, &ddata) != 0)
+                fatal("Couldn't load required data.\n");
             nops++;
-
-            // Load data in operation message
-            if (genop->type == GENERIC_OPERATION__OPERATION_TYPE__WRITE) {
-                if (pread(fd, wdata + nbytes, genop->write_op->size,
-                        genop->write_op->offset) != genop->write_op->size)
-                    perror("pread");
-
-                ProtobufCBinaryData data = {genop->write_op->size,
-                    wdata + nbytes};
-
-                genop->write_op->has_data = 1;
-                genop->write_op->data = data;
+            
+            if (ddata.size >= MESSAGE_MAX) {
+                // if we have just added last operation, set last_chunk flag
+                if (i == fileop->nelem - 1)
+                    transferChunk(sfd, fileop, opstart, nops, 1);
+                else
+                    transferChunk(sfd, fileop, opstart, nops, 0);
+                
+                // reset counters
+                opstart = fileop->operations + i;
+                nops = 0;
+                ddata.offset = 0;
+                ddata.size = 0;
             }
-
         }
-        // Transfer rest
+        // Transfer last chunk (if there is still some data left)
         if (nops > 0) {
-            transferChunk(sfd, fileop, opstart, nops, nchunks);
+            transferChunk(sfd, fileop, opstart, nops, 1);
         }
 
         if (close(fd) == -1)
@@ -250,13 +219,13 @@ void initiateSync(int sfd, int numfiles) {
 }
 
 void transferChunk(int sfd, fileop_t *fileop, GenericOperation **opstart,
-        int nops, int numchunks) {
+        int nops, int lastchunk) {
     FileChunk fchunk = FILE_CHUNK__INIT;
     uint8_t *buf;
     uint32_t msglen;
 
     fchunk.relative_path = fileop->filename;
-    fchunk.number_chunks = numchunks;
+    fchunk.last_chunk = lastchunk;
     fchunk.n_ops = nops;
     fchunk.ops = opstart;
 
@@ -274,7 +243,7 @@ void transferChunk(int sfd, fileop_t *fileop, GenericOperation **opstart,
 // Operation handlers
 //------------------------------------------------------------------------------
 
-int handleGenericOperation(int fd, GenericOperation *genop) {
+int cHandleGenericOperation(int fd, GenericOperation *genop, dyndata_t *dyndata) {
     int ret;
 
     switch (genop->type) {
@@ -290,21 +259,38 @@ int handleGenericOperation(int fd, GenericOperation *genop) {
         case GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE:
             break;
         case GENERIC_OPERATION__OPERATION_TYPE__WRITE:
-            ret = handleWrite(fd, genop->write_op);
+            ret = cHandleWrite(fd, genop->write_op, dyndata);
             break;
     }
 
     return ret;
 }
 
-int handleWrite(int fd, WriteOperation *writeop, void *buf) {
-    if (pread(fd, buf, writeop->size, writeop->offset) != writeop->size)
+int cHandleWrite(int fd, WriteOperation *writeop, dyndata_t *dyndata) {
+    // realloc, if necessary
+    if (writeop->size > dyndata->size - dyndata->offset) {
+        int nsize = dyndata->size + writeop->size;
+        
+        dyndata->buf = realloc(dyndata->buf, nsize);
+        if (dyndata->buf == NULL) {
+            perror("realloc");
+            return -1;
+        }
+        dyndata->size = nsize;
+    }
+    
+    if (pread(fd, dyndata->buf + dyndata->offset, writeop->size,
+            writeop->offset) != writeop->size) {
         perror("pread");
+        return -2;
+    }
 
-    ProtobufCBinaryData data = {writeop->size, buf};
-
+    ProtobufCBinaryData data = {writeop->size, dyndata->buf + dyndata->offset};
     writeop->has_data = 1;
     writeop->data = data;
+    
+    dyndata->offset += writeop->size;
+    return 0;
 }
 
 //------------------------------------------------------------------------------

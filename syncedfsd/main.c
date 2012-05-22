@@ -17,53 +17,16 @@
 
 void usage(void) {
     fprintf(stderr, "usage: syncedfsd server|client [host] port\n");
-    abort();
 }
-
-/*void log_write(const char *relpath, off_t offset, size_t size) {
-    FILE *log;
-    log = fopen("/home/lfr/writes.log", "ab");
-    if (log == NULL)
-        perror("open");
-    
-    uint32_t msglen;
-    uint32_t writelen;
-    uint8_t *buf;
-    uint32_t *buf_p;
-    FileOperation fileop = FILE_OPERATION__INIT;
-    GenericOperation genop = GENERIC_OPERATION__INIT;
-    WriteOperation writeop = WRITE_OPERATION__INIT;
-
-    writeop.offset = (int64_t) offset;
-    writeop.size = (int32_t) size;
-
-    genop.type = GENERIC_OPERATION__OPERATION_TYPE__WRITE;
-    genop.write_op = &writeop;
-
-    fileop.relative_path = relpath;
-    fileop.op = &genop;
-
-    msglen = (uint32_t) file_operation__get_packed_size(&fileop);
-    writelen = msglen + sizeof (uint32_t);
-    buf_p = malloc(writelen);
-    if (buf_p == NULL) {
-        return;
-    }
-    *buf_p = htonl(msglen);
-    buf = (uint8_t *) (buf_p + 1);
-    file_operation__pack(&fileop, buf);
-
-    if (fwrite(buf_p, writelen, 1, log) != 1)
-        return; //error
-    fclose(log);
-}*/
 
 /*
  * 
  */
 int main(int argc, char** argv) {
-    if (argc < 3)
+    if (argc < 3) {
         usage();
+        return (EXIT_FAILURE);
+    }
     
     if (strcmp(argv[1], "server") == 0) {
         if (argc == 3) {

@@ -31,6 +31,7 @@ void freePackedMessage(uint8_t *buffer);
 //------------------------------------------------------------------------------
 // Unpacking messages
 //------------------------------------------------------------------------------
-void *getMessageFromSocket(int cfd, enum messagetype msgtype, long long *bytesread);
+void *getMessageFromSocket(int cfd, enum messagetype msgtype,
+        long long *bytesread);
 
 #endif	/* COMMON_H */

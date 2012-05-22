@@ -7,8 +7,11 @@
 
 #include "config.h"
 #include <string.h>
+#include <unistd.h>
 #include "time.h"
+#include <pwd.h>
 #include "string.h"
+
 
 /* TODO: this should be called when SIGHUP signal is received */
 void parseConfig(char *host, char* port) {
@@ -16,10 +19,13 @@ void parseConfig(char *host, char* port) {
     (void) strcpy(c_port, port);
 
     (void) strcpy(c_mountpoint, "/mnt/kvmstorage");
+    
+    (void) strcat(c_rootdir, getHomeDir());
     if (strcmp(c_host, "") == 0)
-        (void) strcpy(c_rootdir, "/home/lukes/syncedfs/secondary/physical");      // server
+        (void) strcat(c_rootdir, "/syncedfs/secondary/physical");
     else
-        (void) strcpy(c_rootdir, "/home/lukes/syncedfs/primary/physical");
+        (void) strcat(c_rootdir, "/syncedfs/primary/physical");
+        
     (void) strcpy(c_resource, "r0");
 }
 
@@ -36,6 +42,20 @@ char *getSyncId(void) {
         s = strftime(syncid, SYNCID_MAX, "%D_%T", tm);
         (void) strncpy(syncid + s, c_resource, SYNCID_MAX - s);
     }
-    
+
     return syncid;
+}
+
+char *getHomeDir(void) {
+    struct passwd *pw;
+    static char homedir[40];
+    register uid_t uid;
+
+    uid = geteuid();
+    pw = getpwuid(uid);
+    if (pw) {
+        strncpy(homedir, pw->pw_dir, 39);
+    }
+
+    return homedir;
 }

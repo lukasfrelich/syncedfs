@@ -50,6 +50,9 @@ void handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
     SyncInitialization *syncinit;
     syncinit = (SyncInitialization *)
             getMessageFromSocket(cfd, SyncInitializationType, &nbytes);
+    if (syncinit == NULL) {
+        errExit("Couldn't read message from client.\n");
+    }
 
     // check sync-id
     // check resource (must match)
@@ -69,27 +72,36 @@ void handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
     // outer loop: files, inner loop: chunks
     for (int i = 0; i < nfiles; i++) {
         FileChunk *chunk;
-        int32_t nchunks;
         int fd;
 
+        // we are guaranteed to get at least one chunk for each file
         chunk = (FileChunk *) getMessageFromSocket(cfd, FileChunkType, &nbytes);
-        nchunks = chunk->number_chunks;
-
+        if (chunk == NULL) {
+            errExit("Couldn't read message from client.\n");
+        }
         fd = open(getAbsolutePath(chunk->relative_path), O_WRONLY | O_CREAT,
                 /*temporary*/ S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-        if (fd == -1)
+        if (fd == -1) {
             perror("open");
+            continue;
+        }
 
-        for (int j = 0; j < nchunks; j++) {
-            // usage do-while loop instead
-            if (j != 0)
-                chunk = (FileChunk *) getMessageFromSocket(cfd, FileChunkType, &nbytes);
-
+        for (;;) {
             for (int k = 0; k < chunk->n_ops; k++) {
-                handleGenericOperation(fd, chunk->ops[k]);
+                sHandleGenericOperation(fd, chunk->ops[k]);
             }
 
-            file_chunk__free_unpacked(chunk, NULL);
+            if (chunk->last_chunk == 1) {
+                file_chunk__free_unpacked(chunk, NULL);
+                break;
+            } else {
+                file_chunk__free_unpacked(chunk, NULL);
+                chunk = (FileChunk *) getMessageFromSocket(cfd, FileChunkType,
+                        &nbytes);
+                if (chunk == NULL) {
+                    errExit("Couldn't read message from client.\n");
+                }
+            }
         }
 
         close(fd);
@@ -97,7 +109,6 @@ void handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
     if (close(cfd) == -1)
         errMsg("close");
     printf("Transfered bytes: %lld \n", nbytes);
-
 }
 
 int createSnapshot(void) {
@@ -110,7 +121,7 @@ int createSnapshot(void) {
 // Operation handlers
 //------------------------------------------------------------------------------
 
-int handleGenericOperation(int fd, GenericOperation *genop) {
+int sHandleGenericOperation(int fd, GenericOperation *genop) {
     int ret;
 
     switch (genop->type) {
@@ -126,14 +137,14 @@ int handleGenericOperation(int fd, GenericOperation *genop) {
         case GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE:
             break;
         case GENERIC_OPERATION__OPERATION_TYPE__WRITE:
-            ret = handleWrite(fd, genop->write_op);
+            ret = sHandleWrite(fd, genop->write_op);
             break;
     }
 
     return ret;
 }
 
-int handleWrite(int fd, WriteOperation *writeop) {
+int sHandleWrite(int fd, WriteOperation *writeop) {
     if (writeop->has_data != 1)
         return -1;
 

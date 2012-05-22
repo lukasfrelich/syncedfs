@@ -21,6 +21,12 @@ typedef struct fileop {
     UT_hash_handle hh;
 } fileop_t;
 
+typedef struct dyndata {
+    uint8_t *buf;
+    int offset;
+    int size;
+} dyndata_t;
+
 void synchronize(void);
 
 //------------------------------------------------------------------------------
@@ -29,7 +35,7 @@ void synchronize(void);
 void processLog(char *logpath);
 void printLog(void);
 void addOperation(char *relpath, GenericOperation *genop);
-int optimizeOperations(fileop_t *fileop);
+void optimizeOperations(fileop_t *fileop);
 
 //------------------------------------------------------------------------------
 // Transfer
@@ -42,8 +48,8 @@ void transferChunk(int sfd, fileop_t *fileop, GenericOperation **opstart,
 //------------------------------------------------------------------------------
 // Operation handlers
 //------------------------------------------------------------------------------
-int handleGenericOperation(int fd, GenericOperation *genop);
-int handleWrite(int fd, WriteOperation *writeop);
+int cHandleGenericOperation(int fd, GenericOperation *genop, dyndata_t *dyndata);
+int cHandleWrite(int fd, WriteOperation *writeop, dyndata_t *dyndata);
 
 //------------------------------------------------------------------------------
 // Auxiliary functions

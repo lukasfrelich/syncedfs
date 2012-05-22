@@ -59,13 +59,13 @@ struct  _FileChunk
 {
   ProtobufCMessage base;
   char *relative_path;
-  int32_t number_chunks;
   size_t n_ops;
   GenericOperation **ops;
+  protobuf_c_boolean last_chunk;
 };
 #define FILE_CHUNK__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&file_chunk__descriptor) \
-    , NULL, 0, 0,NULL }
+    , NULL, 0,NULL, 0 }
 
 
 struct  _FileOperation

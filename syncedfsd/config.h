@@ -32,5 +32,7 @@ void parseConfig(char *host, char* port);
 
 char *getSyncId(void);
 
+// TODO: delete
+char *getHomeDir(void);
 #endif	/* CONFIG_H */
 
