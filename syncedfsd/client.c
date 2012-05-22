@@ -19,7 +19,7 @@
 
 fileop_t *files = NULL; // Hash map
 
-void sync(void) {
+void synchronize(void) {
     // force syncedfs to switch to a new log file
 
     // new sync or resume?
@@ -210,8 +210,8 @@ void transfer(char *host, char *port) {
                         genop->write_op->offset) != genop->write_op->size)
                     perror("pread");
 
-                ProtobufCBinaryData data = {genop->write_op->size, 
-                                            wdata + nbytes};
+                ProtobufCBinaryData data = {genop->write_op->size,
+                    wdata + nbytes};
 
                 genop->write_op->has_data = 1;
                 genop->write_op->data = data;
@@ -251,16 +251,16 @@ void initiateSync(int sfd, int numfiles) {
 
 void transferChunk(int sfd, fileop_t *fileop, GenericOperation **opstart,
         int nops, int numchunks) {
-    FileChunk opchunk = FILE_CHUNK__INIT;
+    FileChunk fchunk = FILE_CHUNK__INIT;
     uint8_t *buf;
     uint32_t msglen;
 
-    opchunk.relative_path = fileop->filename;
-    opchunk.number_chunks = numchunks;
-    opchunk.n_ops = nops;
-    opchunk.ops = opstart;
+    fchunk.relative_path = fileop->filename;
+    fchunk.number_chunks = numchunks;
+    fchunk.n_ops = nops;
+    fchunk.ops = opstart;
 
-    packMessage(FileChunkType, &opchunk, &buf, &msglen);
+    packMessage(FileChunkType, &fchunk, &buf, &msglen);
 
     if (send(sfd, buf, msglen, MSG_NOSIGNAL) == -1) {
         perror("send chunk");
@@ -268,6 +268,43 @@ void transferChunk(int sfd, fileop_t *fileop, GenericOperation **opstart,
     // wait for ACK?
 
     freePackedMessage(buf);
+}
+
+//------------------------------------------------------------------------------
+// Operation handlers
+//------------------------------------------------------------------------------
+
+int handleGenericOperation(int fd, GenericOperation *genop) {
+    int ret;
+
+    switch (genop->type) {
+        case GENERIC_OPERATION__OPERATION_TYPE__MKNOD:
+        case GENERIC_OPERATION__OPERATION_TYPE__MKDIR:
+        case GENERIC_OPERATION__OPERATION_TYPE__SYMLINK:
+        case GENERIC_OPERATION__OPERATION_TYPE__UNLINK:
+        case GENERIC_OPERATION__OPERATION_TYPE__RMDIR:
+        case GENERIC_OPERATION__OPERATION_TYPE__RENAME:
+        case GENERIC_OPERATION__OPERATION_TYPE__LINK:
+        case GENERIC_OPERATION__OPERATION_TYPE__CHMOD:
+        case GENERIC_OPERATION__OPERATION_TYPE__CHOWN:
+        case GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE:
+            break;
+        case GENERIC_OPERATION__OPERATION_TYPE__WRITE:
+            ret = handleWrite(fd, genop->write_op);
+            break;
+    }
+
+    return ret;
+}
+
+int handleWrite(int fd, WriteOperation *writeop, void *buf) {
+    if (pread(fd, buf, writeop->size, writeop->offset) != writeop->size)
+        perror("pread");
+
+    ProtobufCBinaryData data = {writeop->size, buf};
+
+    writeop->has_data = 1;
+    writeop->data = data;
 }
 
 //------------------------------------------------------------------------------

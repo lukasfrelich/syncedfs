@@ -21,7 +21,7 @@ typedef struct fileop {
     UT_hash_handle hh;
 } fileop_t;
 
-void sync(void);
+void synchronize(void);
 
 //------------------------------------------------------------------------------
 // Log processing

@@ -13,6 +13,9 @@
 #include <arpa/inet.h>
 #include "config.h"
 
+//------------------------------------------------------------------------------
+// File system
+//------------------------------------------------------------------------------
 char *getAbsolutePath(char *relpath) {
     static char absolutepath[PATH_MAX];
     (void) strcpy(absolutepath, c_rootdir);
@@ -21,6 +24,9 @@ char *getAbsolutePath(char *relpath) {
     return absolutepath;
 }
 
+//------------------------------------------------------------------------------
+// Packing messages
+//------------------------------------------------------------------------------
 int packMessage(enum messagetype msgtype, void *message, uint8_t **buffer,
         uint32_t *length) {
     uint32_t msglen;
@@ -70,6 +76,9 @@ void freePackedMessage(uint8_t *buffer) {
     free(buffer);
 }
 
+//------------------------------------------------------------------------------
+// Unpacking messages
+//------------------------------------------------------------------------------
 void *getMessageFromSocket(int cfd, enum messagetype msgtype, long long *bytesread) {
     size_t s;
     uint8_t *buf;

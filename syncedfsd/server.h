@@ -23,10 +23,4 @@ int getMessage(int cfd, uint8_t **buffer, uint32_t *length);
 int handleGenericOperation(int fd, GenericOperation *genop);
 int handleWrite(int fd, WriteOperation *writeop);
 
-
-/*int parseSyncStart(char *header, char *resname, int *numoper);
-int parseOperation(char *header, char *operation, long long *datalength,
-                   char *filename);
-int handleWrite(int cfd, long long datalength, char *filename);*/
-
 #endif	/* SERVER_H */

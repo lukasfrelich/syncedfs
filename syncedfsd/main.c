@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
     if (strcmp(argv[1], "client") == 0) {
         if (argc == 4) {
             parseConfig(argv[2], argv[3]);
-            sync();
+            synchronize();
         } else {
             usage();
         }
