@@ -20,7 +20,7 @@
 #include <fuse.h>
 struct sfs_state {
     FILE *logfile;
-    FILE *writelog;
+    //FILE *writelog;
     char *rootdir;
 };
 #define LOG_ENTRY_HEADER sizeof(char) + sizeof(size_t) + sizeof(int)

@@ -9,8 +9,8 @@
 #include "log.h"
 #include "protobuf/syncedfs.pb-c.h"
 
-FILE *log_open() {
-    /*FILE *logfile;
+/*FILE *log_open() {
+    FILE *logfile;
     
     // very first thing, open up the logfile and mark that we got in
     // here.  If we can't open the logfile, we're dead.
@@ -23,16 +23,22 @@ FILE *log_open() {
     // set logfile to line buffering
     setvbuf(logfile, NULL, _IOLBF, 0);
 
-    return logfile;*/
+    return logfile;*
     return NULL;
-}
+}*/
+/*void log_msg(const char *format, ...) {
+    va_list ap;
+    va_start(ap, format);
+
+    vfprintf(SFS_DATA->logfile, format, ap);
+}*/
 
 FILE *writelog_open() {
     FILE *logfile;
 
     // very first thing, open up the logfile and mark that we got in
     // here.  If we can't open the logfile, we're dead.
-    logfile = fopen("/home/lukes/writes.log", "ab");
+    logfile = fopen("/home/lfr/syncedfs/primary/r0.log", "ab");
     if (logfile == NULL) {
         perror("logfile");
         exit(EXIT_FAILURE);
@@ -44,12 +50,6 @@ FILE *writelog_open() {
     return logfile;
 }
 
-void log_msg(const char *format, ...) {
-    /*va_list ap;
-    va_start(ap, format);
-
-    vfprintf(SFS_DATA->logfile, format, ap);*/
-}
 
 void log_write(const char *relpath, off_t offset, size_t size) {
     // TODO: change to use getPackedMessage
@@ -82,11 +82,7 @@ void log_write(const char *relpath, off_t offset, size_t size) {
     buf = (uint8_t *) (bufbegin + 1);
     file_operation__pack(&fileop, buf);
 
-    if (fwrite(bufbegin, writelen, 1, SFS_DATA->writelog) != 1)
+    if (fwrite(bufbegin, writelen, 1, SFS_DATA->logfile) != 1)
         return; //error
 }
 
-/*void log_write(const char *relpath, off_t offset, size_t size) {
-    fprintf(SFS_DATA->writelog, "w;%lld;%lld;%s\n", (long long) offset,
-            (long long) size, relpath);
-}*/

@@ -4,8 +4,7 @@
  *
  * Created on April 20, 2012, 4:13 PM
  * 
- * Based on Big Brother File System by Joseph J. Pfeiffer, Jr., Ph.D. &
- * loggedfs by Remi Flament <rflament at laposte dot net>
+ * Based on Big Brother File System by Joseph J. Pfeiffer, Jr., Ph.D.
  */
 
 #include "params.h"
@@ -32,7 +31,7 @@
 static int sfs_error(char *str) {
     int ret = -errno;
 
-    log_msg("    ERROR %s: %s\n", str, strerror(errno));
+    //log_msg("    ERROR %s: %s\n", str, strerror(errno));
 
     return ret;
 }
@@ -45,13 +44,9 @@ static int sfs_error(char *str) {
 //  whenever I need a path for something I'll call this to construct
 //  it.
 
-static void sfs_fullpath(char fpath[PATH_MAX], const char *path) {
+static inline void sfs_fullpath(char fpath[PATH_MAX], const char *path) {
     strcpy(fpath, SFS_DATA->rootdir);
     strncat(fpath, path, PATH_MAX); // ridiculously long paths will
-    // break here
-
-    log_msg("    sfs_fullpath:  rootdir = \"%s\", path = \"%s\", fpath = \"%s\"\n",
-            SFS_DATA->rootdir, path, fpath);
 }
 
 ///////////////////////////////////////////////////////////
@@ -70,8 +65,6 @@ int sfs_getattr(const char *path, struct stat *statbuf) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    log_msg("\nsfs_getattr(path=\"%s\", statbuf=0x%08x)\n",
-            path, statbuf);
     sfs_fullpath(fpath, path);
 
     retstat = lstat(fpath, statbuf);
@@ -98,8 +91,6 @@ int sfs_readlink(const char *path, char *link, size_t size) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    log_msg("sfs_readlink(path=\"%s\", link=\"%s\", size=%d)\n",
-            path, link, size);
     sfs_fullpath(fpath, path);
 
     retstat = readlink(fpath, link, size - 1);
@@ -124,8 +115,7 @@ int sfs_mknod(const char *path, mode_t mode, dev_t dev) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    log_msg("\nsfs_mknod(path=\"%s\", mode=0%3o, dev=%lld)\n",
-            path, mode, dev);
+    // TODO: log
     sfs_fullpath(fpath, path);
 
     // On Linux this could just be 'mknod(path, mode, rdev)' but this
@@ -158,8 +148,7 @@ int sfs_mkdir(const char *path, mode_t mode) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    log_msg("\nsfs_mkdir(path=\"%s\", mode=0%3o)\n",
-            path, mode);
+    // TODO: log
     sfs_fullpath(fpath, path);
 
     retstat = mkdir(fpath, mode);
@@ -174,8 +163,7 @@ int sfs_unlink(const char *path) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    log_msg("sfs_unlink(path=\"%s\")\n",
-            path);
+    // TODO: log
     sfs_fullpath(fpath, path);
 
     retstat = unlink(fpath);
@@ -190,8 +178,7 @@ int sfs_rmdir(const char *path) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    log_msg("sfs_rmdir(path=\"%s\")\n",
-            path);
+    // TODO: log
     sfs_fullpath(fpath, path);
 
     retstat = rmdir(fpath);
@@ -211,8 +198,7 @@ int sfs_symlink(const char *path, const char *link) {
     int retstat = 0;
     char flink[PATH_MAX];
 
-    log_msg("\nsfs_symlink(path=\"%s\", link=\"%s\")\n",
-            path, link);
+    // TODO: log
     sfs_fullpath(flink, link);
 
     retstat = symlink(path, flink);
@@ -230,8 +216,7 @@ int sfs_rename(const char *path, const char *newpath) {
     char fpath[PATH_MAX];
     char fnewpath[PATH_MAX];
 
-    log_msg("\nsfs_rename(fpath=\"%s\", newpath=\"%s\")\n",
-            path, newpath);
+    // TODO: log
     sfs_fullpath(fpath, path);
     sfs_fullpath(fnewpath, newpath);
 
@@ -247,8 +232,7 @@ int sfs_link(const char *path, const char *newpath) {
     int retstat = 0;
     char fpath[PATH_MAX], fnewpath[PATH_MAX];
 
-    log_msg("\nsfs_link(path=\"%s\", newpath=\"%s\")\n",
-            path, newpath);
+    // TODO: log
     sfs_fullpath(fpath, path);
     sfs_fullpath(fnewpath, newpath);
 
@@ -264,8 +248,7 @@ int sfs_chmod(const char *path, mode_t mode) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    log_msg("\nsfs_chmod(fpath=\"%s\", mode=0%03o)\n",
-            path, mode);
+    // TODO: log
     sfs_fullpath(fpath, path);
 
     retstat = chmod(fpath, mode);
@@ -280,8 +263,7 @@ int sfs_chown(const char *path, uid_t uid, gid_t gid) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    log_msg("\nsfs_chown(path=\"%s\", uid=%d, gid=%d)\n",
-            path, uid, gid);
+    // TODO: log
     sfs_fullpath(fpath, path);
 
     retstat = chown(fpath, uid, gid);
@@ -296,8 +278,7 @@ int sfs_truncate(const char *path, off_t newsize) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    log_msg("\nsfs_truncate(path=\"%s\", newsize=%lld)\n",
-            path, newsize);
+    // TODO: log
     sfs_fullpath(fpath, path);
 
     retstat = truncate(fpath, newsize);
@@ -314,8 +295,6 @@ int sfs_utime(const char *path, struct utimbuf *ubuf) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    log_msg("\nsfs_utime(path=\"%s\", ubuf=0x%08x)\n",
-            path, ubuf);
     sfs_fullpath(fpath, path);
 
     retstat = utime(fpath, ubuf);
@@ -340,8 +319,6 @@ int sfs_open(const char *path, struct fuse_file_info *fi) {
     int fd;
     char fpath[PATH_MAX];
 
-    log_msg("\nsfs_open(path\"%s\", fi=0x%08x)\n",
-            path, fi);
     sfs_fullpath(fpath, path);
 
     fd = open(fpath, fi->flags);
@@ -373,8 +350,7 @@ int sfs_open(const char *path, struct fuse_file_info *fi) {
 int sfs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
     int retstat = 0;
 
-    log_msg("\nsfs_read(path=\"%s\", buf=0x%08x, size=%d, offset=%lld, fi=0x%08x)\n",
-            path, buf, size, offset, fi);
+
     // no need to get fpath on this one, since I work from fi->fh not the path
 
     retstat = pread(fi->fh, buf, size, offset);
@@ -400,8 +376,6 @@ int sfs_write(const char *path, const char *buf, size_t size, off_t offset,
     int retstat = 0;
 
     log_write(path, offset, size);
-    //log_msg("\nsfs_write(path=\"%s\", buf=0x%08x, size=%d, offset=%lld, fi=0x%08x)\n",
-    //        path, buf, size, offset, fi);
 
     retstat = pwrite(fi->fh, buf, size, offset);
     if (retstat < 0)
@@ -421,8 +395,6 @@ int sfs_statfs(const char *path, struct statvfs *statv) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    log_msg("\nsfs_statfs(path=\"%s\", statv=0x%08x)\n",
-            path, statv);
     sfs_fullpath(fpath, path);
 
     // get stats for underlying filesystem
@@ -459,7 +431,6 @@ int sfs_statfs(const char *path, struct statvfs *statv) {
 int sfs_flush(const char *path, struct fuse_file_info *fi) {
     int retstat = 0;
 
-    log_msg("\nsfs_flush(path=\"%s\", fi=0x%08x)\n", path, fi);
     // no need to get fpath on this one, since I work from fi->fh not the path
 
     return retstat;
@@ -482,9 +453,6 @@ int sfs_flush(const char *path, struct fuse_file_info *fi) {
 int sfs_release(const char *path, struct fuse_file_info *fi) {
     int retstat = 0;
 
-    log_msg("\nsfs_release(path=\"%s\", fi=0x%08x)\n",
-            path, fi);
-
     // We need to close the file.  Had we allocated any resources
     // (buffers etc) we'd need to free them here as well.
     retstat = close(fi->fh);
@@ -502,9 +470,6 @@ int sfs_release(const char *path, struct fuse_file_info *fi) {
 int sfs_fsync(const char *path, int datasync, struct fuse_file_info *fi) {
     int retstat = 0;
 
-    log_msg("\nsfs_fsync(path=\"%s\", datasync=%d, fi=0x%08x)\n",
-            path, datasync, fi);
-
     if (datasync)
         retstat = fdatasync(fi->fh);
     else
@@ -521,8 +486,7 @@ int sfs_setxattr(const char *path, const char *name, const char *value, size_t s
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    log_msg("\nsfs_setxattr(path=\"%s\", name=\"%s\", value=\"%s\", size=%d, flags=0x%08x)\n",
-            path, name, value, size, flags);
+    // TODO: log?
     sfs_fullpath(fpath, path);
 
     retstat = lsetxattr(fpath, name, value, size, flags);
@@ -537,15 +501,11 @@ int sfs_getxattr(const char *path, const char *name, char *value, size_t size) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    log_msg("\nsfs_getxattr(path = \"%s\", name = \"%s\", value = 0x%08x, size = %d)\n",
-            path, name, value, size);
     sfs_fullpath(fpath, path);
 
     retstat = lgetxattr(fpath, name, value, size);
     if (retstat < 0)
         retstat = sfs_error("sfs_getxattr lgetxattr");
-    else
-        log_msg("    value = \"%s\"\n", value);
 
     return retstat;
 }
@@ -554,20 +514,12 @@ int sfs_getxattr(const char *path, const char *name, char *value, size_t size) {
 int sfs_listxattr(const char *path, char *list, size_t size) {
     int retstat = 0;
     char fpath[PATH_MAX];
-    char *ptr;
 
-    log_msg("sfs_listxattr(path=\"%s\", list=0x%08x, size=%d)\n",
-            path, list, size
-            );
     sfs_fullpath(fpath, path);
 
     retstat = llistxattr(fpath, list, size);
     if (retstat < 0)
         retstat = sfs_error("sfs_listxattr llistxattr");
-
-    log_msg("    returned attributes (length %d):\n", retstat);
-    for (ptr = list; ptr < list + retstat; ptr += strlen(ptr) + 1)
-        log_msg("    \"%s\"\n", ptr);
 
     return retstat;
 }
@@ -577,8 +529,7 @@ int sfs_removexattr(const char *path, const char *name) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    log_msg("\nsfs_removexattr(path=\"%s\", name=\"%s\")\n",
-            path, name);
+    // TODO: log?
     sfs_fullpath(fpath, path);
 
     retstat = lremovexattr(fpath, name);
@@ -600,8 +551,6 @@ int sfs_opendir(const char *path, struct fuse_file_info *fi) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    log_msg("\nsfs_opendir(path=\"%s\", fi=0x%08x)\n",
-            path, fi);
     sfs_fullpath(fpath, path);
 
     dp = opendir(fpath);
@@ -641,8 +590,6 @@ int sfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offse
     DIR *dp;
     struct dirent *de;
 
-    log_msg("\nsfs_readdir(path=\"%s\", buf=0x%08x, filler=0x%08x, offset=%lld, fi=0x%08x)\n",
-            path, buf, filler, offset, fi);
     // once again, no need for fullpath -- but note that I need to cast fi->fh
     dp = (DIR *) (uintptr_t) fi->fh;
 
@@ -661,9 +608,7 @@ int sfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offse
     // returns something non-zero.  The first case just means I've
     // read the whole directory; the second means the buffer is full.
     do {
-        log_msg("calling filler with name %s\n", de->d_name);
         if (filler(buf, de->d_name, NULL, 0) != 0) {
-            log_msg("    ERROR sfs_readdir filler:  buffer full");
             return -ENOMEM;
         }
     } while ((de = readdir(dp)) != NULL);
@@ -678,9 +623,6 @@ int sfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offse
  */
 int sfs_releasedir(const char *path, struct fuse_file_info *fi) {
     int retstat = 0;
-
-    log_msg("\nsfs_releasedir(path=\"%s\", fi=0x%08x)\n",
-            path, fi);
 
     closedir((DIR *) (uintptr_t) fi->fh);
 
@@ -699,9 +641,6 @@ int sfs_releasedir(const char *path, struct fuse_file_info *fi) {
 
 int sfs_fsyncdir(const char *path, int datasync, struct fuse_file_info *fi) {
     int retstat = 0;
-
-    log_msg("\nsfs_fsyncdir(path=\"%s\", datasync=%d, fi=0x%08x)\n",
-            path, datasync, fi);
 
     return retstat;
 }
@@ -726,8 +665,6 @@ int sfs_fsyncdir(const char *path, int datasync, struct fuse_file_info *fi) {
 
 void *sfs_init(struct fuse_conn_info *conn) {
 
-    log_msg("\nsfs_init()\n");
-
     return SFS_DATA;
 }
 
@@ -739,7 +676,7 @@ void *sfs_init(struct fuse_conn_info *conn) {
  * Introduced in version 2.3
  */
 void sfs_destroy(void *userdata) {
-    log_msg("\nsfs_destroy(userdata=0x%08x)\n", userdata);
+    
 }
 
 /**
@@ -757,8 +694,6 @@ int sfs_access(const char *path, int mask) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    log_msg("\nsfs_access(path=\"%s\", mask=0%o)\n",
-            path, mask);
     sfs_fullpath(fpath, path);
 
     retstat = access(fpath, mask);
@@ -786,8 +721,7 @@ int sfs_create(const char *path, mode_t mode, struct fuse_file_info *fi) {
     char fpath[PATH_MAX];
     int fd;
 
-    log_msg("\nsfs_create(path=\"%s\", mode=0%03o, fi=0x%08x)\n",
-            path, mode, fi);
+    // TODO: log
     sfs_fullpath(fpath, path);
 
     fd = creat(fpath, mode);
@@ -814,8 +748,7 @@ int sfs_create(const char *path, mode_t mode, struct fuse_file_info *fi) {
 int sfs_ftruncate(const char *path, off_t offset, struct fuse_file_info *fi) {
     int retstat = 0;
 
-    log_msg("\nsfs_ftruncate(path=\"%s\", offset=%lld, fi=0x%08x)\n",
-            path, offset, fi);
+    // TODO: log as truncate
 
     retstat = ftruncate(fi->fh, offset);
     if (retstat < 0)
@@ -842,9 +775,6 @@ int sfs_ftruncate(const char *path, off_t offset, struct fuse_file_info *fi) {
 
 int sfs_fgetattr(const char *path, struct stat *statbuf, struct fuse_file_info *fi) {
     int retstat = 0;
-
-    log_msg("\nsfs_fgetattr(path=\"%s\", statbuf=0x%08x, fi=0x%08x)\n",
-            path, statbuf, fi);
 
     retstat = fstat(fi->fh, statbuf);
     if (retstat < 0)
@@ -931,8 +861,7 @@ int main(int argc, char** argv) {
     }
     
     // open logs
-    sfs_data->logfile = log_open();
-    sfs_data->writelog = writelog_open();
+    sfs_data->logfile = writelog_open();
 
     // add -o nonempty,use_ino (maybe also allow_other,default_permissions?)
     fargc = argc + 2;
