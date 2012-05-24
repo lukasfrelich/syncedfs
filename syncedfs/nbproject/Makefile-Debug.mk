@@ -36,11 +36,12 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/log.o \
 	${OBJECTDIR}/protobuf/syncedfs.pb-c.o \
-	${OBJECTDIR}/syncedfs.o
+	${OBJECTDIR}/syncedfs.o \
+	${OBJECTDIR}/config.o
 
 
 # C Compiler Flags
-CFLAGS=-Wall -pedantic -std=c99
+CFLAGS=-std=c99 -D_XOPEN_SOURCE=600 -D_BSD_SOURCE -D_FILE_OFFSET_BITS=64 -Wall -pedantic -std=c99
 
 # CC Compiler Flags
 CCFLAGS=
@@ -53,7 +54,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=`pkg-config --libs fuse` `pkg-config --libs libprotobuf-c`  
+LDLIBSOPTIONS=`pkg-config --libs fuse` `pkg-config --libs libprotobuf-c` `pkg-config --libs libconfig`  
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -66,17 +67,22 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs: ${OBJECTFILES}
 ${OBJECTDIR}/log.o: log.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g `pkg-config --cflags fuse` `pkg-config --cflags libprotobuf-c`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/log.o log.c
+	$(COMPILE.c) -g `pkg-config --cflags fuse` `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/log.o log.c
 
 ${OBJECTDIR}/protobuf/syncedfs.pb-c.o: protobuf/syncedfs.pb-c.c 
 	${MKDIR} -p ${OBJECTDIR}/protobuf
 	${RM} $@.d
-	$(COMPILE.c) -g `pkg-config --cflags fuse` `pkg-config --cflags libprotobuf-c`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/protobuf/syncedfs.pb-c.o protobuf/syncedfs.pb-c.c
+	$(COMPILE.c) -g `pkg-config --cflags fuse` `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/protobuf/syncedfs.pb-c.o protobuf/syncedfs.pb-c.c
 
 ${OBJECTDIR}/syncedfs.o: syncedfs.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g `pkg-config --cflags fuse` `pkg-config --cflags libprotobuf-c`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/syncedfs.o syncedfs.c
+	$(COMPILE.c) -g `pkg-config --cflags fuse` `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/syncedfs.o syncedfs.c
+
+${OBJECTDIR}/config.o: config.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -g `pkg-config --cflags fuse` `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/config.o config.c
 
 # Subprojects
 .build-subprojects:

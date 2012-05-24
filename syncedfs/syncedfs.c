@@ -7,7 +7,8 @@
  * Based on Big Brother File System by Joseph J. Pfeiffer, Jr., Ph.D.
  */
 
-#include "params.h"
+#include "config.h"
+#include "log.h"
 
 #include <ctype.h>
 #include <dirent.h>
@@ -23,11 +24,8 @@
 #include <sys/types.h>
 #include <sys/xattr.h>
 
-#include "log.h"
-
 
 // Report errors to logfile and give -errno to caller
-
 static int sfs_error(char *str) {
     int ret = -errno;
 
@@ -45,7 +43,7 @@ static int sfs_error(char *str) {
 //  it.
 
 static inline void sfs_fullpath(char fpath[PATH_MAX], const char *path) {
-    strcpy(fpath, SFS_DATA->rootdir);
+    strcpy(fpath, config.rootdir);
     strncat(fpath, path, PATH_MAX); // ridiculously long paths will
 }
 
@@ -665,7 +663,8 @@ int sfs_fsyncdir(const char *path, int datasync, struct fuse_file_info *fi) {
 
 void *sfs_init(struct fuse_conn_info *conn) {
 
-    return SFS_DATA;
+    //return SFS_DATA;
+    return NULL;
 }
 
 /**
@@ -784,8 +783,7 @@ int sfs_fgetattr(const char *path, struct stat *statbuf, struct fuse_file_info *
 }
 
 void usage(void) {
-    fprintf(stderr, "usage: syncedfs directory\n");
-    abort();
+    fprintf(stderr, "usage: syncedfs resource-name\n");
 }
 
 struct fuse_operations sfs_oper = {
@@ -835,33 +833,30 @@ int main(int argc, char** argv) {
     int fuse_stat;
     int fargc;
     char** fargv;
-    struct sfs_state *sfs_data;
+    //struct sfs_state *sfs_data;
 
     if ((getuid() == 0) || (geteuid() == 0)) {
         perror("We don't want to run syncedfs as root.");
         abort();
     }
 
-    if (argc < 3) {
+    if (argc != 2) {
         usage();
+        return (EXIT_FAILURE);
     }
 
-    sfs_data = malloc(sizeof (struct sfs_state));
-    if (sfs_data == NULL) {
-        perror("sfs_data malloc");
-        abort();
-    }
+    //sfs_data->rootdir = realpath(argv[1], NULL);
 
-    
-    sfs_data->rootdir = realpath(argv[1], NULL);
+    //if (sfs_data->rootdir == NULL) {
+    //    perror("cannot resolve directory path");
+    //    abort();
+    //}
 
-    if (sfs_data->rootdir == NULL) {
-        perror("cannot resolve directory path");
-        abort();
-    }
+    if (readConfig(argv[1]) != 0)
+        return (EXIT_FAILURE);
     
     // open logs
-    sfs_data->logfile = writelog_open();
+    //sfs_data->logfile = writelog_open();
 
     // add -o nonempty,use_ino (maybe also allow_other,default_permissions?)
     fargc = argc + 2;
@@ -880,6 +875,6 @@ int main(int argc, char** argv) {
 
     // argument parsing: so far only add options and pass to fuse
     // TODO: proper processing
-    fuse_stat = fuse_main(fargc, fargv, &sfs_oper, sfs_data);
+    fuse_stat = fuse_main(fargc, fargv, &sfs_oper, NULL);
     return (fuse_stat);
 }

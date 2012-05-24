@@ -1,11 +1,20 @@
-#include "params.h"
-#include <fuse.h>
+/* 
+ * File:   log.c
+ * Author: lfr
+ *
+ * Created on April 20, 2012, 4:13 PM
+ * 
+ * Based on Big Brother File System by Joseph J. Pfeiffer, Jr., Ph.D.
+ */
+
+#include "config.h"
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <string.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 #include "log.h"
 #include "protobuf/syncedfs.pb-c.h"
 
@@ -33,11 +42,11 @@
     vfprintf(SFS_DATA->logfile, format, ap);
 }*/
 
-FILE *writelog_open() {
+int writelog_open() {
     FILE *logfile;
 
     // very first thing, open up the logfile and mark that we got in
-    // here.  If we can't open the logfile, we're dead.
+    // here.  If we can't opent he logfile, we're dead.
     logfile = fopen("/home/lfr/syncedfs/primary/r0.log", "ab");
     if (logfile == NULL) {
         perror("logfile");
@@ -47,7 +56,8 @@ FILE *writelog_open() {
     // set logfile to no buffering
     setvbuf(logfile, NULL, _IONBF, 0);
 
-    return logfile;
+    // TODO
+    return 0;
 }
 
 
@@ -82,7 +92,7 @@ void log_write(const char *relpath, off_t offset, size_t size) {
     buf = (uint8_t *) (bufbegin + 1);
     file_operation__pack(&fileop, buf);
 
-    if (fwrite(bufbegin, writelen, 1, SFS_DATA->logfile) != 1)
-        return; //error
+    if (write(config.logfd, bufbegin, writelen) != writelen)
+        return;
 }
 

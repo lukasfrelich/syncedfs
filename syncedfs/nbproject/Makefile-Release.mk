@@ -36,7 +36,8 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/log.o \
 	${OBJECTDIR}/protobuf/syncedfs.pb-c.o \
-	${OBJECTDIR}/syncedfs.o
+	${OBJECTDIR}/syncedfs.o \
+	${OBJECTDIR}/config.o
 
 
 # C Compiler Flags
@@ -77,6 +78,11 @@ ${OBJECTDIR}/syncedfs.o: syncedfs.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/syncedfs.o syncedfs.c
+
+${OBJECTDIR}/config.o: config.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/config.o config.c
 
 # Subprojects
 .build-subprojects:
