@@ -18,6 +18,8 @@
 #include "log.h"
 #include "protobuf/syncedfs.pb-c.h"
 
+log_t olog;
+
 /*FILE *log_open() {
     FILE *logfile;
     
@@ -92,7 +94,7 @@ void log_write(const char *relpath, off_t offset, size_t size) {
     buf = (uint8_t *) (bufbegin + 1);
     file_operation__pack(&fileop, buf);
 
-    if (write(config.logfd, bufbegin, writelen) != writelen)
+    if (write(olog.fd, bufbegin, writelen) != writelen)
         return;
 }
 

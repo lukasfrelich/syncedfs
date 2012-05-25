@@ -842,34 +842,27 @@ int main(int argc, char** argv) {
 
     if (argc != 2) {
         usage();
-        return (EXIT_FAILURE);
+        exit (EXIT_FAILURE);
     }
 
-    //sfs_data->rootdir = realpath(argv[1], NULL);
-
-    //if (sfs_data->rootdir == NULL) {
-    //    perror("cannot resolve directory path");
-    //    abort();
-    //}
-
     if (readConfig(argv[1]) != 0)
-        return (EXIT_FAILURE);
+        exit (EXIT_FAILURE);
     
     // open logs
     //sfs_data->logfile = writelog_open();
 
     // add -o nonempty,use_ino (maybe also allow_other,default_permissions?)
-    fargc = argc + 2;
-    fargv = malloc((fargc + 1) * sizeof (char *));
+    fargc = 6;
+    fargv = malloc(fargc * sizeof (char *));
     if (fargv == NULL) {
         perror("fargv malloc");
         abort();
     }
 
     fargv[0] = argv[0];
-    fargv[1] = argv[2];
-    fargv[2] = "-s";
-    fargv[3] = "-o";
+    fargv[1] = config.mountdir;         // mount point
+    fargv[2] = "-s";                    // single thread
+    fargv[3] = "-o";                    // options
     fargv[4] = "nonempty,use_ino";
     fargv[5] = NULL;
 
