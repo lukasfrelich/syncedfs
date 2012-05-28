@@ -9,8 +9,8 @@
 #define	CLIENT_H
 
 #include "config.h"
-#include "lib/uthash.h"
-#include "protobuf/syncedfs.pb-c.h"
+#include "../syncedfs-common/lib/uthash.h"
+#include "../syncedfs-common/protobuf/syncedfs.pb-c.h"
 
 typedef struct fileop {
     char filename[PATH_MAX]; // key

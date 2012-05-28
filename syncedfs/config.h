@@ -17,6 +17,7 @@
 typedef struct configuration_t {
     char resource[RESOURCE_MAX];
     char rootdir[PATH_MAX];
+    int RPATH_MAX;
     char mountdir[PATH_MAX];
     char logdir[PATH_MAX];
 } configuration_t;

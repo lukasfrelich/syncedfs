@@ -6,7 +6,7 @@
  */
 
 #include "common.h"
-#include "protobuf/syncedfs.pb-c.h"
+#include "../syncedfs-common/protobuf/syncedfs.pb-c.h"
 #include <stdlib.h>
 #include <limits.h>
 #include "string.h"

@@ -15,8 +15,10 @@
 #include <string.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include "../syncedfs-common/protobuf/syncedfs.pb-c.h"
+#include "../syncedfs-common/paths.h"
 #include "log.h"
-#include "protobuf/syncedfs.pb-c.h"
 
 log_t olog;
 
@@ -44,26 +46,21 @@ log_t olog;
     vfprintf(SFS_DATA->logfile, format, ap);
 }*/
 
-int writelog_open() {
-    FILE *logfile;
+int logOpen() {
+    char logpath[PATH_MAX];
+    (void) buildPath(logpath, config.logdir, "res.log");
 
-    // very first thing, open up the logfile and mark that we got in
-    // here.  If we can't opent he logfile, we're dead.
-    logfile = fopen("/home/lfr/syncedfs/primary/r0.log", "ab");
-    if (logfile == NULL) {
-        perror("logfile");
-        exit(EXIT_FAILURE);
-    }
+    // TODO: O_SYNC performance?
+    olog.fd = open(logpath, O_APPEND | O_CREAT | O_SYNC);
+    //logfile = fopen("/home/lfr/syncedfs/primary/r0.log", "ab");
+    if (olog.fd == -1)
+        return -1;
 
-    // set logfile to no buffering
-    setvbuf(logfile, NULL, _IONBF, 0);
-
-    // TODO
     return 0;
 }
 
 
-void log_write(const char *relpath, off_t offset, size_t size) {
+void logWrite(const char *relpath, off_t offset, size_t size) {
     // TODO: change to use getPackedMessage
     
     uint32_t msglen;
@@ -95,6 +92,6 @@ void log_write(const char *relpath, off_t offset, size_t size) {
     file_operation__pack(&fileop, buf);
 
     if (write(olog.fd, bufbegin, writelen) != writelen)
-        return;
+        return; // TODO: log
 }
 

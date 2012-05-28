@@ -34,17 +34,16 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/_ext/988793768/error_functions.o \
 	${OBJECTDIR}/client.o \
+	${OBJECTDIR}/_ext/988793768/get_num.o \
 	${OBJECTDIR}/common.o \
-	${OBJECTDIR}/protobuf/syncedfs.pb-c.o \
+	${OBJECTDIR}/_ext/813881960/syncedfs.pb-c.o \
 	${OBJECTDIR}/server.o \
-	${OBJECTDIR}/lib/get_num.o \
-	${OBJECTDIR}/lib/error_functions.o \
-	${OBJECTDIR}/lib/inet_sockets.o \
+	${OBJECTDIR}/_ext/988793768/inet_sockets.o \
+	${OBJECTDIR}/_ext/988793768/alt_functions.o \
 	${OBJECTDIR}/config.o \
-	${OBJECTDIR}/main.o \
-	${OBJECTDIR}/lib/alt_functions.o \
-	${OBJECTDIR}/lib/read_line.o
+	${OBJECTDIR}/main.o
 
 
 # C Compiler Flags
@@ -65,46 +64,51 @@ LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfsd
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-deamon
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfsd: ${OBJECTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-deamon: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfsd ${OBJECTFILES} ${LDLIBSOPTIONS} 
+	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-deamon ${OBJECTFILES} ${LDLIBSOPTIONS} 
+
+${OBJECTDIR}/_ext/988793768/error_functions.o: ../syncedfs-common/lib/error_functions.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/error_functions.o ../syncedfs-common/lib/error_functions.c
 
 ${OBJECTDIR}/client.o: client.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/client.o client.c
 
+${OBJECTDIR}/_ext/988793768/get_num.o: ../syncedfs-common/lib/get_num.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/get_num.o ../syncedfs-common/lib/get_num.c
+
 ${OBJECTDIR}/common.o: common.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/common.o common.c
 
-${OBJECTDIR}/protobuf/syncedfs.pb-c.o: protobuf/syncedfs.pb-c.c 
-	${MKDIR} -p ${OBJECTDIR}/protobuf
+${OBJECTDIR}/_ext/813881960/syncedfs.pb-c.o: ../syncedfs-common/protobuf/syncedfs.pb-c.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/813881960
 	${RM} $@.d
-	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/protobuf/syncedfs.pb-c.o protobuf/syncedfs.pb-c.c
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/813881960/syncedfs.pb-c.o ../syncedfs-common/protobuf/syncedfs.pb-c.c
 
 ${OBJECTDIR}/server.o: server.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/server.o server.c
 
-${OBJECTDIR}/lib/get_num.o: lib/get_num.c 
-	${MKDIR} -p ${OBJECTDIR}/lib
+${OBJECTDIR}/_ext/988793768/inet_sockets.o: ../syncedfs-common/lib/inet_sockets.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
 	${RM} $@.d
-	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/lib/get_num.o lib/get_num.c
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/inet_sockets.o ../syncedfs-common/lib/inet_sockets.c
 
-${OBJECTDIR}/lib/error_functions.o: lib/error_functions.c 
-	${MKDIR} -p ${OBJECTDIR}/lib
+${OBJECTDIR}/_ext/988793768/alt_functions.o: ../syncedfs-common/lib/alt_functions.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
 	${RM} $@.d
-	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/lib/error_functions.o lib/error_functions.c
-
-${OBJECTDIR}/lib/inet_sockets.o: lib/inet_sockets.c 
-	${MKDIR} -p ${OBJECTDIR}/lib
-	${RM} $@.d
-	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/lib/inet_sockets.o lib/inet_sockets.c
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/alt_functions.o ../syncedfs-common/lib/alt_functions.c
 
 ${OBJECTDIR}/config.o: config.c 
 	${MKDIR} -p ${OBJECTDIR}
@@ -116,23 +120,13 @@ ${OBJECTDIR}/main.o: main.c
 	${RM} $@.d
 	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.c
 
-${OBJECTDIR}/lib/alt_functions.o: lib/alt_functions.c 
-	${MKDIR} -p ${OBJECTDIR}/lib
-	${RM} $@.d
-	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/lib/alt_functions.o lib/alt_functions.c
-
-${OBJECTDIR}/lib/read_line.o: lib/read_line.c 
-	${MKDIR} -p ${OBJECTDIR}/lib
-	${RM} $@.d
-	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/lib/read_line.o lib/read_line.c
-
 # Subprojects
 .build-subprojects:
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfsd
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-deamon
 
 # Subprojects
 .clean-subprojects:

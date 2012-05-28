@@ -10,7 +10,7 @@
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>protobuf</sourceRootElem>
+                <sourceRootElem>../syncedfs-common</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

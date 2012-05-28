@@ -3,15 +3,14 @@
     <type>org.netbeans.modules.cnd.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>syncedfsd</name>
+            <name>syncedfs-deamon</name>
             <c-extensions>c</c-extensions>
             <cpp-extensions/>
             <header-extensions>h</header-extensions>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>lib</sourceRootElem>
-                <sourceRootElem>protobuf</sourceRootElem>
+                <sourceRootElem>../syncedfs-common</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>

@@ -9,8 +9,8 @@
 #include "server.h"
 #include <netinet/in.h>
 #include <sys/socket.h>
-#include "lib/inet_sockets.h"
-#include "lib/tlpi_hdr.h"
+#include "../syncedfs-common/lib/inet_sockets.h"
+#include "../syncedfs-common/lib/tlpi_hdr.h"
 #include "common.h"
 
 #include <fcntl.h>

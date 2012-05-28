@@ -36,19 +36,20 @@ int readConfig(char *resource) {
 
     int ret = 0;
     if (config_lookup_string(&cfg, "rootdir", &str)) {
-        (void) strcpy(config.rootdir, str);
+        (void) strncpy(config.rootdir, str, PATH_MAX);
+        config.RPATH_MAX = PATH_MAX - strlen(str) - 2; // -2: '\0' and '/' chars
     } else {
         fprintf(stderr, "No 'rootdir' setting in configuration file.\n");
         ret = -2;
     }
     if (config_lookup_string(&cfg, "mountdir", &str)) {
-        (void) strcpy(config.mountdir, str);
+        (void) strncpy(config.mountdir, str, PATH_MAX);
     } else {
         fprintf(stderr, "No 'rootdir' setting in configuration file.\n");
         ret = -2;
     }
     if (config_lookup_string(&cfg, "logdir", &str)) {
-        (void) strcpy(config.logdir, str);
+        (void) strncpy(config.logdir, str, PATH_MAX);
     } else {
         fprintf(stderr, "No 'rootdir' setting in configuration file.\n");
         ret = -2;

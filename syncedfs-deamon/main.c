@@ -9,11 +9,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "lib/inet_sockets.h"
+#include "../syncedfs-common/lib/inet_sockets.h"
 #include "config.h"
 #include "client.h"
 #include "server.h"
-#include "protobuf/syncedfs.pb-c.h"
+#include "../syncedfs-common/protobuf/syncedfs.pb-c.h"
 
 void usage(void) {
     fprintf(stderr, "usage: syncedfsd server|client [host] port\n");

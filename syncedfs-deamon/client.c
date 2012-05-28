@@ -7,10 +7,10 @@
 
 #include "config.h"
 #include "client.h"
-#include "lib/inet_sockets.h"
-#include "lib/uthash.h"
 #include "common.h"
-#include "lib/tlpi_hdr.h"
+#include "../syncedfs-common/lib/inet_sockets.h"
+#include "../syncedfs-common/lib/uthash.h"
+#include "../syncedfs-common/lib/tlpi_hdr.h"
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>

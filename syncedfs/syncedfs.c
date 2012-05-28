@@ -44,7 +44,11 @@ static int sfs_error(char *str) {
 
 static inline void sfs_fullpath(char fpath[PATH_MAX], const char *path) {
     strcpy(fpath, config.rootdir);
-    strncat(fpath, path, PATH_MAX); // ridiculously long paths will
+    // if relative path does not begin with '/'
+    if (path != NULL && *path != '/') {
+        strcat(fpath, "/");
+    }
+    strncat(fpath, path, config.RPATH_MAX);
 }
 
 ///////////////////////////////////////////////////////////
@@ -373,7 +377,7 @@ int sfs_write(const char *path, const char *buf, size_t size, off_t offset,
         struct fuse_file_info *fi) {
     int retstat = 0;
 
-    log_write(path, offset, size);
+    logWrite(path, offset, size);
 
     retstat = pwrite(fi->fh, buf, size, offset);
     if (retstat < 0)
@@ -833,7 +837,6 @@ int main(int argc, char** argv) {
     int fuse_stat;
     int fargc;
     char** fargv;
-    //struct sfs_state *sfs_data;
 
     if ((getuid() == 0) || (geteuid() == 0)) {
         perror("We don't want to run syncedfs as root.");
