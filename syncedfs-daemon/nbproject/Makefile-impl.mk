@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=syncedfs-deamon
+PROJECTNAME=syncedfs-daemon
 
 # Active Configuration
 DEFAULTCONF=Debug

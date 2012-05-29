@@ -27,7 +27,7 @@ void synchronize(void) {
     //test("/test.txt", 0, 4096);
     processLog("/home/lfr/syncedfs/primary/r0.log");
     //printLog();
-    transfer(c_host, c_port);
+    transfer(config.host, config.port);
 }
 
 //------------------------------------------------------------------------------
@@ -204,7 +204,7 @@ void initiateSync(int sfd, int numfiles) {
 
     syncinit.number_files = numfiles;
     syncinit.sync_id = getSyncId();
-    syncinit.resource = c_resource;
+    syncinit.resource = config.resource;
 
     packMessage(SyncInitializationType, &syncinit, &buf, &msglen);
 

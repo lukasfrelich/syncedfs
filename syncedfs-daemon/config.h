@@ -8,8 +8,7 @@
 #ifndef CONFIG_H
 #define	CONFIG_H
 
-#define MAX_HEADER_LEN 4096 /*file name etc.*/
-#define RESNAME_MAX 32
+#define RESOURCE_MAX 32
 #define SYNCID_MAX 64
 #define MAX_WRITE_LEN 4096
 #define MESSAGE_MAX 524288
@@ -21,18 +20,21 @@
 #include <netdb.h>
 #include <limits.h>
 
-char c_port[NI_MAXSERV];
-char c_host[NI_MAXHOST];
+typedef struct configuration_t {
+    char resource[RESOURCE_MAX];
+    char rootdir[PATH_MAX];
+    char snapshot[PATH_MAX];
+    char logdir[PATH_MAX];
+    char host[NI_MAXHOST];
+    char port[NI_MAXSERV];
+} configuration_t;
 
-char c_resource[RESNAME_MAX];
-char c_mountpoint[PATH_MAX];
-char c_rootdir[PATH_MAX];
+extern configuration_t config;
 
-void parseConfig(char *host, char* port);
+
+int readConfig(char *resource);
 
 char *getSyncId(void);
 
-// TODO: delete
-char *getHomeDir(void);
 #endif	/* CONFIG_H */
 

@@ -18,7 +18,7 @@
 //------------------------------------------------------------------------------
 char *getAbsolutePath(char *relpath) {
     static char absolutepath[PATH_MAX];
-    (void) strcpy(absolutepath, c_rootdir);
+    (void) strcpy(absolutepath, config.rootdir);
     (void) strcat(absolutepath, relpath);
 
     return absolutepath;

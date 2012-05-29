@@ -9,19 +9,19 @@ CND_DISTDIR=dist
 # Debug configuration
 CND_PLATFORM_Debug=GNU-Linux-x86
 CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux-x86
-CND_ARTIFACT_NAME_Debug=syncedfs-deamon
-CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/syncedfs-deamon
+CND_ARTIFACT_NAME_Debug=syncedfs-daemon
+CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/syncedfs-daemon
 CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Debug=syncedfs-deamon.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/syncedfs-deamon.tar
+CND_PACKAGE_NAME_Debug=syncedfs-daemon.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/syncedfs-daemon.tar
 # Release configuration
 CND_PLATFORM_Release=GNU-Linux-x86
 CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux-x86
-CND_ARTIFACT_NAME_Release=syncedfs-deamon
-CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/syncedfs-deamon
+CND_ARTIFACT_NAME_Release=syncedfs-daemon
+CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/syncedfs-daemon
 CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Release=syncedfs-deamon.tar
-CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/syncedfs-deamon.tar
+CND_PACKAGE_NAME_Release=syncedfs-daemon.tar
+CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/syncedfs-daemon.tar
 #
 # include compiler specific variables
 #

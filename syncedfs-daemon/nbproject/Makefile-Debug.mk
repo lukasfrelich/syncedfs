@@ -34,8 +34,10 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/_ext/1275677342/path_functions.o \
 	${OBJECTDIR}/_ext/988793768/error_functions.o \
 	${OBJECTDIR}/client.o \
+	${OBJECTDIR}/_ext/1275677342/config_functions.o \
 	${OBJECTDIR}/_ext/988793768/get_num.o \
 	${OBJECTDIR}/common.o \
 	${OBJECTDIR}/_ext/813881960/syncedfs.pb-c.o \
@@ -60,65 +62,75 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=`pkg-config --libs libprotobuf-c`  
+LDLIBSOPTIONS=`pkg-config --libs libprotobuf-c` `pkg-config --libs libconfig`  
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-deamon
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-daemon
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-deamon: ${OBJECTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-daemon: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-deamon ${OBJECTFILES} ${LDLIBSOPTIONS} 
+	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-daemon ${OBJECTFILES} ${LDLIBSOPTIONS} 
+
+${OBJECTDIR}/_ext/1275677342/path_functions.o: ../syncedfs-common/path_functions.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342
+	${RM} $@.d
+	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1275677342/path_functions.o ../syncedfs-common/path_functions.c
 
 ${OBJECTDIR}/_ext/988793768/error_functions.o: ../syncedfs-common/lib/error_functions.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
 	${RM} $@.d
-	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/error_functions.o ../syncedfs-common/lib/error_functions.c
+	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/error_functions.o ../syncedfs-common/lib/error_functions.c
 
 ${OBJECTDIR}/client.o: client.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/client.o client.c
+	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/client.o client.c
+
+${OBJECTDIR}/_ext/1275677342/config_functions.o: ../syncedfs-common/config_functions.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342
+	${RM} $@.d
+	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1275677342/config_functions.o ../syncedfs-common/config_functions.c
 
 ${OBJECTDIR}/_ext/988793768/get_num.o: ../syncedfs-common/lib/get_num.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
 	${RM} $@.d
-	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/get_num.o ../syncedfs-common/lib/get_num.c
+	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/get_num.o ../syncedfs-common/lib/get_num.c
 
 ${OBJECTDIR}/common.o: common.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/common.o common.c
+	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/common.o common.c
 
 ${OBJECTDIR}/_ext/813881960/syncedfs.pb-c.o: ../syncedfs-common/protobuf/syncedfs.pb-c.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/813881960
 	${RM} $@.d
-	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/813881960/syncedfs.pb-c.o ../syncedfs-common/protobuf/syncedfs.pb-c.c
+	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/813881960/syncedfs.pb-c.o ../syncedfs-common/protobuf/syncedfs.pb-c.c
 
 ${OBJECTDIR}/server.o: server.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/server.o server.c
+	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/server.o server.c
 
 ${OBJECTDIR}/_ext/988793768/inet_sockets.o: ../syncedfs-common/lib/inet_sockets.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
 	${RM} $@.d
-	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/inet_sockets.o ../syncedfs-common/lib/inet_sockets.c
+	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/inet_sockets.o ../syncedfs-common/lib/inet_sockets.c
 
 ${OBJECTDIR}/_ext/988793768/alt_functions.o: ../syncedfs-common/lib/alt_functions.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
 	${RM} $@.d
-	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/alt_functions.o ../syncedfs-common/lib/alt_functions.c
+	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/alt_functions.o ../syncedfs-common/lib/alt_functions.c
 
 ${OBJECTDIR}/config.o: config.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/config.o config.c
+	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/config.o config.c
 
 ${OBJECTDIR}/main.o: main.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
-	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.c
+	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.c
 
 # Subprojects
 .build-subprojects:
@@ -126,7 +138,7 @@ ${OBJECTDIR}/main.o: main.c
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-deamon
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-daemon
 
 # Subprojects
 .clean-subprojects:

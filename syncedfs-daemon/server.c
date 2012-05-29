@@ -20,7 +20,7 @@ void startServer(void) {
     socklen_t addrlen;
     struct sockaddr claddr;
 
-    lfd = inetListen(c_port, 0, &addrlen);
+    lfd = inetListen(config.port, 0, &addrlen);
     printf("Server booted.\n");
 
     //setup signal handler to stop handling requests
@@ -56,7 +56,7 @@ void handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
 
     // check sync-id
     // check resource (must match)
-    if (strcmp(syncinit->resource, c_resource) != 0) {
+    if (strcmp(syncinit->resource, config.resource) != 0) {
         // TODO: set fail flag
         return;
     }

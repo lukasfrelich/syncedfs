@@ -34,8 +34,10 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/_ext/1275677342/path_functions.o \
 	${OBJECTDIR}/_ext/988793768/error_functions.o \
 	${OBJECTDIR}/client.o \
+	${OBJECTDIR}/_ext/1275677342/config_functions.o \
 	${OBJECTDIR}/_ext/988793768/get_num.o \
 	${OBJECTDIR}/common.o \
 	${OBJECTDIR}/_ext/813881960/syncedfs.pb-c.o \
@@ -64,11 +66,16 @@ LDLIBSOPTIONS=
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
-	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-deamon
+	"${MAKE}"  -f nbproject/Makefile-${CND_CONF}.mk ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-daemon
 
-${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-deamon: ${OBJECTFILES}
+${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-daemon: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-deamon ${OBJECTFILES} ${LDLIBSOPTIONS} 
+	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-daemon ${OBJECTFILES} ${LDLIBSOPTIONS} 
+
+${OBJECTDIR}/_ext/1275677342/path_functions.o: ../syncedfs-common/path_functions.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1275677342/path_functions.o ../syncedfs-common/path_functions.c
 
 ${OBJECTDIR}/_ext/988793768/error_functions.o: ../syncedfs-common/lib/error_functions.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
@@ -79,6 +86,11 @@ ${OBJECTDIR}/client.o: client.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/client.o client.c
+
+${OBJECTDIR}/_ext/1275677342/config_functions.o: ../syncedfs-common/config_functions.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1275677342/config_functions.o ../syncedfs-common/config_functions.c
 
 ${OBJECTDIR}/_ext/988793768/get_num.o: ../syncedfs-common/lib/get_num.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
@@ -126,7 +138,7 @@ ${OBJECTDIR}/main.o: main.c
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-deamon
+	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-daemon
 
 # Subprojects
 .clean-subprojects:

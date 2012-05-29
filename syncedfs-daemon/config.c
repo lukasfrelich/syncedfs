@@ -6,27 +6,47 @@
  */
 
 #include "config.h"
+#include "../syncedfs-common/path_functions.h"
+#include "../syncedfs-common/config_functions.h"
 #include <string.h>
 #include <unistd.h>
+#include <libconfig.h>
 #include "time.h"
 #include <pwd.h>
 #include "string.h"
 
+configuration_t config;
 
 /* TODO: this should be called when SIGHUP signal is received */
-void parseConfig(char *host, char* port) {
-    (void) strcpy(c_host, host);
-    (void) strcpy(c_port, port);
+int readConfig(char *resource) {
+    char cfgpath[PATH_MAX];
+    config_t cfg;
+    const char *str;
 
-    (void) strcpy(c_mountpoint, "/mnt/kvmstorage");
+    strncpy(config.resource, resource, RESOURCE_MAX);
     
-    (void) strcat(c_rootdir, getHomeDir());
-    if (strcmp(c_host, "") == 0)
-        (void) strcat(c_rootdir, "/syncedfs/secondary/physical");
-    else
-        (void) strcat(c_rootdir, "/syncedfs/primary/physical");
-        
-    (void) strcpy(c_resource, "r0");
+    snprintf(cfgpath, PATH_MAX, "%s%s%s",
+            "/etc/syncedfs.d/", resource, ".conf");
+
+    config_init(&cfg);
+    // Read the file. If there is an error, report it and exit
+    if (!config_read_file(&cfg, cfgpath)) {
+        fprintf(stderr, "%s:%d - %s\n", config_error_file(&cfg),
+                config_error_line(&cfg), config_error_text(&cfg));
+        config_destroy(&cfg);
+        return -2;
+    }
+
+    int ret = 0;
+    ret |= setConfigString(&cfg, "rootdir", str, config.rootdir, PATH_MAX, 1);
+    ret |= setConfigString(&cfg, "snapshot", str, config.snapshot, PATH_MAX, 1);
+    ret |= setConfigString(&cfg, "logdir", str, config.logdir, PATH_MAX, 1);
+
+    ret |= setConfigString(&cfg, "host", str, config.host, NI_MAXHOST, 0);
+    ret |= setConfigString(&cfg, "port", str, config.port, NI_MAXSERV, 0);
+    
+    config_destroy(&cfg);
+    return ret;
 }
 
 char *getSyncId(void) {
@@ -40,22 +60,8 @@ char *getSyncId(void) {
         t = time(NULL);
         tm = gmtime(&t);
         s = strftime(syncid, SYNCID_MAX, "%D_%T", tm);
-        (void) strncpy(syncid + s, c_resource, SYNCID_MAX - s);
+        (void) strncpy(syncid + s, config.resource, SYNCID_MAX - s);
     }
 
     return syncid;
-}
-
-char *getHomeDir(void) {
-    struct passwd *pw;
-    static char homedir[40];
-    register uid_t uid;
-
-    uid = geteuid();
-    pw = getpwuid(uid);
-    if (pw) {
-        strncpy(homedir, pw->pw_dir, 39);
-    }
-
-    return homedir;
 }
