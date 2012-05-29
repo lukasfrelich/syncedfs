@@ -6,8 +6,8 @@ message SyncInitialization {
 
 message FileChunk {
 	required string relative_path = 1;
-	required int32 number_chunks = 2;
-	repeated GenericOperation ops = 3;
+	repeated GenericOperation ops = 2;
+	required bool last_chunk = 3 [default = false];
 }
 
 message FileOperation {

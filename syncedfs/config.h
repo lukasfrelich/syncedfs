@@ -14,10 +14,14 @@
 
 #include <limits.h>
 
+//------------------------------------------------------------------------------
+// Structures
+//------------------------------------------------------------------------------
 typedef struct configuration_t {
     char resource[RESOURCE_MAX];
+    // all paths are stored without trailing '/'
     char rootdir[PATH_MAX];
-    int RPATH_MAX;
+    int rootdir_len;
     char mountdir[PATH_MAX];
     char logdir[PATH_MAX];
 } configuration_t;
@@ -30,14 +34,10 @@ typedef struct log_t {
 
 extern configuration_t config;
 
+//------------------------------------------------------------------------------
+// Functions
+//------------------------------------------------------------------------------
 int readConfig(char *resource);
-
-/*struct sfs_state {
-    int logfile;
-    int errlog;
-    char *rootdir;
-};*/
-//#define SFS_DATA ((struct sfs_state *) fuse_get_context()->private_data)
 
 #endif	/* PARAMS_H */
 

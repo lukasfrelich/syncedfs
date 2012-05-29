@@ -34,15 +34,16 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/_ext/1275677342/path_functions.o \
 	${OBJECTDIR}/_ext/988793768/error_functions.o \
+	${OBJECTDIR}/_ext/1275677342/config_functions.o \
 	${OBJECTDIR}/log.o \
 	${OBJECTDIR}/_ext/988793768/get_num.o \
 	${OBJECTDIR}/_ext/813881960/syncedfs.pb-c.o \
 	${OBJECTDIR}/_ext/988793768/inet_sockets.o \
 	${OBJECTDIR}/_ext/988793768/alt_functions.o \
 	${OBJECTDIR}/syncedfs.o \
-	${OBJECTDIR}/config.o \
-	${OBJECTDIR}/_ext/1275677342/paths.o
+	${OBJECTDIR}/config.o
 
 
 # C Compiler Flags
@@ -69,10 +70,20 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs ${OBJECTFILES} ${LDLIBSOPTIONS} 
 
+${OBJECTDIR}/_ext/1275677342/path_functions.o: ../syncedfs-common/path_functions.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1275677342/path_functions.o ../syncedfs-common/path_functions.c
+
 ${OBJECTDIR}/_ext/988793768/error_functions.o: ../syncedfs-common/lib/error_functions.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
 	${RM} $@.d
 	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/error_functions.o ../syncedfs-common/lib/error_functions.c
+
+${OBJECTDIR}/_ext/1275677342/config_functions.o: ../syncedfs-common/config_functions.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1275677342/config_functions.o ../syncedfs-common/config_functions.c
 
 ${OBJECTDIR}/log.o: log.c 
 	${MKDIR} -p ${OBJECTDIR}
@@ -108,11 +119,6 @@ ${OBJECTDIR}/config.o: config.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/config.o config.c
-
-${OBJECTDIR}/_ext/1275677342/paths.o: ../syncedfs-common/paths.c 
-	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342
-	${RM} $@.d
-	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1275677342/paths.o ../syncedfs-common/paths.c
 
 # Subprojects
 .build-subprojects:

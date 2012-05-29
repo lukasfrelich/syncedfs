@@ -17,7 +17,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "../syncedfs-common/protobuf/syncedfs.pb-c.h"
-#include "../syncedfs-common/paths.h"
+#include "../syncedfs-common/path_functions.h"
 #include "log.h"
 
 log_t olog;
@@ -46,13 +46,15 @@ log_t olog;
     vfprintf(SFS_DATA->logfile, format, ap);
 }*/
 
-int logOpen() {
+int openLog() {
     char logpath[PATH_MAX];
-    (void) buildPath(logpath, config.logdir, "res.log");
+    snprintf(logpath, PATH_MAX, "%s/%s.log", config.logdir, config.resource);
+    //printf("%s", logpath);
 
     // TODO: O_SYNC performance?
-    olog.fd = open(logpath, O_APPEND | O_CREAT | O_SYNC);
-    //logfile = fopen("/home/lfr/syncedfs/primary/r0.log", "ab");
+    olog.fd = open(logpath, O_WRONLY | O_APPEND | O_CREAT | O_SYNC,
+            S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    
     if (olog.fd == -1)
         return -1;
 
@@ -78,7 +80,7 @@ void logWrite(const char *relpath, off_t offset, size_t size) {
     genop.type = GENERIC_OPERATION__OPERATION_TYPE__WRITE;
     genop.write_op = &writeop;
 
-    fileop.relative_path = relpath;
+    fileop.relative_path = (char *) relpath;
     fileop.op = &genop;
 
     msglen = (uint32_t) file_operation__get_packed_size(&fileop);

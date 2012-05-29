@@ -9,6 +9,7 @@
 
 #include "config.h"
 #include "log.h"
+#include "../syncedfs-common/lib/error_functions.h"
 
 #include <ctype.h>
 #include <dirent.h>
@@ -44,11 +45,17 @@ static int sfs_error(char *str) {
 
 static inline void sfs_fullpath(char fpath[PATH_MAX], const char *path) {
     strcpy(fpath, config.rootdir);
+    
     // if relative path does not begin with '/'
     if (path != NULL && *path != '/') {
-        strcat(fpath, "/");
+        fpath[config.rootdir_len] = '/';
+        strncpy(fpath + config.rootdir_len + 1, path,
+                PATH_MAX - config.rootdir_len - 1);
+    } else {
+        strncpy(fpath + config.rootdir_len, path,
+                PATH_MAX - config.rootdir_len);
     }
-    strncat(fpath, path, config.RPATH_MAX);
+    fpath[PATH_MAX - 1] = '\0';         // fpath might not have been terminated
 }
 
 ///////////////////////////////////////////////////////////
@@ -838,29 +845,31 @@ int main(int argc, char** argv) {
     int fargc;
     char** fargv;
 
-    if ((getuid() == 0) || (geteuid() == 0)) {
-        perror("We don't want to run syncedfs as root.");
-        abort();
-    }
+    if ((getuid() == 0) || (geteuid() == 0))
+        fatal("We don't want to run syncedfs as root.");
 
-    if (argc != 2) {
-        usage();
-        exit (EXIT_FAILURE);
-    }
-
-    if (readConfig(argv[1]) != 0)
-        exit (EXIT_FAILURE);
+    if (argc != 2)
+        usageErr("syncedfs resource-name\n");
     
-    // open logs
-    //sfs_data->logfile = writelog_open();
+    if (readConfig(argv[1]) != 0)
+        fatal("Error reading configuration file.");
+    
 
+    printf("resource: %s\n", config.resource);
+    printf("rootdir: %s\n", config.rootdir);
+    printf("mountdir: %s\n", config.mountdir);
+    printf("logdir: %s\n", config.logdir);
+
+    // open log
+    if (openLog() != 0)
+        errExit("Could not open log file.");
+    
+    return 0;
     // add -o nonempty,use_ino (maybe also allow_other,default_permissions?)
     fargc = 6;
     fargv = malloc(fargc * sizeof (char *));
-    if (fargv == NULL) {
-        perror("fargv malloc");
-        abort();
-    }
+    if (fargv == NULL)
+        fatal("Cannot allocate memory for fuse arguments.\n");
 
     fargv[0] = argv[0];
     fargv[1] = config.mountdir;         // mount point

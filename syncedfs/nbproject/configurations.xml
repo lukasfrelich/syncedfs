@@ -39,8 +39,10 @@
         <itemPath>../syncedfs-common/protobuf/syncedfs.pb-c.h</itemPath>
         <itemPath>../syncedfs-common/protobuf/syncedfs.proto</itemPath>
       </logicalFolder>
-      <itemPath>../syncedfs-common/paths.c</itemPath>
-      <itemPath>../syncedfs-common/paths.h</itemPath>
+      <itemPath>../syncedfs-common/config_functions.c</itemPath>
+      <itemPath>../syncedfs-common/config_functions.h</itemPath>
+      <itemPath>../syncedfs-common/path_functions.c</itemPath>
+      <itemPath>../syncedfs-common/path_functions.h</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"

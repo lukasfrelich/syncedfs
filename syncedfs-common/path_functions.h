@@ -8,7 +8,8 @@
 #ifndef PATHS_H
 #define	PATHS_H
 
-char *buildPath(char *dest, char *parent, char* child);
+// removes trailing '/'
+char *getCanonincalPath(char *path);
 
 #endif	/* PATHS_H */
 

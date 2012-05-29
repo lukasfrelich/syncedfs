@@ -715,6 +715,7 @@ const ProtobufCMessageDescriptor sync_initialization__descriptor =
   (ProtobufCMessageInit) sync_initialization__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
+static const protobuf_c_boolean file_chunk__last_chunk__default_value = 0;
 static const ProtobufCFieldDescriptor file_chunk__field_descriptors[3] =
 {
   {
@@ -730,20 +731,8 @@ static const ProtobufCFieldDescriptor file_chunk__field_descriptors[3] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "number_chunks",
-    2,
-    PROTOBUF_C_LABEL_REQUIRED,
-    PROTOBUF_C_TYPE_INT32,
-    0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(FileChunk, number_chunks),
-    NULL,
-    NULL,
-    0,            /* packed */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
     "ops",
-    3,
+    2,
     PROTOBUF_C_LABEL_REPEATED,
     PROTOBUF_C_TYPE_MESSAGE,
     PROTOBUF_C_OFFSETOF(FileChunk, n_ops),
@@ -753,10 +742,22 @@ static const ProtobufCFieldDescriptor file_chunk__field_descriptors[3] =
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "last_chunk",
+    3,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(FileChunk, last_chunk),
+    NULL,
+    &file_chunk__last_chunk__default_value,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned file_chunk__field_indices_by_name[] = {
-  1,   /* field[1] = number_chunks */
-  2,   /* field[2] = ops */
+  2,   /* field[2] = last_chunk */
+  1,   /* field[1] = ops */
   0,   /* field[0] = relative_path */
 };
 static const ProtobufCIntRange file_chunk__number_ranges[1 + 1] =

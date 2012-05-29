@@ -8,13 +8,12 @@
 #ifndef LOG_H
 #define	LOG_H
 
-/*FILE *log_open(void);
-// used only to make the code run
-// TODO: get rid of it
-void log_msg(const char *format, ...);*/
 #include <unistd.h>
 
-int logOpen(void);
+int openLog(void);
+//------------------------------------------------------------------------------
+// Operation handlers
+//------------------------------------------------------------------------------
 void logWrite(const char *relpath, off_t offset, size_t size);
 
 #endif	/* LOG_H */

@@ -6,6 +6,8 @@
  */
 
 #include "config.h"
+#include "../syncedfs-common/path_functions.h"
+#include "../syncedfs-common/config_functions.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <libconfig.h>
@@ -16,44 +18,27 @@ configuration_t config;
 int readConfig(char *resource) {
     char cfgpath[PATH_MAX];
     config_t cfg;
-    const char *str;
+    char *str;
 
     strncpy(config.resource, resource, RESOURCE_MAX);
-
-    (void) strcat(cfgpath, "/etc/syncedfs.d/");
-    (void) strcat(cfgpath, resource);
-    (void) strcat(cfgpath, ".conf");
+    
+    snprintf(cfgpath, PATH_MAX, "%s%s%s",
+            "/etc/syncedfs.d/", resource, ".conf");
 
     config_init(&cfg);
-
-    // Read the file. If there is an error, report it and exit
     if (!config_read_file(&cfg, cfgpath)) {
         fprintf(stderr, "%s:%d - %s\n", config_error_file(&cfg),
                 config_error_line(&cfg), config_error_text(&cfg));
         config_destroy(&cfg);
-        return -1;
+        return -2;
     }
 
     int ret = 0;
-    if (config_lookup_string(&cfg, "rootdir", &str)) {
-        (void) strncpy(config.rootdir, str, PATH_MAX);
-        config.RPATH_MAX = PATH_MAX - strlen(str) - 2; // -2: '\0' and '/' chars
-    } else {
-        fprintf(stderr, "No 'rootdir' setting in configuration file.\n");
-        ret = -2;
-    }
-    if (config_lookup_string(&cfg, "mountdir", &str)) {
-        (void) strncpy(config.mountdir, str, PATH_MAX);
-    } else {
-        fprintf(stderr, "No 'rootdir' setting in configuration file.\n");
-        ret = -2;
-    }
-    if (config_lookup_string(&cfg, "logdir", &str)) {
-        (void) strncpy(config.logdir, str, PATH_MAX);
-    } else {
-        fprintf(stderr, "No 'rootdir' setting in configuration file.\n");
-        ret = -2;
-    }
+    ret |= setConfigString(&cfg, "rootdir", str, config.rootdir, PATH_MAX, 1);
+    ret |= setConfigString(&cfg, "mountdir", str, config.mountdir, PATH_MAX, 1);
+    ret |= setConfigString(&cfg, "logdir", str, config.logdir, PATH_MAX, 1);
+    config.rootdir_len = strlen(config.rootdir);
     
+    config_destroy(&cfg);
     return ret;
 }
