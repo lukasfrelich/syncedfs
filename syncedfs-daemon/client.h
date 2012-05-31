@@ -32,7 +32,7 @@ void synchronize(void);
 //------------------------------------------------------------------------------
 // Log processing
 //------------------------------------------------------------------------------
-void processLog(char *logpath);
+void processLog(int logfd);
 void printLog(void);
 void addOperation(char *relpath, GenericOperation *genop);
 void optimizeOperations(fileop_t *fileop);
@@ -55,6 +55,7 @@ int cHandleWrite(int fd, WriteOperation *writeop, dyndata_t *dyndata);
 // Auxiliary functions
 //------------------------------------------------------------------------------
 int sortByOrder(fileop_t *a, fileop_t *b);
+int switchLog(void);
 
 #endif	/* CLIENT_H */
 

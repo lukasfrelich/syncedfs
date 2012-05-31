@@ -5,53 +5,80 @@
  * Created on May 2, 2012, 9:53 AM
  */
 
+#define _GNU_SOURCE
+
 #include "config.h"
 #include "client.h"
 #include "common.h"
 #include "../syncedfs-common/lib/inet_sockets.h"
+#include "../syncedfs-common/lib/create_pid_file.h"
 #include "../syncedfs-common/lib/uthash.h"
 #include "../syncedfs-common/lib/tlpi_hdr.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/time.h>
 
 fileop_t *files = NULL; // Hash map
 
 void synchronize(void) {
-    // force syncedfs to switch to a new log file
+    char pidpath[PATH_MAX];
+    char logpath[PATH_MAX];
+    int logfd;
+
+    // make sure, that there isn't another client process for this resource
+    // already running
+    snprintf(pidpath, PATH_MAX, "/var/run/syncedfs/client/%s.pid",
+            config.resource);
+    createPidFile(config.resource, pidpath, 0);
 
     // new sync or resume?
+    snprintf(logpath, PATH_MAX, "%s/%s.sync", config.logdir, config.resource);
+    printf("logpath: %s\n", logpath);
+    logfd = open(logpath, O_RDWR);
+    if (logfd == -1) {
+        if (switchLog() != 0) {
+            fatal("Could not switch log file.");
+        }
+        
+        logfd = open(logpath, O_RDWR);
+        if (logfd == -1) {
+            fatal("Could not open log file %s", logpath);
+        }
+    }
 
-    //test("/test.txt", 0, 4096);
-    processLog("/home/lfr/syncedfs/primary/r0.log");
+
+    //processLog(logfd);
     //printLog();
-    transfer(config.host, config.port);
+    //transfer(config.host, config.port);
+
+    close(logfd);
+    // delete pid file
+    if (unlink(pidpath) == -1)
+        errExit("Deleting PID file '%s'", pidpath);
+
+    // delete log
 }
 
 //------------------------------------------------------------------------------
 // Log processing
 //------------------------------------------------------------------------------
 
-void processLog(char *logpath) {
-    FILE *log;
+void processLog(int logfd) {
     uint8_t *buf;
     uint32_t msglen;
     FileOperation *fileop;
 
-    log = fopen(logpath, "rb");
-    if (log == NULL) {
-        errExit("%s", logpath);
-    }
-
-    while (fread(&msglen, sizeof (uint32_t), 1, log) == 1) {
+    while (read(logfd, &msglen, sizeof (uint32_t)) == sizeof (uint32_t)) {
         msglen = ntohl(msglen);
 
         buf = malloc(msglen);
         if (buf == NULL)
             perror("malloc buf");
-        if (fread(buf, msglen, 1, log) != 1)
+        if (read(logfd, buf, msglen) != msglen)
             perror("read message");
 
         fileop = file_operation__unpack(NULL, msglen, buf);
@@ -126,16 +153,16 @@ void optimizeOperations(fileop_t *fileop) {
 //------------------------------------------------------------------------------
 
 void transfer(char *host, char *port) {
-    int sfd;            // server socket
-    fileop_t *fileop;   // contains all operations for a file
-    GenericOperation *genop;    // current operation
-    int fd;             // descriptor for file we will process
-    
-    dyndata_t ddata = {0};// used for dynamically allocated data (to lower number
-                        // of malloc calls)
-    //int nbytes;         // how many bytes in ddata are used
+    int sfd; // server socket
+    fileop_t *fileop; // contains all operations for a file
+    GenericOperation *genop; // current operation
+    int fd; // descriptor for file we will process
+
+    dyndata_t ddata = {0}; // used for dynamically allocated data (to lower
+    // number of malloc calls)
+    //int nbytes;          // how many bytes in ddata are used
     GenericOperation **opstart; //first operation to be send in the message
-    int nops;           // how many GenericOperations are in the message
+    int nops; // how many GenericOperations are in the message
 
     ddata.buf = malloc(MESSAGE_MAX * sizeof (uint8_t));
     if (ddata.buf == NULL)
@@ -172,14 +199,14 @@ void transfer(char *host, char *port) {
             if (cHandleGenericOperation(fd, genop, &ddata) != 0)
                 fatal("Couldn't load required data.\n");
             nops++;
-            
+
             if (ddata.size >= MESSAGE_MAX) {
                 // if we have just added last operation, set last_chunk flag
                 if (i == fileop->nelem - 1)
                     transferChunk(sfd, fileop, opstart, nops, 1);
                 else
                     transferChunk(sfd, fileop, opstart, nops, 0);
-                
+
                 // reset counters
                 opstart = fileop->operations + i;
                 nops = 0;
@@ -270,7 +297,7 @@ int cHandleWrite(int fd, WriteOperation *writeop, dyndata_t *dyndata) {
     // realloc, if necessary
     if (writeop->size > dyndata->size - dyndata->offset) {
         int nsize = dyndata->size + writeop->size;
-        
+
         dyndata->buf = realloc(dyndata->buf, nsize);
         if (dyndata->buf == NULL) {
             perror("realloc");
@@ -278,7 +305,7 @@ int cHandleWrite(int fd, WriteOperation *writeop, dyndata_t *dyndata) {
         }
         dyndata->size = nsize;
     }
-    
+
     if (pread(fd, dyndata->buf + dyndata->offset, writeop->size,
             writeop->offset) != writeop->size) {
         perror("pread");
@@ -288,7 +315,7 @@ int cHandleWrite(int fd, WriteOperation *writeop, dyndata_t *dyndata) {
     ProtobufCBinaryData data = {writeop->size, dyndata->buf + dyndata->offset};
     writeop->has_data = 1;
     writeop->data = data;
-    
+
     dyndata->offset += writeop->size;
     return 0;
 }
@@ -301,4 +328,69 @@ int sortByOrder(fileop_t *a, fileop_t *b) {
     if (a->order == b->order)
         return 0;
     return (a->order < b->order) ? -1 : 1;
+}
+
+int switchLog(void) {
+    FILE *pidfile;
+    long pid;
+    char pidpath[PATH_MAX]; // syncedfs pid
+    char buf[RESOURCE_MAX];
+    snprintf(pidpath, PATH_MAX, "/var/run/syncedfs/fs/%s.pid", config.resource);
+
+    pidfile = fopen(pidpath, "r");
+    if (pidfile == NULL) {
+        errMsg("Error opening syncedfs PID file: %s", pidpath);
+        return -1;
+    }
+
+    // read PID
+    if (fgets(buf, RESOURCE_MAX - 1, pidfile) == NULL) {
+        errMsg("Error reading syncedfs PID file: %s", pidpath);
+        return -1;
+    }
+
+    fclose(pidfile);
+
+    char *endptr = NULL;
+    errno = 0;
+    pid = strtol(buf, &endptr, 10);
+    if (errno != 0 || pid == 0) {
+        errMsg("Error reading syncedfs PID file: %s", pidpath);
+        return -1;
+    }
+
+    // verify PID
+    if (kill(pid, 0) == -1) {
+        errMsg("Could not verify syncedfs PID.");
+        return -1;
+    }
+
+    // send signal
+    if (kill(pid, SIGUSR1) == -1) {
+        errMsg("Could not send SIGUSR1 signal to %ld", pid);
+        return -1;
+    }
+
+    // wait for response
+    int sig;
+    siginfo_t si;
+    sigset_t allsigs;
+    struct timespec tspec;
+
+    sigemptyset(&allsigs);
+    sigaddset(&allsigs, SIGUSR1);
+    tspec.tv_sec = 10;
+
+    sig = sigtimedwait(&allsigs, &si, &tspec);
+    if (sig != SIGUSR1) {
+        errMsg("sigtimedwait failed.");
+        return -1;
+    }
+
+    if (si.si_pid != pid) {
+        errMsg("Received SIGUSR1 from wrong process");
+        return -1;
+    }
+
+    return 0;
 }

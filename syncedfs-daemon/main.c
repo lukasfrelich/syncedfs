@@ -20,26 +20,27 @@
  * 
  */
 int main(int argc, char** argv) {
-    if (argc < 2)
+    if (argc < 3)
         usageErr("syncedfsd server|client [host] port\n");
 
+    // TODO: this app probably will have to run as root
+    // but it can drop root privileges most of the time
+    
     if (readConfig(argv[1]) != 0)
         fatal("Error reading configuration file.");
 
-    printf("resource: %s\n", config.resource);
+/*    printf("resource: %s\n", config.resource);
     printf("rootdir: %s\n", config.rootdir);
     printf("mountdir: %s\n", config.snapshot);
     printf("logdir: %s\n", config.logdir);
 
     printf("host: %s\n", config.host);
-    printf("port: %s\n", config.port);
+    printf("port: %s\n", config.port);*/
     
-    return 0;
-    //
-    if (strcmp(argv[1], "server") == 0)
+    if (strcmp(argv[2], "server") == 0)
         startServer();
 
-    if (strcmp(argv[1], "client") == 0)
+    if (strcmp(argv[2], "client") == 0)
         synchronize();
 
     return (EXIT_SUCCESS);

@@ -37,6 +37,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/1275677342/path_functions.o \
 	${OBJECTDIR}/_ext/988793768/error_functions.o \
 	${OBJECTDIR}/client.o \
+	${OBJECTDIR}/_ext/988793768/region_locking.o \
 	${OBJECTDIR}/_ext/1275677342/config_functions.o \
 	${OBJECTDIR}/_ext/988793768/get_num.o \
 	${OBJECTDIR}/common.o \
@@ -44,6 +45,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/server.o \
 	${OBJECTDIR}/_ext/988793768/inet_sockets.o \
 	${OBJECTDIR}/_ext/988793768/alt_functions.o \
+	${OBJECTDIR}/_ext/988793768/create_pid_file.o \
 	${OBJECTDIR}/config.o \
 	${OBJECTDIR}/main.o
 
@@ -87,6 +89,11 @@ ${OBJECTDIR}/client.o: client.c
 	${RM} $@.d
 	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/client.o client.c
 
+${OBJECTDIR}/_ext/988793768/region_locking.o: ../syncedfs-common/lib/region_locking.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/region_locking.o ../syncedfs-common/lib/region_locking.c
+
 ${OBJECTDIR}/_ext/1275677342/config_functions.o: ../syncedfs-common/config_functions.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342
 	${RM} $@.d
@@ -121,6 +128,11 @@ ${OBJECTDIR}/_ext/988793768/alt_functions.o: ../syncedfs-common/lib/alt_function
 	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
 	${RM} $@.d
 	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/alt_functions.o ../syncedfs-common/lib/alt_functions.c
+
+${OBJECTDIR}/_ext/988793768/create_pid_file.o: ../syncedfs-common/lib/create_pid_file.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/create_pid_file.o ../syncedfs-common/lib/create_pid_file.c
 
 ${OBJECTDIR}/config.o: config.c 
 	${MKDIR} -p ${OBJECTDIR}

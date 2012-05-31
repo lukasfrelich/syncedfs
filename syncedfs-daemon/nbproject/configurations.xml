@@ -28,6 +28,8 @@
       <logicalFolder name="lib" displayName="lib" projectFiles="true">
         <itemPath>../syncedfs-common/lib/alt_functions.c</itemPath>
         <itemPath>../syncedfs-common/lib/alt_functions.h</itemPath>
+        <itemPath>../syncedfs-common/lib/create_pid_file.c</itemPath>
+        <itemPath>../syncedfs-common/lib/create_pid_file.h</itemPath>
         <itemPath>../syncedfs-common/lib/ename.c.inc</itemPath>
         <itemPath>../syncedfs-common/lib/error_functions.c</itemPath>
         <itemPath>../syncedfs-common/lib/error_functions.h</itemPath>
@@ -35,6 +37,8 @@
         <itemPath>../syncedfs-common/lib/get_num.h</itemPath>
         <itemPath>../syncedfs-common/lib/inet_sockets.c</itemPath>
         <itemPath>../syncedfs-common/lib/inet_sockets.h</itemPath>
+        <itemPath>../syncedfs-common/lib/region_locking.c</itemPath>
+        <itemPath>../syncedfs-common/lib/region_locking.h</itemPath>
         <itemPath>../syncedfs-common/lib/tlpi_hdr.h</itemPath>
         <itemPath>../syncedfs-common/lib/uthash.h</itemPath>
       </logicalFolder>
