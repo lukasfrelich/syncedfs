@@ -36,6 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/1275677342/path_functions.o \
 	${OBJECTDIR}/_ext/988793768/error_functions.o \
+	${OBJECTDIR}/_ext/988793768/region_locking.o \
 	${OBJECTDIR}/_ext/1275677342/config_functions.o \
 	${OBJECTDIR}/log.o \
 	${OBJECTDIR}/_ext/988793768/get_num.o \
@@ -43,6 +44,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/988793768/inet_sockets.o \
 	${OBJECTDIR}/_ext/988793768/alt_functions.o \
 	${OBJECTDIR}/syncedfs.o \
+	${OBJECTDIR}/_ext/988793768/create_pid_file.o \
+	${OBJECTDIR}/sighandlers.o \
 	${OBJECTDIR}/config.o
 
 
@@ -80,6 +83,11 @@ ${OBJECTDIR}/_ext/988793768/error_functions.o: ../syncedfs-common/lib/error_func
 	${RM} $@.d
 	$(COMPILE.c) -g `pkg-config --cflags fuse` `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/error_functions.o ../syncedfs-common/lib/error_functions.c
 
+${OBJECTDIR}/_ext/988793768/region_locking.o: ../syncedfs-common/lib/region_locking.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
+	${RM} $@.d
+	$(COMPILE.c) -g `pkg-config --cflags fuse` `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/region_locking.o ../syncedfs-common/lib/region_locking.c
+
 ${OBJECTDIR}/_ext/1275677342/config_functions.o: ../syncedfs-common/config_functions.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342
 	${RM} $@.d
@@ -114,6 +122,16 @@ ${OBJECTDIR}/syncedfs.o: syncedfs.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -g `pkg-config --cflags fuse` `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/syncedfs.o syncedfs.c
+
+${OBJECTDIR}/_ext/988793768/create_pid_file.o: ../syncedfs-common/lib/create_pid_file.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
+	${RM} $@.d
+	$(COMPILE.c) -g `pkg-config --cflags fuse` `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/create_pid_file.o ../syncedfs-common/lib/create_pid_file.c
+
+${OBJECTDIR}/sighandlers.o: sighandlers.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -g `pkg-config --cflags fuse` `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/sighandlers.o sighandlers.c
 
 ${OBJECTDIR}/config.o: config.c 
 	${MKDIR} -p ${OBJECTDIR}

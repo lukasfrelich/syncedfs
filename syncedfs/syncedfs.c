@@ -9,6 +9,7 @@
 
 #include "config.h"
 #include "log.h"
+#include "sighandlers.h"
 #include "../syncedfs-common/lib/error_functions.h"
 
 #include <ctype.h>
@@ -22,11 +23,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <signal.h>
 #include <sys/types.h>
 #include <sys/xattr.h>
 
 
 // Report errors to logfile and give -errno to caller
+
 static int sfs_error(char *str) {
     int ret = -errno;
 
@@ -38,14 +41,13 @@ static int sfs_error(char *str) {
 // Check whether the given user is permitted to perform the given operation on the given 
 
 //  All the paths I see are relative to the root of the mounted
-//  filesystem.  In order to get to the underlying filesystem, I need to
-//  have the mountpoint.  I'll save it away early on in main(), and then
-//  whenever I need a path for something I'll call this to construct
-//  it.
+//  filesystem.  In order to get to the underlying filesystem, we need to
+//  have the rootdir.
+// syncedfs specific version for better performance
 
 static inline void sfs_fullpath(char fpath[PATH_MAX], const char *path) {
     strcpy(fpath, config.rootdir);
-    
+
     // if relative path does not begin with '/'
     if (path != NULL && *path != '/') {
         fpath[config.rootdir_len] = '/';
@@ -55,7 +57,7 @@ static inline void sfs_fullpath(char fpath[PATH_MAX], const char *path) {
         strncpy(fpath + config.rootdir_len, path,
                 PATH_MAX - config.rootdir_len);
     }
-    fpath[PATH_MAX - 1] = '\0';         // fpath might not have been terminated
+    fpath[PATH_MAX - 1] = '\0'; // fpath might not have been terminated
 }
 
 ///////////////////////////////////////////////////////////
@@ -673,8 +675,31 @@ int sfs_fsyncdir(const char *path, int datasync, struct fuse_file_info *fi) {
 // FUSE).
 
 void *sfs_init(struct fuse_conn_info *conn) {
+    int fd;
+    char pidpath[PATH_MAX];
+    char buf[RESOURCE_MAX];
+    
+    // write PID into .pid file
+    // we can't do it in main(), because fuse clones this process
+    snprintf(pidpath, PATH_MAX, "/var/run/syncedfs/fs/%s.pid", config.resource);
+    fd = open(pidpath, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
 
-    //return SFS_DATA;
+    if (ftruncate(fd, 0) == -1)
+        errExit("Could not truncate PID file '%s'", pidpath);
+
+    snprintf(buf, RESOURCE_MAX, "%ld\n", (long) getpid());
+    if (write(fd, buf, strlen(buf)) != strlen(buf))
+        fatal("Writing to PID file '%s'", pidpath);
+    
+    // setup signal handlers
+    struct sigaction act;
+    sigemptyset(&act.sa_mask);
+    act.sa_sigaction = handleSIGUSR1;
+    act.sa_flags = SA_SIGINFO;
+    
+    if (sigaction(SIGUSR1, &act, NULL) == -1)
+        fatal("sigaction");
+
     return NULL;
 }
 
@@ -686,7 +711,12 @@ void *sfs_init(struct fuse_conn_info *conn) {
  * Introduced in version 2.3
  */
 void sfs_destroy(void *userdata) {
+    char pidpath[PATH_MAX];
+
+    snprintf(pidpath, PATH_MAX, "/var/run/syncedfs/fs/%s.pid", config.resource);
     
+    if (unlink(pidpath) == -1)
+        errExit("Deleting PID file '%s'", pidpath);
 }
 
 /**
@@ -793,10 +823,6 @@ int sfs_fgetattr(const char *path, struct stat *statbuf, struct fuse_file_info *
     return retstat;
 }
 
-void usage(void) {
-    fprintf(stderr, "usage: syncedfs resource-name\n");
-}
-
 struct fuse_operations sfs_oper = {
     .getattr = sfs_getattr,
     .readlink = sfs_readlink,
@@ -845,36 +871,37 @@ int main(int argc, char** argv) {
     int fargc;
     char** fargv;
 
-    if ((getuid() == 0) || (geteuid() == 0))
-        fatal("We don't want to run syncedfs as root.");
-
     if (argc != 2)
         usageErr("syncedfs resource-name\n");
     
+    if ((getuid() == 0) || (geteuid() == 0))
+        fatal("We don't want to run syncedfs as root.");
+
+    // read configuration
     if (readConfig(argv[1]) != 0)
         fatal("Error reading configuration file.");
-    
 
-    printf("resource: %s\n", config.resource);
-    printf("rootdir: %s\n", config.rootdir);
-    printf("mountdir: %s\n", config.mountdir);
-    printf("logdir: %s\n", config.logdir);
+    /*
+        printf("resource: %s\n", config.resource);
+        printf("rootdir: %s\n", config.rootdir);
+        printf("mountdir: %s\n", config.mountdir);
+        printf("logdir: %s\n", config.logdir);
+     */
 
     // open log
     if (openLog() != 0)
         errExit("Could not open log file.");
-    
-    return 0;
+
     // add -o nonempty,use_ino (maybe also allow_other,default_permissions?)
-    fargc = 6;
-    fargv = malloc(fargc * sizeof (char *));
+    fargc = 5;
+    fargv = malloc((fargc + 1) * sizeof (char *));
     if (fargv == NULL)
         fatal("Cannot allocate memory for fuse arguments.\n");
 
     fargv[0] = argv[0];
-    fargv[1] = config.mountdir;         // mount point
-    fargv[2] = "-s";                    // single thread
-    fargv[3] = "-o";                    // options
+    fargv[1] = config.mountdir; // mount point
+    fargv[2] = "-s"; // single thread
+    fargv[3] = "-o"; // options
     fargv[4] = "nonempty,use_ino";
     fargv[5] = NULL;
 

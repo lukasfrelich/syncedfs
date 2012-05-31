@@ -11,5 +11,7 @@
 // removes trailing '/'
 char *getCanonincalPath(char *path);
 
+//void getFullpath(char fpath[PATH_MAX], config_t *cfg, const char *path);
+
 #endif	/* PATHS_H */
 
