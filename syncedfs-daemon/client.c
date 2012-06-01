@@ -43,7 +43,7 @@ void synchronize(void) {
         if (switchLog() != 0) {
             fatal("Could not switch log file.");
         }
-        
+
         logfd = open(logpath, O_RDWR);
         if (logfd == -1) {
             fatal("Could not open log file %s", logpath);
@@ -270,7 +270,9 @@ void transferChunk(int sfd, fileop_t *fileop, GenericOperation **opstart,
 // Operation handlers
 //------------------------------------------------------------------------------
 
-int cHandleGenericOperation(int fd, GenericOperation *genop, dyndata_t *dyndata) {
+int cHandleGenericOperation(int fd, GenericOperation *genop,
+        dyndata_t *dyndata) {
+    
     int ret;
 
     switch (genop->type) {
@@ -365,6 +367,17 @@ int switchLog(void) {
         return -1;
     }
 
+    // block SIGUSR1 signal (so a response is not delivered before we wait
+    // for it)
+    sigset_t origmask, blockmask;
+
+    sigemptyset(&blockmask);
+    sigaddset(&blockmask, SIGUSR1);
+    if (sigprocmask(SIG_BLOCK, &blockmask, &origmask) == -1) {
+        errMsg("Could not block SIGUSR1 signal.");
+        return -1;
+    }
+
     // send signal
     if (kill(pid, SIGUSR1) == -1) {
         errMsg("Could not send SIGUSR1 signal to %ld", pid);
@@ -391,6 +404,11 @@ int switchLog(void) {
         errMsg("Received SIGUSR1 from wrong process");
         return -1;
     }
-
+    
+    // restore signal mask
+    if (sigprocmask(SIG_SETMASK, &origmask, NULL) == -1) {
+        errMsg("Could not restore signal mask.");
+        return -1;
+    }
     return 0;
 }

@@ -48,7 +48,8 @@ void transferChunk(int sfd, fileop_t *fileop, GenericOperation **opstart,
 //------------------------------------------------------------------------------
 // Operation handlers
 //------------------------------------------------------------------------------
-int cHandleGenericOperation(int fd, GenericOperation *genop, dyndata_t *dyndata);
+int cHandleGenericOperation(int fd, GenericOperation *genop,
+        dyndata_t *dyndata);
 int cHandleWrite(int fd, WriteOperation *writeop, dyndata_t *dyndata);
 
 //------------------------------------------------------------------------------
