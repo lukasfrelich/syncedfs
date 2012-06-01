@@ -16,11 +16,17 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <signal.h>
 #include "../syncedfs-common/protobuf/syncedfs.pb-c.h"
 #include "../syncedfs-common/path_functions.h"
+#include "../syncedfs-common/lib/error_functions.h"
 #include "log.h"
+#include "sighandlers.h"
 
-log_t olog;
+//log_t olog;
+static int logfd;
+volatile sig_atomic_t switchpending = 0;
+volatile sig_atomic_t writepending = 0;
 
 /*FILE *log_open() {
     FILE *logfile;
@@ -39,6 +45,7 @@ log_t olog;
     return logfile;*
     return NULL;
 }*/
+
 /*void log_msg(const char *format, ...) {
     va_list ap;
     va_start(ap, format);
@@ -51,20 +58,40 @@ int openLog() {
     snprintf(logpath, PATH_MAX, "%s/%s.log", config.logdir, config.resource);
     //printf("%s", logpath);
 
-    // TODO: O_SYNC performance?
-    olog.fd = open(logpath, O_WRONLY | O_APPEND | O_CREAT | O_SYNC,
+    // O_SYNC absolutely kills the performance
+    logfd = open(logpath, O_WRONLY | O_APPEND | O_CREAT, /*O_SYNC,*/
             S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    
-    if (olog.fd == -1)
+
+    if (logfd == -1)
         return -1;
 
     return 0;
 }
 
+void switchLog(void) {
+    // switch log by renaming current log and opening a new log
+    char oldpath[PATH_MAX], newpath[PATH_MAX];
+    snprintf(oldpath, PATH_MAX, "%s/%s.log", config.logdir, config.resource);
+    snprintf(newpath, PATH_MAX, "%s/%s.sync", config.logdir, config.resource);
+
+    if (close(logfd) == -1)
+        errExit("Could not close log file %s.", oldpath);
+
+    if (rename(oldpath, newpath) == -1)
+        fatal("Could not rename log file %s to %s", oldpath, newpath);
+
+    if (openLog() != 0)
+        errExit("Could not create new log file.");
+}
+
+//------------------------------------------------------------------------------
+// Operation handlers
+//------------------------------------------------------------------------------
 
 void logWrite(const char *relpath, off_t offset, size_t size) {
-    // TODO: change to use getPackedMessage
+    writepending = 1;
     
+    // TODO: change to use getPackedMessage?
     uint32_t msglen;
     uint32_t writelen;
     uint8_t *buf;
@@ -93,7 +120,10 @@ void logWrite(const char *relpath, off_t offset, size_t size) {
     buf = (uint8_t *) (bufbegin + 1);
     file_operation__pack(&fileop, buf);
 
-    if (write(olog.fd, bufbegin, writelen) != writelen)
+    if (write(logfd, bufbegin, writelen) != writelen)
         return; // TODO: log
+    
+    writepending = 0;
+    if (switchpending == 1)
+        handleSIGUSR1(0, NULL, NULL);
 }
-

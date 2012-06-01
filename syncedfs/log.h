@@ -11,9 +11,12 @@
 #include <unistd.h>
 
 int openLog(void);
+void switchLog(void);
+
 //------------------------------------------------------------------------------
 // Operation handlers
 //------------------------------------------------------------------------------
 void logWrite(const char *relpath, off_t offset, size_t size);
+
 
 #endif	/* LOG_H */

@@ -26,13 +26,15 @@ typedef struct configuration_t {
     char logdir[PATH_MAX];
 } configuration_t;
 
-typedef struct log_t {
+
+/*typedef struct log_t {
     int fd;
     int switchpending;
     int writepending;
-} log_t;
+} log_t;*/
 
 extern configuration_t config;
+//extern log_t olog;
 
 //------------------------------------------------------------------------------
 // Functions
