@@ -11,7 +11,7 @@
 #include <sys/socket.h>
 #include "../syncedfs-common/lib/inet_sockets.h"
 #include "../syncedfs-common/lib/tlpi_hdr.h"
-#include "common.h"
+#include "../syncedfs-common/message_functions.h"
 
 #include <fcntl.h>
 
@@ -124,20 +124,26 @@ int createSnapshot(void) {
 int sHandleGenericOperation(int fd, GenericOperation *genop) {
     int ret;
 
+    // check fd here, if it's -1 and operation is not create, we have a problem
     switch (genop->type) {
+        case GENERIC_OPERATION__OPERATION_TYPE__CREATE:
         case GENERIC_OPERATION__OPERATION_TYPE__MKNOD:
         case GENERIC_OPERATION__OPERATION_TYPE__MKDIR:
         case GENERIC_OPERATION__OPERATION_TYPE__SYMLINK:
-        case GENERIC_OPERATION__OPERATION_TYPE__UNLINK:
-        case GENERIC_OPERATION__OPERATION_TYPE__RMDIR:
-        case GENERIC_OPERATION__OPERATION_TYPE__RENAME:
         case GENERIC_OPERATION__OPERATION_TYPE__LINK:
-        case GENERIC_OPERATION__OPERATION_TYPE__CHMOD:
-        case GENERIC_OPERATION__OPERATION_TYPE__CHOWN:
-        case GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE:
             break;
         case GENERIC_OPERATION__OPERATION_TYPE__WRITE:
             ret = sHandleWrite(fd, genop->write_op);
+            break;
+        case GENERIC_OPERATION__OPERATION_TYPE__UNLINK:
+        case GENERIC_OPERATION__OPERATION_TYPE__RMDIR:
+        case GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE:
+        case GENERIC_OPERATION__OPERATION_TYPE__CHMOD:
+        case GENERIC_OPERATION__OPERATION_TYPE__CHOWN:
+        case GENERIC_OPERATION__OPERATION_TYPE__RENAME:
+            break;
+        case GENERIC_OPERATION__OPERATION_TYPE__SETXATTR:
+        case GENERIC_OPERATION__OPERATION_TYPE__REMOVEXATTR:
             break;
     }
 

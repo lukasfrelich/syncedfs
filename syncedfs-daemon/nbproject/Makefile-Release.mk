@@ -34,13 +34,13 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/_ext/1275677342/message_functions.o \
 	${OBJECTDIR}/_ext/1275677342/path_functions.o \
 	${OBJECTDIR}/_ext/988793768/error_functions.o \
 	${OBJECTDIR}/client.o \
 	${OBJECTDIR}/_ext/988793768/region_locking.o \
 	${OBJECTDIR}/_ext/1275677342/config_functions.o \
 	${OBJECTDIR}/_ext/988793768/get_num.o \
-	${OBJECTDIR}/common.o \
 	${OBJECTDIR}/_ext/813881960/syncedfs.pb-c.o \
 	${OBJECTDIR}/server.o \
 	${OBJECTDIR}/_ext/988793768/inet_sockets.o \
@@ -74,6 +74,11 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-daemon: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-daemon ${OBJECTFILES} ${LDLIBSOPTIONS} 
 
+${OBJECTDIR}/_ext/1275677342/message_functions.o: ../syncedfs-common/message_functions.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1275677342/message_functions.o ../syncedfs-common/message_functions.c
+
 ${OBJECTDIR}/_ext/1275677342/path_functions.o: ../syncedfs-common/path_functions.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342
 	${RM} $@.d
@@ -103,11 +108,6 @@ ${OBJECTDIR}/_ext/988793768/get_num.o: ../syncedfs-common/lib/get_num.c
 	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
 	${RM} $@.d
 	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/get_num.o ../syncedfs-common/lib/get_num.c
-
-${OBJECTDIR}/common.o: common.c 
-	${MKDIR} -p ${OBJECTDIR}
-	${RM} $@.d
-	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/common.o common.c
 
 ${OBJECTDIR}/_ext/813881960/syncedfs.pb-c.o: ../syncedfs-common/protobuf/syncedfs.pb-c.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/813881960

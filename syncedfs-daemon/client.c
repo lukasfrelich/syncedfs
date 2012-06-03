@@ -9,7 +9,7 @@
 
 #include "config.h"
 #include "client.h"
-#include "common.h"
+#include "../syncedfs-common/message_functions.h"
 #include "../syncedfs-common/lib/inet_sockets.h"
 #include "../syncedfs-common/lib/create_pid_file.h"
 #include "../syncedfs-common/lib/uthash.h"
@@ -276,19 +276,24 @@ int cHandleGenericOperation(int fd, GenericOperation *genop,
     int ret;
 
     switch (genop->type) {
+        case GENERIC_OPERATION__OPERATION_TYPE__CREATE:
         case GENERIC_OPERATION__OPERATION_TYPE__MKNOD:
         case GENERIC_OPERATION__OPERATION_TYPE__MKDIR:
         case GENERIC_OPERATION__OPERATION_TYPE__SYMLINK:
-        case GENERIC_OPERATION__OPERATION_TYPE__UNLINK:
-        case GENERIC_OPERATION__OPERATION_TYPE__RMDIR:
-        case GENERIC_OPERATION__OPERATION_TYPE__RENAME:
         case GENERIC_OPERATION__OPERATION_TYPE__LINK:
-        case GENERIC_OPERATION__OPERATION_TYPE__CHMOD:
-        case GENERIC_OPERATION__OPERATION_TYPE__CHOWN:
-        case GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE:
             break;
         case GENERIC_OPERATION__OPERATION_TYPE__WRITE:
             ret = cHandleWrite(fd, genop->write_op, dyndata);
+            break;
+        case GENERIC_OPERATION__OPERATION_TYPE__UNLINK:
+        case GENERIC_OPERATION__OPERATION_TYPE__RMDIR:
+        case GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE:
+        case GENERIC_OPERATION__OPERATION_TYPE__CHMOD:
+        case GENERIC_OPERATION__OPERATION_TYPE__CHOWN:
+        case GENERIC_OPERATION__OPERATION_TYPE__RENAME:
+            break;
+        case GENERIC_OPERATION__OPERATION_TYPE__SETXATTR:
+        case GENERIC_OPERATION__OPERATION_TYPE__REMOVEXATTR:
             break;
     }
 
