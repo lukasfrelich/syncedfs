@@ -9,6 +9,11 @@
 #define	LOG_H
 
 #include <unistd.h>
+#include <fcntl.h>
+#include "../syncedfs-common/protobuf/syncedfs.pb-c.h"
+
+void openTmpLog(void);
+void tmpLog(char *msg);
 
 int openLog(void);
 void switchLog(void);
@@ -16,7 +21,20 @@ void switchLog(void);
 //------------------------------------------------------------------------------
 // Operation handlers
 //------------------------------------------------------------------------------
-void logWrite(const char *relpath, off_t offset, size_t size);
+void logCreate(const char *relpath, mode_t mode);
+void logMknod(const char *relpath, mode_t mode, dev_t dev);
+void logMkdir(const char *relpath, mode_t mode);
+void logSymlink(const char *relpath, const char *target);
+void logLink(const char *relpath, const char *newpath);
+void logWrite(const char *relpath, size_t size, off_t offset);
+void logUnlink(const char *relpath);
+void logRmdir(const char *relpath);
+void logTruncate(const char *relpath, off_t newsize);
+void logChmod(const char *relpath, mode_t mode);
+void logChown(const char *relpath, uid_t uid, gid_t gid);
+void logRename(const char *relpath, const char *newpath);
+
+void logGeneric(const char *relpath, GenericOperation genop);
 
 
 #endif	/* LOG_H */

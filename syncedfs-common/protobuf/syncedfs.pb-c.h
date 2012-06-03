@@ -12,33 +12,39 @@ typedef struct _SyncInitialization SyncInitialization;
 typedef struct _FileChunk FileChunk;
 typedef struct _FileOperation FileOperation;
 typedef struct _GenericOperation GenericOperation;
+typedef struct _CreateOperation CreateOperation;
 typedef struct _MknodOperation MknodOperation;
 typedef struct _MkdirOperation MkdirOperation;
 typedef struct _SymlinkOperation SymlinkOperation;
+typedef struct _LinkOperation LinkOperation;
+typedef struct _WriteOperation WriteOperation;
 typedef struct _UnlinkOperation UnlinkOperation;
 typedef struct _RmdirOperation RmdirOperation;
-typedef struct _RenameOperation RenameOperation;
-typedef struct _LinkOperation LinkOperation;
+typedef struct _TruncateOperation TruncateOperation;
 typedef struct _ChmodOperation ChmodOperation;
 typedef struct _ChownOperation ChownOperation;
-typedef struct _TruncateOperation TruncateOperation;
-typedef struct _WriteOperation WriteOperation;
+typedef struct _RenameOperation RenameOperation;
+typedef struct _SetxattrOperation SetxattrOperation;
+typedef struct _RemovexattrOperation RemovexattrOperation;
 
 
 /* --- enums --- */
 
 typedef enum _GenericOperation__OperationType {
-  GENERIC_OPERATION__OPERATION_TYPE__MKNOD = 3,
-  GENERIC_OPERATION__OPERATION_TYPE__MKDIR = 4,
-  GENERIC_OPERATION__OPERATION_TYPE__SYMLINK = 5,
-  GENERIC_OPERATION__OPERATION_TYPE__UNLINK = 6,
-  GENERIC_OPERATION__OPERATION_TYPE__RMDIR = 7,
-  GENERIC_OPERATION__OPERATION_TYPE__RENAME = 8,
-  GENERIC_OPERATION__OPERATION_TYPE__LINK = 9,
-  GENERIC_OPERATION__OPERATION_TYPE__CHMOD = 10,
-  GENERIC_OPERATION__OPERATION_TYPE__CHOWN = 11,
-  GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE = 12,
-  GENERIC_OPERATION__OPERATION_TYPE__WRITE = 13
+  GENERIC_OPERATION__OPERATION_TYPE__CREATE = 3,
+  GENERIC_OPERATION__OPERATION_TYPE__MKNOD = 4,
+  GENERIC_OPERATION__OPERATION_TYPE__MKDIR = 5,
+  GENERIC_OPERATION__OPERATION_TYPE__SYMLINK = 6,
+  GENERIC_OPERATION__OPERATION_TYPE__LINK = 7,
+  GENERIC_OPERATION__OPERATION_TYPE__WRITE = 8,
+  GENERIC_OPERATION__OPERATION_TYPE__UNLINK = 9,
+  GENERIC_OPERATION__OPERATION_TYPE__RMDIR = 10,
+  GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE = 11,
+  GENERIC_OPERATION__OPERATION_TYPE__CHMOD = 12,
+  GENERIC_OPERATION__OPERATION_TYPE__CHOWN = 13,
+  GENERIC_OPERATION__OPERATION_TYPE__RENAME = 14,
+  GENERIC_OPERATION__OPERATION_TYPE__SETXATTR = 15,
+  GENERIC_OPERATION__OPERATION_TYPE__REMOVEXATTR = 16
 } GenericOperation__OperationType;
 
 /* --- messages --- */
@@ -84,133 +90,76 @@ struct  _GenericOperation
   ProtobufCMessage base;
   protobuf_c_boolean has_id;
   int32_t id;
-  protobuf_c_boolean has_type;
   GenericOperation__OperationType type;
+  CreateOperation *create_op;
   MknodOperation *mknod_op;
   MkdirOperation *mkdir_op;
   SymlinkOperation *symlink_op;
+  LinkOperation *link_op;
+  WriteOperation *write_op;
   UnlinkOperation *unlink_op;
   RmdirOperation *rmdir_op;
-  RenameOperation *rename_op;
-  LinkOperation *link_op;
+  TruncateOperation *truncate_op;
   ChmodOperation *chmod_op;
   ChownOperation *chown_op;
-  TruncateOperation *truncate_op;
-  WriteOperation *write_op;
+  RenameOperation *rename_op;
+  SetxattrOperation *setxattr_op;
+  RemovexattrOperation *removexattr_op;
 };
 #define GENERIC_OPERATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&generic_operation__descriptor) \
-    , 0,0, 0,0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
+    , 0,0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL }
+
+
+struct  _CreateOperation
+{
+  ProtobufCMessage base;
+  int32_t mode;
+};
+#define CREATE_OPERATION__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&create_operation__descriptor) \
+    , 0 }
 
 
 struct  _MknodOperation
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_dummy;
-  int32_t dummy;
+  int32_t mode;
+  int64_t dev;
 };
 #define MKNOD_OPERATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&mknod_operation__descriptor) \
-    , 0,0 }
+    , 0, 0 }
 
 
 struct  _MkdirOperation
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_dummy;
-  int32_t dummy;
+  int32_t mode;
 };
 #define MKDIR_OPERATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&mkdir_operation__descriptor) \
-    , 0,0 }
+    , 0 }
 
 
 struct  _SymlinkOperation
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_dummy;
-  int32_t dummy;
+  char *target;
 };
 #define SYMLINK_OPERATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&symlink_operation__descriptor) \
-    , 0,0 }
-
-
-struct  _UnlinkOperation
-{
-  ProtobufCMessage base;
-  protobuf_c_boolean has_dummy;
-  int32_t dummy;
-};
-#define UNLINK_OPERATION__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&unlink_operation__descriptor) \
-    , 0,0 }
-
-
-struct  _RmdirOperation
-{
-  ProtobufCMessage base;
-  protobuf_c_boolean has_dummy;
-  int32_t dummy;
-};
-#define RMDIR_OPERATION__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&rmdir_operation__descriptor) \
-    , 0,0 }
-
-
-struct  _RenameOperation
-{
-  ProtobufCMessage base;
-  protobuf_c_boolean has_dummy;
-  int32_t dummy;
-};
-#define RENAME_OPERATION__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&rename_operation__descriptor) \
-    , 0,0 }
+    , NULL }
 
 
 struct  _LinkOperation
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_dummy;
-  int32_t dummy;
+  char *newpath;
 };
 #define LINK_OPERATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&link_operation__descriptor) \
-    , 0,0 }
-
-
-struct  _ChmodOperation
-{
-  ProtobufCMessage base;
-  protobuf_c_boolean has_dummy;
-  int32_t dummy;
-};
-#define CHMOD_OPERATION__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&chmod_operation__descriptor) \
-    , 0,0 }
-
-
-struct  _ChownOperation
-{
-  ProtobufCMessage base;
-  protobuf_c_boolean has_dummy;
-  int32_t dummy;
-};
-#define CHOWN_OPERATION__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&chown_operation__descriptor) \
-    , 0,0 }
-
-
-struct  _TruncateOperation
-{
-  ProtobufCMessage base;
-  protobuf_c_boolean has_dummy;
-  int32_t dummy;
-};
-#define TRUNCATE_OPERATION__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&truncate_operation__descriptor) \
-    , 0,0 }
+    , NULL }
 
 
 struct  _WriteOperation
@@ -224,6 +173,87 @@ struct  _WriteOperation
 #define WRITE_OPERATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&write_operation__descriptor) \
     , 0, 0, 0,{0,NULL} }
+
+
+struct  _UnlinkOperation
+{
+  ProtobufCMessage base;
+};
+#define UNLINK_OPERATION__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&unlink_operation__descriptor) \
+     }
+
+
+struct  _RmdirOperation
+{
+  ProtobufCMessage base;
+};
+#define RMDIR_OPERATION__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&rmdir_operation__descriptor) \
+     }
+
+
+struct  _TruncateOperation
+{
+  ProtobufCMessage base;
+  int64_t newsize;
+};
+#define TRUNCATE_OPERATION__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&truncate_operation__descriptor) \
+    , 0 }
+
+
+struct  _ChmodOperation
+{
+  ProtobufCMessage base;
+  int32_t mode;
+};
+#define CHMOD_OPERATION__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&chmod_operation__descriptor) \
+    , 0 }
+
+
+struct  _ChownOperation
+{
+  ProtobufCMessage base;
+  int32_t uid;
+  int32_t gid;
+};
+#define CHOWN_OPERATION__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&chown_operation__descriptor) \
+    , 0, 0 }
+
+
+struct  _RenameOperation
+{
+  ProtobufCMessage base;
+  char *newpath;
+};
+#define RENAME_OPERATION__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&rename_operation__descriptor) \
+    , NULL }
+
+
+struct  _SetxattrOperation
+{
+  ProtobufCMessage base;
+  protobuf_c_boolean has_dummy;
+  int32_t dummy;
+};
+#define SETXATTR_OPERATION__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&setxattr_operation__descriptor) \
+    , 0,0 }
+
+
+struct  _RemovexattrOperation
+{
+  ProtobufCMessage base;
+  protobuf_c_boolean has_dummy;
+  int32_t dummy;
+};
+#define REMOVEXATTR_OPERATION__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&removexattr_operation__descriptor) \
+    , 0,0 }
 
 
 /* SyncInitialization methods */
@@ -302,6 +332,25 @@ GenericOperation *
 void   generic_operation__free_unpacked
                      (GenericOperation *message,
                       ProtobufCAllocator *allocator);
+/* CreateOperation methods */
+void   create_operation__init
+                     (CreateOperation         *message);
+size_t create_operation__get_packed_size
+                     (const CreateOperation   *message);
+size_t create_operation__pack
+                     (const CreateOperation   *message,
+                      uint8_t             *out);
+size_t create_operation__pack_to_buffer
+                     (const CreateOperation   *message,
+                      ProtobufCBuffer     *buffer);
+CreateOperation *
+       create_operation__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   create_operation__free_unpacked
+                     (CreateOperation *message,
+                      ProtobufCAllocator *allocator);
 /* MknodOperation methods */
 void   mknod_operation__init
                      (MknodOperation         *message);
@@ -359,6 +408,44 @@ SymlinkOperation *
 void   symlink_operation__free_unpacked
                      (SymlinkOperation *message,
                       ProtobufCAllocator *allocator);
+/* LinkOperation methods */
+void   link_operation__init
+                     (LinkOperation         *message);
+size_t link_operation__get_packed_size
+                     (const LinkOperation   *message);
+size_t link_operation__pack
+                     (const LinkOperation   *message,
+                      uint8_t             *out);
+size_t link_operation__pack_to_buffer
+                     (const LinkOperation   *message,
+                      ProtobufCBuffer     *buffer);
+LinkOperation *
+       link_operation__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   link_operation__free_unpacked
+                     (LinkOperation *message,
+                      ProtobufCAllocator *allocator);
+/* WriteOperation methods */
+void   write_operation__init
+                     (WriteOperation         *message);
+size_t write_operation__get_packed_size
+                     (const WriteOperation   *message);
+size_t write_operation__pack
+                     (const WriteOperation   *message,
+                      uint8_t             *out);
+size_t write_operation__pack_to_buffer
+                     (const WriteOperation   *message,
+                      ProtobufCBuffer     *buffer);
+WriteOperation *
+       write_operation__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   write_operation__free_unpacked
+                     (WriteOperation *message,
+                      ProtobufCAllocator *allocator);
 /* UnlinkOperation methods */
 void   unlink_operation__init
                      (UnlinkOperation         *message);
@@ -397,43 +484,24 @@ RmdirOperation *
 void   rmdir_operation__free_unpacked
                      (RmdirOperation *message,
                       ProtobufCAllocator *allocator);
-/* RenameOperation methods */
-void   rename_operation__init
-                     (RenameOperation         *message);
-size_t rename_operation__get_packed_size
-                     (const RenameOperation   *message);
-size_t rename_operation__pack
-                     (const RenameOperation   *message,
+/* TruncateOperation methods */
+void   truncate_operation__init
+                     (TruncateOperation         *message);
+size_t truncate_operation__get_packed_size
+                     (const TruncateOperation   *message);
+size_t truncate_operation__pack
+                     (const TruncateOperation   *message,
                       uint8_t             *out);
-size_t rename_operation__pack_to_buffer
-                     (const RenameOperation   *message,
+size_t truncate_operation__pack_to_buffer
+                     (const TruncateOperation   *message,
                       ProtobufCBuffer     *buffer);
-RenameOperation *
-       rename_operation__unpack
+TruncateOperation *
+       truncate_operation__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data);
-void   rename_operation__free_unpacked
-                     (RenameOperation *message,
-                      ProtobufCAllocator *allocator);
-/* LinkOperation methods */
-void   link_operation__init
-                     (LinkOperation         *message);
-size_t link_operation__get_packed_size
-                     (const LinkOperation   *message);
-size_t link_operation__pack
-                     (const LinkOperation   *message,
-                      uint8_t             *out);
-size_t link_operation__pack_to_buffer
-                     (const LinkOperation   *message,
-                      ProtobufCBuffer     *buffer);
-LinkOperation *
-       link_operation__unpack
-                     (ProtobufCAllocator  *allocator,
-                      size_t               len,
-                      const uint8_t       *data);
-void   link_operation__free_unpacked
-                     (LinkOperation *message,
+void   truncate_operation__free_unpacked
+                     (TruncateOperation *message,
                       ProtobufCAllocator *allocator);
 /* ChmodOperation methods */
 void   chmod_operation__init
@@ -473,43 +541,62 @@ ChownOperation *
 void   chown_operation__free_unpacked
                      (ChownOperation *message,
                       ProtobufCAllocator *allocator);
-/* TruncateOperation methods */
-void   truncate_operation__init
-                     (TruncateOperation         *message);
-size_t truncate_operation__get_packed_size
-                     (const TruncateOperation   *message);
-size_t truncate_operation__pack
-                     (const TruncateOperation   *message,
+/* RenameOperation methods */
+void   rename_operation__init
+                     (RenameOperation         *message);
+size_t rename_operation__get_packed_size
+                     (const RenameOperation   *message);
+size_t rename_operation__pack
+                     (const RenameOperation   *message,
                       uint8_t             *out);
-size_t truncate_operation__pack_to_buffer
-                     (const TruncateOperation   *message,
+size_t rename_operation__pack_to_buffer
+                     (const RenameOperation   *message,
                       ProtobufCBuffer     *buffer);
-TruncateOperation *
-       truncate_operation__unpack
+RenameOperation *
+       rename_operation__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data);
-void   truncate_operation__free_unpacked
-                     (TruncateOperation *message,
+void   rename_operation__free_unpacked
+                     (RenameOperation *message,
                       ProtobufCAllocator *allocator);
-/* WriteOperation methods */
-void   write_operation__init
-                     (WriteOperation         *message);
-size_t write_operation__get_packed_size
-                     (const WriteOperation   *message);
-size_t write_operation__pack
-                     (const WriteOperation   *message,
+/* SetxattrOperation methods */
+void   setxattr_operation__init
+                     (SetxattrOperation         *message);
+size_t setxattr_operation__get_packed_size
+                     (const SetxattrOperation   *message);
+size_t setxattr_operation__pack
+                     (const SetxattrOperation   *message,
                       uint8_t             *out);
-size_t write_operation__pack_to_buffer
-                     (const WriteOperation   *message,
+size_t setxattr_operation__pack_to_buffer
+                     (const SetxattrOperation   *message,
                       ProtobufCBuffer     *buffer);
-WriteOperation *
-       write_operation__unpack
+SetxattrOperation *
+       setxattr_operation__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data);
-void   write_operation__free_unpacked
-                     (WriteOperation *message,
+void   setxattr_operation__free_unpacked
+                     (SetxattrOperation *message,
+                      ProtobufCAllocator *allocator);
+/* RemovexattrOperation methods */
+void   removexattr_operation__init
+                     (RemovexattrOperation         *message);
+size_t removexattr_operation__get_packed_size
+                     (const RemovexattrOperation   *message);
+size_t removexattr_operation__pack
+                     (const RemovexattrOperation   *message,
+                      uint8_t             *out);
+size_t removexattr_operation__pack_to_buffer
+                     (const RemovexattrOperation   *message,
+                      ProtobufCBuffer     *buffer);
+RemovexattrOperation *
+       removexattr_operation__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   removexattr_operation__free_unpacked
+                     (RemovexattrOperation *message,
                       ProtobufCAllocator *allocator);
 /* --- per-message closures --- */
 
@@ -525,6 +612,9 @@ typedef void (*FileOperation_Closure)
 typedef void (*GenericOperation_Closure)
                  (const GenericOperation *message,
                   void *closure_data);
+typedef void (*CreateOperation_Closure)
+                 (const CreateOperation *message,
+                  void *closure_data);
 typedef void (*MknodOperation_Closure)
                  (const MknodOperation *message,
                   void *closure_data);
@@ -534,17 +624,20 @@ typedef void (*MkdirOperation_Closure)
 typedef void (*SymlinkOperation_Closure)
                  (const SymlinkOperation *message,
                   void *closure_data);
+typedef void (*LinkOperation_Closure)
+                 (const LinkOperation *message,
+                  void *closure_data);
+typedef void (*WriteOperation_Closure)
+                 (const WriteOperation *message,
+                  void *closure_data);
 typedef void (*UnlinkOperation_Closure)
                  (const UnlinkOperation *message,
                   void *closure_data);
 typedef void (*RmdirOperation_Closure)
                  (const RmdirOperation *message,
                   void *closure_data);
-typedef void (*RenameOperation_Closure)
-                 (const RenameOperation *message,
-                  void *closure_data);
-typedef void (*LinkOperation_Closure)
-                 (const LinkOperation *message,
+typedef void (*TruncateOperation_Closure)
+                 (const TruncateOperation *message,
                   void *closure_data);
 typedef void (*ChmodOperation_Closure)
                  (const ChmodOperation *message,
@@ -552,11 +645,14 @@ typedef void (*ChmodOperation_Closure)
 typedef void (*ChownOperation_Closure)
                  (const ChownOperation *message,
                   void *closure_data);
-typedef void (*TruncateOperation_Closure)
-                 (const TruncateOperation *message,
+typedef void (*RenameOperation_Closure)
+                 (const RenameOperation *message,
                   void *closure_data);
-typedef void (*WriteOperation_Closure)
-                 (const WriteOperation *message,
+typedef void (*SetxattrOperation_Closure)
+                 (const SetxattrOperation *message,
+                  void *closure_data);
+typedef void (*RemovexattrOperation_Closure)
+                 (const RemovexattrOperation *message,
                   void *closure_data);
 
 /* --- services --- */
@@ -569,17 +665,20 @@ extern const ProtobufCMessageDescriptor file_chunk__descriptor;
 extern const ProtobufCMessageDescriptor file_operation__descriptor;
 extern const ProtobufCMessageDescriptor generic_operation__descriptor;
 extern const ProtobufCEnumDescriptor    generic_operation__operation_type__descriptor;
+extern const ProtobufCMessageDescriptor create_operation__descriptor;
 extern const ProtobufCMessageDescriptor mknod_operation__descriptor;
 extern const ProtobufCMessageDescriptor mkdir_operation__descriptor;
 extern const ProtobufCMessageDescriptor symlink_operation__descriptor;
+extern const ProtobufCMessageDescriptor link_operation__descriptor;
+extern const ProtobufCMessageDescriptor write_operation__descriptor;
 extern const ProtobufCMessageDescriptor unlink_operation__descriptor;
 extern const ProtobufCMessageDescriptor rmdir_operation__descriptor;
-extern const ProtobufCMessageDescriptor rename_operation__descriptor;
-extern const ProtobufCMessageDescriptor link_operation__descriptor;
+extern const ProtobufCMessageDescriptor truncate_operation__descriptor;
 extern const ProtobufCMessageDescriptor chmod_operation__descriptor;
 extern const ProtobufCMessageDescriptor chown_operation__descriptor;
-extern const ProtobufCMessageDescriptor truncate_operation__descriptor;
-extern const ProtobufCMessageDescriptor write_operation__descriptor;
+extern const ProtobufCMessageDescriptor rename_operation__descriptor;
+extern const ProtobufCMessageDescriptor setxattr_operation__descriptor;
+extern const ProtobufCMessageDescriptor removexattr_operation__descriptor;
 
 PROTOBUF_C_END_DECLS
 

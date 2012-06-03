@@ -178,6 +178,49 @@ void   generic_operation__free_unpacked
   PROTOBUF_C_ASSERT (message->base.descriptor == &generic_operation__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
+void   create_operation__init
+                     (CreateOperation         *message)
+{
+  static CreateOperation init_value = CREATE_OPERATION__INIT;
+  *message = init_value;
+}
+size_t create_operation__get_packed_size
+                     (const CreateOperation *message)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &create_operation__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t create_operation__pack
+                     (const CreateOperation *message,
+                      uint8_t       *out)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &create_operation__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t create_operation__pack_to_buffer
+                     (const CreateOperation *message,
+                      ProtobufCBuffer *buffer)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &create_operation__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+CreateOperation *
+       create_operation__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (CreateOperation *)
+     protobuf_c_message_unpack (&create_operation__descriptor,
+                                allocator, len, data);
+}
+void   create_operation__free_unpacked
+                     (CreateOperation *message,
+                      ProtobufCAllocator *allocator)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &create_operation__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
 void   mknod_operation__init
                      (MknodOperation         *message)
 {
@@ -307,6 +350,92 @@ void   symlink_operation__free_unpacked
   PROTOBUF_C_ASSERT (message->base.descriptor == &symlink_operation__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
+void   link_operation__init
+                     (LinkOperation         *message)
+{
+  static LinkOperation init_value = LINK_OPERATION__INIT;
+  *message = init_value;
+}
+size_t link_operation__get_packed_size
+                     (const LinkOperation *message)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &link_operation__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t link_operation__pack
+                     (const LinkOperation *message,
+                      uint8_t       *out)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &link_operation__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t link_operation__pack_to_buffer
+                     (const LinkOperation *message,
+                      ProtobufCBuffer *buffer)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &link_operation__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+LinkOperation *
+       link_operation__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (LinkOperation *)
+     protobuf_c_message_unpack (&link_operation__descriptor,
+                                allocator, len, data);
+}
+void   link_operation__free_unpacked
+                     (LinkOperation *message,
+                      ProtobufCAllocator *allocator)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &link_operation__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   write_operation__init
+                     (WriteOperation         *message)
+{
+  static WriteOperation init_value = WRITE_OPERATION__INIT;
+  *message = init_value;
+}
+size_t write_operation__get_packed_size
+                     (const WriteOperation *message)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &write_operation__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t write_operation__pack
+                     (const WriteOperation *message,
+                      uint8_t       *out)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &write_operation__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t write_operation__pack_to_buffer
+                     (const WriteOperation *message,
+                      ProtobufCBuffer *buffer)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &write_operation__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+WriteOperation *
+       write_operation__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (WriteOperation *)
+     protobuf_c_message_unpack (&write_operation__descriptor,
+                                allocator, len, data);
+}
+void   write_operation__free_unpacked
+                     (WriteOperation *message,
+                      ProtobufCAllocator *allocator)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &write_operation__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
 void   unlink_operation__init
                      (UnlinkOperation         *message)
 {
@@ -393,90 +522,47 @@ void   rmdir_operation__free_unpacked
   PROTOBUF_C_ASSERT (message->base.descriptor == &rmdir_operation__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-void   rename_operation__init
-                     (RenameOperation         *message)
+void   truncate_operation__init
+                     (TruncateOperation         *message)
 {
-  static RenameOperation init_value = RENAME_OPERATION__INIT;
+  static TruncateOperation init_value = TRUNCATE_OPERATION__INIT;
   *message = init_value;
 }
-size_t rename_operation__get_packed_size
-                     (const RenameOperation *message)
+size_t truncate_operation__get_packed_size
+                     (const TruncateOperation *message)
 {
-  PROTOBUF_C_ASSERT (message->base.descriptor == &rename_operation__descriptor);
+  PROTOBUF_C_ASSERT (message->base.descriptor == &truncate_operation__descriptor);
   return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
-size_t rename_operation__pack
-                     (const RenameOperation *message,
+size_t truncate_operation__pack
+                     (const TruncateOperation *message,
                       uint8_t       *out)
 {
-  PROTOBUF_C_ASSERT (message->base.descriptor == &rename_operation__descriptor);
+  PROTOBUF_C_ASSERT (message->base.descriptor == &truncate_operation__descriptor);
   return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
-size_t rename_operation__pack_to_buffer
-                     (const RenameOperation *message,
+size_t truncate_operation__pack_to_buffer
+                     (const TruncateOperation *message,
                       ProtobufCBuffer *buffer)
 {
-  PROTOBUF_C_ASSERT (message->base.descriptor == &rename_operation__descriptor);
+  PROTOBUF_C_ASSERT (message->base.descriptor == &truncate_operation__descriptor);
   return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
-RenameOperation *
-       rename_operation__unpack
+TruncateOperation *
+       truncate_operation__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data)
 {
-  return (RenameOperation *)
-     protobuf_c_message_unpack (&rename_operation__descriptor,
+  return (TruncateOperation *)
+     protobuf_c_message_unpack (&truncate_operation__descriptor,
                                 allocator, len, data);
 }
-void   rename_operation__free_unpacked
-                     (RenameOperation *message,
+void   truncate_operation__free_unpacked
+                     (TruncateOperation *message,
                       ProtobufCAllocator *allocator)
 {
-  PROTOBUF_C_ASSERT (message->base.descriptor == &rename_operation__descriptor);
-  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
-}
-void   link_operation__init
-                     (LinkOperation         *message)
-{
-  static LinkOperation init_value = LINK_OPERATION__INIT;
-  *message = init_value;
-}
-size_t link_operation__get_packed_size
-                     (const LinkOperation *message)
-{
-  PROTOBUF_C_ASSERT (message->base.descriptor == &link_operation__descriptor);
-  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
-}
-size_t link_operation__pack
-                     (const LinkOperation *message,
-                      uint8_t       *out)
-{
-  PROTOBUF_C_ASSERT (message->base.descriptor == &link_operation__descriptor);
-  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
-}
-size_t link_operation__pack_to_buffer
-                     (const LinkOperation *message,
-                      ProtobufCBuffer *buffer)
-{
-  PROTOBUF_C_ASSERT (message->base.descriptor == &link_operation__descriptor);
-  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
-}
-LinkOperation *
-       link_operation__unpack
-                     (ProtobufCAllocator  *allocator,
-                      size_t               len,
-                      const uint8_t       *data)
-{
-  return (LinkOperation *)
-     protobuf_c_message_unpack (&link_operation__descriptor,
-                                allocator, len, data);
-}
-void   link_operation__free_unpacked
-                     (LinkOperation *message,
-                      ProtobufCAllocator *allocator)
-{
-  PROTOBUF_C_ASSERT (message->base.descriptor == &link_operation__descriptor);
+  PROTOBUF_C_ASSERT (message->base.descriptor == &truncate_operation__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 void   chmod_operation__init
@@ -565,90 +651,133 @@ void   chown_operation__free_unpacked
   PROTOBUF_C_ASSERT (message->base.descriptor == &chown_operation__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-void   truncate_operation__init
-                     (TruncateOperation         *message)
+void   rename_operation__init
+                     (RenameOperation         *message)
 {
-  static TruncateOperation init_value = TRUNCATE_OPERATION__INIT;
+  static RenameOperation init_value = RENAME_OPERATION__INIT;
   *message = init_value;
 }
-size_t truncate_operation__get_packed_size
-                     (const TruncateOperation *message)
+size_t rename_operation__get_packed_size
+                     (const RenameOperation *message)
 {
-  PROTOBUF_C_ASSERT (message->base.descriptor == &truncate_operation__descriptor);
+  PROTOBUF_C_ASSERT (message->base.descriptor == &rename_operation__descriptor);
   return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
-size_t truncate_operation__pack
-                     (const TruncateOperation *message,
+size_t rename_operation__pack
+                     (const RenameOperation *message,
                       uint8_t       *out)
 {
-  PROTOBUF_C_ASSERT (message->base.descriptor == &truncate_operation__descriptor);
+  PROTOBUF_C_ASSERT (message->base.descriptor == &rename_operation__descriptor);
   return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
-size_t truncate_operation__pack_to_buffer
-                     (const TruncateOperation *message,
+size_t rename_operation__pack_to_buffer
+                     (const RenameOperation *message,
                       ProtobufCBuffer *buffer)
 {
-  PROTOBUF_C_ASSERT (message->base.descriptor == &truncate_operation__descriptor);
+  PROTOBUF_C_ASSERT (message->base.descriptor == &rename_operation__descriptor);
   return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
-TruncateOperation *
-       truncate_operation__unpack
+RenameOperation *
+       rename_operation__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data)
 {
-  return (TruncateOperation *)
-     protobuf_c_message_unpack (&truncate_operation__descriptor,
+  return (RenameOperation *)
+     protobuf_c_message_unpack (&rename_operation__descriptor,
                                 allocator, len, data);
 }
-void   truncate_operation__free_unpacked
-                     (TruncateOperation *message,
+void   rename_operation__free_unpacked
+                     (RenameOperation *message,
                       ProtobufCAllocator *allocator)
 {
-  PROTOBUF_C_ASSERT (message->base.descriptor == &truncate_operation__descriptor);
+  PROTOBUF_C_ASSERT (message->base.descriptor == &rename_operation__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-void   write_operation__init
-                     (WriteOperation         *message)
+void   setxattr_operation__init
+                     (SetxattrOperation         *message)
 {
-  static WriteOperation init_value = WRITE_OPERATION__INIT;
+  static SetxattrOperation init_value = SETXATTR_OPERATION__INIT;
   *message = init_value;
 }
-size_t write_operation__get_packed_size
-                     (const WriteOperation *message)
+size_t setxattr_operation__get_packed_size
+                     (const SetxattrOperation *message)
 {
-  PROTOBUF_C_ASSERT (message->base.descriptor == &write_operation__descriptor);
+  PROTOBUF_C_ASSERT (message->base.descriptor == &setxattr_operation__descriptor);
   return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
 }
-size_t write_operation__pack
-                     (const WriteOperation *message,
+size_t setxattr_operation__pack
+                     (const SetxattrOperation *message,
                       uint8_t       *out)
 {
-  PROTOBUF_C_ASSERT (message->base.descriptor == &write_operation__descriptor);
+  PROTOBUF_C_ASSERT (message->base.descriptor == &setxattr_operation__descriptor);
   return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
 }
-size_t write_operation__pack_to_buffer
-                     (const WriteOperation *message,
+size_t setxattr_operation__pack_to_buffer
+                     (const SetxattrOperation *message,
                       ProtobufCBuffer *buffer)
 {
-  PROTOBUF_C_ASSERT (message->base.descriptor == &write_operation__descriptor);
+  PROTOBUF_C_ASSERT (message->base.descriptor == &setxattr_operation__descriptor);
   return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
 }
-WriteOperation *
-       write_operation__unpack
+SetxattrOperation *
+       setxattr_operation__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data)
 {
-  return (WriteOperation *)
-     protobuf_c_message_unpack (&write_operation__descriptor,
+  return (SetxattrOperation *)
+     protobuf_c_message_unpack (&setxattr_operation__descriptor,
                                 allocator, len, data);
 }
-void   write_operation__free_unpacked
-                     (WriteOperation *message,
+void   setxattr_operation__free_unpacked
+                     (SetxattrOperation *message,
                       ProtobufCAllocator *allocator)
 {
-  PROTOBUF_C_ASSERT (message->base.descriptor == &write_operation__descriptor);
+  PROTOBUF_C_ASSERT (message->base.descriptor == &setxattr_operation__descriptor);
+  protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
+}
+void   removexattr_operation__init
+                     (RemovexattrOperation         *message)
+{
+  static RemovexattrOperation init_value = REMOVEXATTR_OPERATION__INIT;
+  *message = init_value;
+}
+size_t removexattr_operation__get_packed_size
+                     (const RemovexattrOperation *message)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &removexattr_operation__descriptor);
+  return protobuf_c_message_get_packed_size ((const ProtobufCMessage*)(message));
+}
+size_t removexattr_operation__pack
+                     (const RemovexattrOperation *message,
+                      uint8_t       *out)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &removexattr_operation__descriptor);
+  return protobuf_c_message_pack ((const ProtobufCMessage*)message, out);
+}
+size_t removexattr_operation__pack_to_buffer
+                     (const RemovexattrOperation *message,
+                      ProtobufCBuffer *buffer)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &removexattr_operation__descriptor);
+  return protobuf_c_message_pack_to_buffer ((const ProtobufCMessage*)message, buffer);
+}
+RemovexattrOperation *
+       removexattr_operation__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data)
+{
+  return (RemovexattrOperation *)
+     protobuf_c_message_unpack (&removexattr_operation__descriptor,
+                                allocator, len, data);
+}
+void   removexattr_operation__free_unpacked
+                     (RemovexattrOperation *message,
+                      ProtobufCAllocator *allocator)
+{
+  PROTOBUF_C_ASSERT (message->base.descriptor == &removexattr_operation__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
 static const ProtobufCFieldDescriptor sync_initialization__field_descriptors[3] =
@@ -831,36 +960,42 @@ const ProtobufCMessageDescriptor file_operation__descriptor =
   (ProtobufCMessageInit) file_operation__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-const ProtobufCEnumValue generic_operation__operation_type__enum_values_by_number[11] =
+const ProtobufCEnumValue generic_operation__operation_type__enum_values_by_number[14] =
 {
-  { "MKNOD", "GENERIC_OPERATION__OPERATION_TYPE__MKNOD", 3 },
-  { "MKDIR", "GENERIC_OPERATION__OPERATION_TYPE__MKDIR", 4 },
-  { "SYMLINK", "GENERIC_OPERATION__OPERATION_TYPE__SYMLINK", 5 },
-  { "UNLINK", "GENERIC_OPERATION__OPERATION_TYPE__UNLINK", 6 },
-  { "RMDIR", "GENERIC_OPERATION__OPERATION_TYPE__RMDIR", 7 },
-  { "RENAME", "GENERIC_OPERATION__OPERATION_TYPE__RENAME", 8 },
-  { "LINK", "GENERIC_OPERATION__OPERATION_TYPE__LINK", 9 },
-  { "CHMOD", "GENERIC_OPERATION__OPERATION_TYPE__CHMOD", 10 },
-  { "CHOWN", "GENERIC_OPERATION__OPERATION_TYPE__CHOWN", 11 },
-  { "TRUNCATE", "GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE", 12 },
-  { "WRITE", "GENERIC_OPERATION__OPERATION_TYPE__WRITE", 13 },
+  { "CREATE", "GENERIC_OPERATION__OPERATION_TYPE__CREATE", 3 },
+  { "MKNOD", "GENERIC_OPERATION__OPERATION_TYPE__MKNOD", 4 },
+  { "MKDIR", "GENERIC_OPERATION__OPERATION_TYPE__MKDIR", 5 },
+  { "SYMLINK", "GENERIC_OPERATION__OPERATION_TYPE__SYMLINK", 6 },
+  { "LINK", "GENERIC_OPERATION__OPERATION_TYPE__LINK", 7 },
+  { "WRITE", "GENERIC_OPERATION__OPERATION_TYPE__WRITE", 8 },
+  { "UNLINK", "GENERIC_OPERATION__OPERATION_TYPE__UNLINK", 9 },
+  { "RMDIR", "GENERIC_OPERATION__OPERATION_TYPE__RMDIR", 10 },
+  { "TRUNCATE", "GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE", 11 },
+  { "CHMOD", "GENERIC_OPERATION__OPERATION_TYPE__CHMOD", 12 },
+  { "CHOWN", "GENERIC_OPERATION__OPERATION_TYPE__CHOWN", 13 },
+  { "RENAME", "GENERIC_OPERATION__OPERATION_TYPE__RENAME", 14 },
+  { "SETXATTR", "GENERIC_OPERATION__OPERATION_TYPE__SETXATTR", 15 },
+  { "REMOVEXATTR", "GENERIC_OPERATION__OPERATION_TYPE__REMOVEXATTR", 16 },
 };
 static const ProtobufCIntRange generic_operation__operation_type__value_ranges[] = {
-{3, 0},{0, 11}
+{3, 0},{0, 14}
 };
-const ProtobufCEnumValueIndex generic_operation__operation_type__enum_values_by_name[11] =
+const ProtobufCEnumValueIndex generic_operation__operation_type__enum_values_by_name[14] =
 {
-  { "CHMOD", 7 },
-  { "CHOWN", 8 },
-  { "LINK", 6 },
-  { "MKDIR", 1 },
-  { "MKNOD", 0 },
-  { "RENAME", 5 },
-  { "RMDIR", 4 },
-  { "SYMLINK", 2 },
-  { "TRUNCATE", 9 },
-  { "UNLINK", 3 },
-  { "WRITE", 10 },
+  { "CHMOD", 9 },
+  { "CHOWN", 10 },
+  { "CREATE", 0 },
+  { "LINK", 4 },
+  { "MKDIR", 2 },
+  { "MKNOD", 1 },
+  { "REMOVEXATTR", 13 },
+  { "RENAME", 11 },
+  { "RMDIR", 7 },
+  { "SETXATTR", 12 },
+  { "SYMLINK", 3 },
+  { "TRUNCATE", 8 },
+  { "UNLINK", 6 },
+  { "WRITE", 5 },
 };
 const ProtobufCEnumDescriptor generic_operation__operation_type__descriptor =
 {
@@ -869,15 +1004,15 @@ const ProtobufCEnumDescriptor generic_operation__operation_type__descriptor =
   "OperationType",
   "GenericOperation__OperationType",
   "",
-  11,
+  14,
   generic_operation__operation_type__enum_values_by_number,
-  11,
+  14,
   generic_operation__operation_type__enum_values_by_name,
   1,
   generic_operation__operation_type__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
-static const ProtobufCFieldDescriptor generic_operation__field_descriptors[13] =
+static const ProtobufCFieldDescriptor generic_operation__field_descriptors[16] =
 {
   {
     "id",
@@ -894,9 +1029,9 @@ static const ProtobufCFieldDescriptor generic_operation__field_descriptors[13] =
   {
     "type",
     2,
-    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_LABEL_REQUIRED,
     PROTOBUF_C_TYPE_ENUM,
-    PROTOBUF_C_OFFSETOF(GenericOperation, has_type),
+    0,   /* quantifier_offset */
     PROTOBUF_C_OFFSETOF(GenericOperation, type),
     &generic_operation__operation_type__descriptor,
     NULL,
@@ -904,8 +1039,20 @@ static const ProtobufCFieldDescriptor generic_operation__field_descriptors[13] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "mknod_op",
+    "create_op",
     3,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(GenericOperation, create_op),
+    &create_operation__descriptor,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "mknod_op",
+    4,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
@@ -917,7 +1064,7 @@ static const ProtobufCFieldDescriptor generic_operation__field_descriptors[13] =
   },
   {
     "mkdir_op",
-    4,
+    5,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
@@ -929,7 +1076,7 @@ static const ProtobufCFieldDescriptor generic_operation__field_descriptors[13] =
   },
   {
     "symlink_op",
-    5,
+    6,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
@@ -940,8 +1087,32 @@ static const ProtobufCFieldDescriptor generic_operation__field_descriptors[13] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
+    "link_op",
+    7,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(GenericOperation, link_op),
+    &link_operation__descriptor,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "write_op",
+    8,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(GenericOperation, write_op),
+    &write_operation__descriptor,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
     "unlink_op",
-    6,
+    9,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
@@ -953,7 +1124,7 @@ static const ProtobufCFieldDescriptor generic_operation__field_descriptors[13] =
   },
   {
     "rmdir_op",
-    7,
+    10,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
@@ -964,32 +1135,20 @@ static const ProtobufCFieldDescriptor generic_operation__field_descriptors[13] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "rename_op",
-    8,
+    "truncate_op",
+    11,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, rename_op),
-    &rename_operation__descriptor,
-    NULL,
-    0,            /* packed */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "link_op",
-    9,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_MESSAGE,
-    0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, link_op),
-    &link_operation__descriptor,
+    PROTOBUF_C_OFFSETOF(GenericOperation, truncate_op),
+    &truncate_operation__descriptor,
     NULL,
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
     "chmod_op",
-    10,
+    12,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
@@ -1001,7 +1160,7 @@ static const ProtobufCFieldDescriptor generic_operation__field_descriptors[13] =
   },
   {
     "chown_op",
-    11,
+    13,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
@@ -1012,49 +1171,64 @@ static const ProtobufCFieldDescriptor generic_operation__field_descriptors[13] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "truncate_op",
-    12,
+    "rename_op",
+    14,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, truncate_op),
-    &truncate_operation__descriptor,
+    PROTOBUF_C_OFFSETOF(GenericOperation, rename_op),
+    &rename_operation__descriptor,
     NULL,
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "write_op",
-    13,
+    "setxattr_op",
+    15,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, write_op),
-    &write_operation__descriptor,
+    PROTOBUF_C_OFFSETOF(GenericOperation, setxattr_op),
+    &setxattr_operation__descriptor,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "removexattr_op",
+    16,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(GenericOperation, removexattr_op),
+    &removexattr_operation__descriptor,
     NULL,
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
 };
 static const unsigned generic_operation__field_indices_by_name[] = {
-  9,   /* field[9] = chmod_op */
-  10,   /* field[10] = chown_op */
+  11,   /* field[11] = chmod_op */
+  12,   /* field[12] = chown_op */
+  2,   /* field[2] = create_op */
   0,   /* field[0] = id */
-  8,   /* field[8] = link_op */
-  3,   /* field[3] = mkdir_op */
-  2,   /* field[2] = mknod_op */
-  7,   /* field[7] = rename_op */
-  6,   /* field[6] = rmdir_op */
-  4,   /* field[4] = symlink_op */
-  11,   /* field[11] = truncate_op */
+  6,   /* field[6] = link_op */
+  4,   /* field[4] = mkdir_op */
+  3,   /* field[3] = mknod_op */
+  15,   /* field[15] = removexattr_op */
+  13,   /* field[13] = rename_op */
+  9,   /* field[9] = rmdir_op */
+  14,   /* field[14] = setxattr_op */
+  5,   /* field[5] = symlink_op */
+  10,   /* field[10] = truncate_op */
   1,   /* field[1] = type */
-  5,   /* field[5] = unlink_op */
-  12,   /* field[12] = write_op */
+  8,   /* field[8] = unlink_op */
+  7,   /* field[7] = write_op */
 };
 static const ProtobufCIntRange generic_operation__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 13 }
+  { 0, 16 }
 };
 const ProtobufCMessageDescriptor generic_operation__descriptor =
 {
@@ -1064,22 +1238,72 @@ const ProtobufCMessageDescriptor generic_operation__descriptor =
   "GenericOperation",
   "",
   sizeof(GenericOperation),
-  13,
+  16,
   generic_operation__field_descriptors,
   generic_operation__field_indices_by_name,
   1,  generic_operation__number_ranges,
   (ProtobufCMessageInit) generic_operation__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor mknod_operation__field_descriptors[1] =
+static const ProtobufCFieldDescriptor create_operation__field_descriptors[1] =
 {
   {
-    "dummy",
-    3,
-    PROTOBUF_C_LABEL_OPTIONAL,
+    "mode",
+    1,
+    PROTOBUF_C_LABEL_REQUIRED,
     PROTOBUF_C_TYPE_INT32,
-    PROTOBUF_C_OFFSETOF(MknodOperation, has_dummy),
-    PROTOBUF_C_OFFSETOF(MknodOperation, dummy),
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(CreateOperation, mode),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned create_operation__field_indices_by_name[] = {
+  0,   /* field[0] = mode */
+};
+static const ProtobufCIntRange create_operation__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor create_operation__descriptor =
+{
+  PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
+  "CreateOperation",
+  "CreateOperation",
+  "CreateOperation",
+  "",
+  sizeof(CreateOperation),
+  1,
+  create_operation__field_descriptors,
+  create_operation__field_indices_by_name,
+  1,  create_operation__number_ranges,
+  (ProtobufCMessageInit) create_operation__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor mknod_operation__field_descriptors[2] =
+{
+  {
+    "mode",
+    1,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(MknodOperation, mode),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "dev",
+    2,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_INT64,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(MknodOperation, dev),
     NULL,
     NULL,
     0,            /* packed */
@@ -1087,12 +1311,13 @@ static const ProtobufCFieldDescriptor mknod_operation__field_descriptors[1] =
   },
 };
 static const unsigned mknod_operation__field_indices_by_name[] = {
-  0,   /* field[0] = dummy */
+  1,   /* field[1] = dev */
+  0,   /* field[0] = mode */
 };
 static const ProtobufCIntRange mknod_operation__number_ranges[1 + 1] =
 {
-  { 3, 0 },
-  { 0, 1 }
+  { 1, 0 },
+  { 0, 2 }
 };
 const ProtobufCMessageDescriptor mknod_operation__descriptor =
 {
@@ -1102,7 +1327,7 @@ const ProtobufCMessageDescriptor mknod_operation__descriptor =
   "MknodOperation",
   "",
   sizeof(MknodOperation),
-  1,
+  2,
   mknod_operation__field_descriptors,
   mknod_operation__field_indices_by_name,
   1,  mknod_operation__number_ranges,
@@ -1112,12 +1337,12 @@ const ProtobufCMessageDescriptor mknod_operation__descriptor =
 static const ProtobufCFieldDescriptor mkdir_operation__field_descriptors[1] =
 {
   {
-    "dummy",
-    4,
-    PROTOBUF_C_LABEL_OPTIONAL,
+    "mode",
+    1,
+    PROTOBUF_C_LABEL_REQUIRED,
     PROTOBUF_C_TYPE_INT32,
-    PROTOBUF_C_OFFSETOF(MkdirOperation, has_dummy),
-    PROTOBUF_C_OFFSETOF(MkdirOperation, dummy),
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(MkdirOperation, mode),
     NULL,
     NULL,
     0,            /* packed */
@@ -1125,11 +1350,11 @@ static const ProtobufCFieldDescriptor mkdir_operation__field_descriptors[1] =
   },
 };
 static const unsigned mkdir_operation__field_indices_by_name[] = {
-  0,   /* field[0] = dummy */
+  0,   /* field[0] = mode */
 };
 static const ProtobufCIntRange mkdir_operation__number_ranges[1 + 1] =
 {
-  { 4, 0 },
+  { 1, 0 },
   { 0, 1 }
 };
 const ProtobufCMessageDescriptor mkdir_operation__descriptor =
@@ -1150,12 +1375,12 @@ const ProtobufCMessageDescriptor mkdir_operation__descriptor =
 static const ProtobufCFieldDescriptor symlink_operation__field_descriptors[1] =
 {
   {
-    "dummy",
-    5,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_INT32,
-    PROTOBUF_C_OFFSETOF(SymlinkOperation, has_dummy),
-    PROTOBUF_C_OFFSETOF(SymlinkOperation, dummy),
+    "target",
+    1,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(SymlinkOperation, target),
     NULL,
     NULL,
     0,            /* packed */
@@ -1163,11 +1388,11 @@ static const ProtobufCFieldDescriptor symlink_operation__field_descriptors[1] =
   },
 };
 static const unsigned symlink_operation__field_indices_by_name[] = {
-  0,   /* field[0] = dummy */
+  0,   /* field[0] = target */
 };
 static const ProtobufCIntRange symlink_operation__number_ranges[1 + 1] =
 {
-  { 5, 0 },
+  { 1, 0 },
   { 0, 1 }
 };
 const ProtobufCMessageDescriptor symlink_operation__descriptor =
@@ -1185,129 +1410,15 @@ const ProtobufCMessageDescriptor symlink_operation__descriptor =
   (ProtobufCMessageInit) symlink_operation__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor unlink_operation__field_descriptors[1] =
-{
-  {
-    "dummy",
-    6,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_INT32,
-    PROTOBUF_C_OFFSETOF(UnlinkOperation, has_dummy),
-    PROTOBUF_C_OFFSETOF(UnlinkOperation, dummy),
-    NULL,
-    NULL,
-    0,            /* packed */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-};
-static const unsigned unlink_operation__field_indices_by_name[] = {
-  0,   /* field[0] = dummy */
-};
-static const ProtobufCIntRange unlink_operation__number_ranges[1 + 1] =
-{
-  { 6, 0 },
-  { 0, 1 }
-};
-const ProtobufCMessageDescriptor unlink_operation__descriptor =
-{
-  PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
-  "UnlinkOperation",
-  "UnlinkOperation",
-  "UnlinkOperation",
-  "",
-  sizeof(UnlinkOperation),
-  1,
-  unlink_operation__field_descriptors,
-  unlink_operation__field_indices_by_name,
-  1,  unlink_operation__number_ranges,
-  (ProtobufCMessageInit) unlink_operation__init,
-  NULL,NULL,NULL    /* reserved[123] */
-};
-static const ProtobufCFieldDescriptor rmdir_operation__field_descriptors[1] =
-{
-  {
-    "dummy",
-    7,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_INT32,
-    PROTOBUF_C_OFFSETOF(RmdirOperation, has_dummy),
-    PROTOBUF_C_OFFSETOF(RmdirOperation, dummy),
-    NULL,
-    NULL,
-    0,            /* packed */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-};
-static const unsigned rmdir_operation__field_indices_by_name[] = {
-  0,   /* field[0] = dummy */
-};
-static const ProtobufCIntRange rmdir_operation__number_ranges[1 + 1] =
-{
-  { 7, 0 },
-  { 0, 1 }
-};
-const ProtobufCMessageDescriptor rmdir_operation__descriptor =
-{
-  PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
-  "RmdirOperation",
-  "RmdirOperation",
-  "RmdirOperation",
-  "",
-  sizeof(RmdirOperation),
-  1,
-  rmdir_operation__field_descriptors,
-  rmdir_operation__field_indices_by_name,
-  1,  rmdir_operation__number_ranges,
-  (ProtobufCMessageInit) rmdir_operation__init,
-  NULL,NULL,NULL    /* reserved[123] */
-};
-static const ProtobufCFieldDescriptor rename_operation__field_descriptors[1] =
-{
-  {
-    "dummy",
-    8,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_INT32,
-    PROTOBUF_C_OFFSETOF(RenameOperation, has_dummy),
-    PROTOBUF_C_OFFSETOF(RenameOperation, dummy),
-    NULL,
-    NULL,
-    0,            /* packed */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-};
-static const unsigned rename_operation__field_indices_by_name[] = {
-  0,   /* field[0] = dummy */
-};
-static const ProtobufCIntRange rename_operation__number_ranges[1 + 1] =
-{
-  { 8, 0 },
-  { 0, 1 }
-};
-const ProtobufCMessageDescriptor rename_operation__descriptor =
-{
-  PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
-  "RenameOperation",
-  "RenameOperation",
-  "RenameOperation",
-  "",
-  sizeof(RenameOperation),
-  1,
-  rename_operation__field_descriptors,
-  rename_operation__field_indices_by_name,
-  1,  rename_operation__number_ranges,
-  (ProtobufCMessageInit) rename_operation__init,
-  NULL,NULL,NULL    /* reserved[123] */
-};
 static const ProtobufCFieldDescriptor link_operation__field_descriptors[1] =
 {
   {
-    "dummy",
-    9,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_INT32,
-    PROTOBUF_C_OFFSETOF(LinkOperation, has_dummy),
-    PROTOBUF_C_OFFSETOF(LinkOperation, dummy),
+    "newpath",
+    1,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(LinkOperation, newpath),
     NULL,
     NULL,
     0,            /* packed */
@@ -1315,11 +1426,11 @@ static const ProtobufCFieldDescriptor link_operation__field_descriptors[1] =
   },
 };
 static const unsigned link_operation__field_indices_by_name[] = {
-  0,   /* field[0] = dummy */
+  0,   /* field[0] = newpath */
 };
 static const ProtobufCIntRange link_operation__number_ranges[1 + 1] =
 {
-  { 9, 0 },
+  { 1, 0 },
   { 0, 1 }
 };
 const ProtobufCMessageDescriptor link_operation__descriptor =
@@ -1335,120 +1446,6 @@ const ProtobufCMessageDescriptor link_operation__descriptor =
   link_operation__field_indices_by_name,
   1,  link_operation__number_ranges,
   (ProtobufCMessageInit) link_operation__init,
-  NULL,NULL,NULL    /* reserved[123] */
-};
-static const ProtobufCFieldDescriptor chmod_operation__field_descriptors[1] =
-{
-  {
-    "dummy",
-    10,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_INT32,
-    PROTOBUF_C_OFFSETOF(ChmodOperation, has_dummy),
-    PROTOBUF_C_OFFSETOF(ChmodOperation, dummy),
-    NULL,
-    NULL,
-    0,            /* packed */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-};
-static const unsigned chmod_operation__field_indices_by_name[] = {
-  0,   /* field[0] = dummy */
-};
-static const ProtobufCIntRange chmod_operation__number_ranges[1 + 1] =
-{
-  { 10, 0 },
-  { 0, 1 }
-};
-const ProtobufCMessageDescriptor chmod_operation__descriptor =
-{
-  PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
-  "ChmodOperation",
-  "ChmodOperation",
-  "ChmodOperation",
-  "",
-  sizeof(ChmodOperation),
-  1,
-  chmod_operation__field_descriptors,
-  chmod_operation__field_indices_by_name,
-  1,  chmod_operation__number_ranges,
-  (ProtobufCMessageInit) chmod_operation__init,
-  NULL,NULL,NULL    /* reserved[123] */
-};
-static const ProtobufCFieldDescriptor chown_operation__field_descriptors[1] =
-{
-  {
-    "dummy",
-    11,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_INT32,
-    PROTOBUF_C_OFFSETOF(ChownOperation, has_dummy),
-    PROTOBUF_C_OFFSETOF(ChownOperation, dummy),
-    NULL,
-    NULL,
-    0,            /* packed */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-};
-static const unsigned chown_operation__field_indices_by_name[] = {
-  0,   /* field[0] = dummy */
-};
-static const ProtobufCIntRange chown_operation__number_ranges[1 + 1] =
-{
-  { 11, 0 },
-  { 0, 1 }
-};
-const ProtobufCMessageDescriptor chown_operation__descriptor =
-{
-  PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
-  "ChownOperation",
-  "ChownOperation",
-  "ChownOperation",
-  "",
-  sizeof(ChownOperation),
-  1,
-  chown_operation__field_descriptors,
-  chown_operation__field_indices_by_name,
-  1,  chown_operation__number_ranges,
-  (ProtobufCMessageInit) chown_operation__init,
-  NULL,NULL,NULL    /* reserved[123] */
-};
-static const ProtobufCFieldDescriptor truncate_operation__field_descriptors[1] =
-{
-  {
-    "dummy",
-    12,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_INT32,
-    PROTOBUF_C_OFFSETOF(TruncateOperation, has_dummy),
-    PROTOBUF_C_OFFSETOF(TruncateOperation, dummy),
-    NULL,
-    NULL,
-    0,            /* packed */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-};
-static const unsigned truncate_operation__field_indices_by_name[] = {
-  0,   /* field[0] = dummy */
-};
-static const ProtobufCIntRange truncate_operation__number_ranges[1 + 1] =
-{
-  { 12, 0 },
-  { 0, 1 }
-};
-const ProtobufCMessageDescriptor truncate_operation__descriptor =
-{
-  PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
-  "TruncateOperation",
-  "TruncateOperation",
-  "TruncateOperation",
-  "",
-  sizeof(TruncateOperation),
-  1,
-  truncate_operation__field_descriptors,
-  truncate_operation__field_indices_by_name,
-  1,  truncate_operation__number_ranges,
-  (ProtobufCMessageInit) truncate_operation__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
 static const ProtobufCFieldDescriptor write_operation__field_descriptors[3] =
@@ -1513,5 +1510,282 @@ const ProtobufCMessageDescriptor write_operation__descriptor =
   write_operation__field_indices_by_name,
   1,  write_operation__number_ranges,
   (ProtobufCMessageInit) write_operation__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+#define unlink_operation__field_descriptors NULL
+#define unlink_operation__field_indices_by_name NULL
+#define unlink_operation__number_ranges NULL
+const ProtobufCMessageDescriptor unlink_operation__descriptor =
+{
+  PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
+  "UnlinkOperation",
+  "UnlinkOperation",
+  "UnlinkOperation",
+  "",
+  sizeof(UnlinkOperation),
+  0,
+  unlink_operation__field_descriptors,
+  unlink_operation__field_indices_by_name,
+  0,  unlink_operation__number_ranges,
+  (ProtobufCMessageInit) unlink_operation__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+#define rmdir_operation__field_descriptors NULL
+#define rmdir_operation__field_indices_by_name NULL
+#define rmdir_operation__number_ranges NULL
+const ProtobufCMessageDescriptor rmdir_operation__descriptor =
+{
+  PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
+  "RmdirOperation",
+  "RmdirOperation",
+  "RmdirOperation",
+  "",
+  sizeof(RmdirOperation),
+  0,
+  rmdir_operation__field_descriptors,
+  rmdir_operation__field_indices_by_name,
+  0,  rmdir_operation__number_ranges,
+  (ProtobufCMessageInit) rmdir_operation__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor truncate_operation__field_descriptors[1] =
+{
+  {
+    "newsize",
+    1,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_INT64,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(TruncateOperation, newsize),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned truncate_operation__field_indices_by_name[] = {
+  0,   /* field[0] = newsize */
+};
+static const ProtobufCIntRange truncate_operation__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor truncate_operation__descriptor =
+{
+  PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
+  "TruncateOperation",
+  "TruncateOperation",
+  "TruncateOperation",
+  "",
+  sizeof(TruncateOperation),
+  1,
+  truncate_operation__field_descriptors,
+  truncate_operation__field_indices_by_name,
+  1,  truncate_operation__number_ranges,
+  (ProtobufCMessageInit) truncate_operation__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor chmod_operation__field_descriptors[1] =
+{
+  {
+    "mode",
+    1,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(ChmodOperation, mode),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned chmod_operation__field_indices_by_name[] = {
+  0,   /* field[0] = mode */
+};
+static const ProtobufCIntRange chmod_operation__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor chmod_operation__descriptor =
+{
+  PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
+  "ChmodOperation",
+  "ChmodOperation",
+  "ChmodOperation",
+  "",
+  sizeof(ChmodOperation),
+  1,
+  chmod_operation__field_descriptors,
+  chmod_operation__field_indices_by_name,
+  1,  chmod_operation__number_ranges,
+  (ProtobufCMessageInit) chmod_operation__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor chown_operation__field_descriptors[2] =
+{
+  {
+    "uid",
+    1,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(ChownOperation, uid),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "gid",
+    2,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(ChownOperation, gid),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned chown_operation__field_indices_by_name[] = {
+  1,   /* field[1] = gid */
+  0,   /* field[0] = uid */
+};
+static const ProtobufCIntRange chown_operation__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 2 }
+};
+const ProtobufCMessageDescriptor chown_operation__descriptor =
+{
+  PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
+  "ChownOperation",
+  "ChownOperation",
+  "ChownOperation",
+  "",
+  sizeof(ChownOperation),
+  2,
+  chown_operation__field_descriptors,
+  chown_operation__field_indices_by_name,
+  1,  chown_operation__number_ranges,
+  (ProtobufCMessageInit) chown_operation__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor rename_operation__field_descriptors[1] =
+{
+  {
+    "newpath",
+    1,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(RenameOperation, newpath),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned rename_operation__field_indices_by_name[] = {
+  0,   /* field[0] = newpath */
+};
+static const ProtobufCIntRange rename_operation__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor rename_operation__descriptor =
+{
+  PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
+  "RenameOperation",
+  "RenameOperation",
+  "RenameOperation",
+  "",
+  sizeof(RenameOperation),
+  1,
+  rename_operation__field_descriptors,
+  rename_operation__field_indices_by_name,
+  1,  rename_operation__number_ranges,
+  (ProtobufCMessageInit) rename_operation__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor setxattr_operation__field_descriptors[1] =
+{
+  {
+    "dummy",
+    16,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_INT32,
+    PROTOBUF_C_OFFSETOF(SetxattrOperation, has_dummy),
+    PROTOBUF_C_OFFSETOF(SetxattrOperation, dummy),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned setxattr_operation__field_indices_by_name[] = {
+  0,   /* field[0] = dummy */
+};
+static const ProtobufCIntRange setxattr_operation__number_ranges[1 + 1] =
+{
+  { 16, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor setxattr_operation__descriptor =
+{
+  PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
+  "SetxattrOperation",
+  "SetxattrOperation",
+  "SetxattrOperation",
+  "",
+  sizeof(SetxattrOperation),
+  1,
+  setxattr_operation__field_descriptors,
+  setxattr_operation__field_indices_by_name,
+  1,  setxattr_operation__number_ranges,
+  (ProtobufCMessageInit) setxattr_operation__init,
+  NULL,NULL,NULL    /* reserved[123] */
+};
+static const ProtobufCFieldDescriptor removexattr_operation__field_descriptors[1] =
+{
+  {
+    "dummy",
+    17,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_INT32,
+    PROTOBUF_C_OFFSETOF(RemovexattrOperation, has_dummy),
+    PROTOBUF_C_OFFSETOF(RemovexattrOperation, dummy),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned removexattr_operation__field_indices_by_name[] = {
+  0,   /* field[0] = dummy */
+};
+static const ProtobufCIntRange removexattr_operation__number_ranges[1 + 1] =
+{
+  { 17, 0 },
+  { 0, 1 }
+};
+const ProtobufCMessageDescriptor removexattr_operation__descriptor =
+{
+  PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
+  "RemovexattrOperation",
+  "RemovexattrOperation",
+  "RemovexattrOperation",
+  "",
+  sizeof(RemovexattrOperation),
+  1,
+  removexattr_operation__field_descriptors,
+  removexattr_operation__field_indices_by_name,
+  1,  removexattr_operation__number_ranges,
+  (ProtobufCMessageInit) removexattr_operation__init,
   NULL,NULL,NULL    /* reserved[123] */
 };

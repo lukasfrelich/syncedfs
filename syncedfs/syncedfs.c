@@ -126,29 +126,35 @@ int sfs_mknod(const char *path, mode_t mode, dev_t dev) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    // TODO: log
     sfs_fullpath(fpath, path);
 
     // On Linux this could just be 'mknod(path, mode, rdev)' but this
-    //  is more portable
+    // is more portable
     if (S_ISREG(mode)) {
         retstat = open(fpath, O_CREAT | O_EXCL | O_WRONLY, mode);
-        if (retstat < 0)
+        if (retstat < 0) {
             retstat = sfs_error("sfs_mknod open");
-        else {
+        } else {
+            logMknod(path, mode, dev); // log only successful attempts
+
             retstat = close(retstat);
             if (retstat < 0)
                 retstat = sfs_error("sfs_mknod close");
         }
-    } else
-        if (S_ISFIFO(mode)) {
-        retstat = mkfifo(fpath, mode);
-        if (retstat < 0)
-            retstat = sfs_error("sfs_mknod mkfifo");
     } else {
-        retstat = mknod(fpath, mode, dev);
-        if (retstat < 0)
-            retstat = sfs_error("sfs_mknod mknod");
+        if (S_ISFIFO(mode)) {
+            retstat = mkfifo(fpath, mode);
+            if (retstat < 0)
+                retstat = sfs_error("sfs_mknod mkfifo");
+            else
+                logMknod(path, mode, dev); // log only successful attempts
+        } else {
+            retstat = mknod(fpath, mode, dev);
+            if (retstat < 0)
+                retstat = sfs_error("sfs_mknod mknod");
+            else
+                logMknod(path, mode, dev); // log only successful attempts
+        }
     }
 
     return retstat;
@@ -159,10 +165,13 @@ int sfs_mkdir(const char *path, mode_t mode) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    // TODO: log
     sfs_fullpath(fpath, path);
 
     retstat = mkdir(fpath, mode);
+
+    if (retstat != -1) // log only successful attempts
+        logMkdir(path, mode);
+
     if (retstat < 0)
         retstat = sfs_error("sfs_mkdir mkdir");
 
@@ -174,10 +183,13 @@ int sfs_unlink(const char *path) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    // TODO: log
     sfs_fullpath(fpath, path);
 
     retstat = unlink(fpath);
+
+    if (retstat != -1) // log only successful attempts
+        logUnlink(path);
+
     if (retstat < 0)
         retstat = sfs_error("sfs_unlink unlink");
 
@@ -189,10 +201,13 @@ int sfs_rmdir(const char *path) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    // TODO: log
     sfs_fullpath(fpath, path);
 
     retstat = rmdir(fpath);
+
+    if (retstat != -1) // log only successful attempts
+        logRmdir(path);
+
     if (retstat < 0)
         retstat = sfs_error("sfs_rmdir rmdir");
 
@@ -209,10 +224,13 @@ int sfs_symlink(const char *path, const char *link) {
     int retstat = 0;
     char flink[PATH_MAX];
 
-    // TODO: log
     sfs_fullpath(flink, link);
 
     retstat = symlink(path, flink);
+
+    if (retstat != -1) // log only successful attempts
+        logSymlink(link, path);
+
     if (retstat < 0)
         retstat = sfs_error("sfs_symlink symlink");
 
@@ -227,11 +245,14 @@ int sfs_rename(const char *path, const char *newpath) {
     char fpath[PATH_MAX];
     char fnewpath[PATH_MAX];
 
-    // TODO: log
     sfs_fullpath(fpath, path);
     sfs_fullpath(fnewpath, newpath);
 
     retstat = rename(fpath, fnewpath);
+
+    if (retstat != -1) // log only successful attempts
+        logRename(path, newpath);
+
     if (retstat < 0)
         retstat = sfs_error("sfs_rename rename");
 
@@ -243,11 +264,14 @@ int sfs_link(const char *path, const char *newpath) {
     int retstat = 0;
     char fpath[PATH_MAX], fnewpath[PATH_MAX];
 
-    // TODO: log
     sfs_fullpath(fpath, path);
     sfs_fullpath(fnewpath, newpath);
 
     retstat = link(fpath, fnewpath);
+
+    if (retstat != -1) // log only successful attempts
+        logLink(path, newpath);
+
     if (retstat < 0)
         retstat = sfs_error("sfs_link link");
 
@@ -259,10 +283,13 @@ int sfs_chmod(const char *path, mode_t mode) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    // TODO: log
     sfs_fullpath(fpath, path);
 
     retstat = chmod(fpath, mode);
+
+    if (retstat != -1) // log only successful attempts
+        logChmod(path, mode);
+
     if (retstat < 0)
         retstat = sfs_error("sfs_chmod chmod");
 
@@ -274,10 +301,13 @@ int sfs_chown(const char *path, uid_t uid, gid_t gid) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    // TODO: log
     sfs_fullpath(fpath, path);
 
     retstat = chown(fpath, uid, gid);
+
+    if (retstat != -1) // log only successful attempts
+        logChown(path, uid, gid);
+
     if (retstat < 0)
         retstat = sfs_error("sfs_chown chown");
 
@@ -289,10 +319,13 @@ int sfs_truncate(const char *path, off_t newsize) {
     int retstat = 0;
     char fpath[PATH_MAX];
 
-    // TODO: log
     sfs_fullpath(fpath, path);
 
     retstat = truncate(fpath, newsize);
+
+    if (retstat != -1) // log only successful attempts
+        logTruncate(path, newsize);
+
     if (retstat < 0)
         sfs_error("sfs_truncate truncate");
 
@@ -358,9 +391,10 @@ int sfs_open(const char *path, struct fuse_file_info *fi) {
 // with the fusexmp code which returns the amount of data also
 // returned by read.
 
-int sfs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
-    int retstat = 0;
+int sfs_read(const char *path, char *buf, size_t size, off_t offset,
+        struct fuse_file_info *fi) {
 
+    int retstat = 0;
 
     // no need to get fpath on this one, since I work from fi->fh not the path
 
@@ -386,9 +420,14 @@ int sfs_write(const char *path, const char *buf, size_t size, off_t offset,
         struct fuse_file_info *fi) {
     int retstat = 0;
 
-    logWrite(path, offset, size);
-
     retstat = pwrite(fi->fh, buf, size, offset);
+
+    // log all writes, where number of written bytes was greater than 0
+    // since number of written bytes can be less than size, use returned number
+    // for logging
+    if (retstat > 0)
+        logWrite(path, retstat, offset);
+
     if (retstat < 0)
         retstat = sfs_error("sfs_write pwrite");
 
@@ -678,7 +717,7 @@ void *sfs_init(struct fuse_conn_info *conn) {
     int fd;
     char pidpath[PATH_MAX];
     char buf[RESOURCE_MAX];
-    
+
     // write PID into .pid file
     // we can't do it in main(), because fuse clones this process
     snprintf(pidpath, PATH_MAX, "/var/run/syncedfs/fs/%s.pid", config.resource);
@@ -690,13 +729,13 @@ void *sfs_init(struct fuse_conn_info *conn) {
     snprintf(buf, RESOURCE_MAX, "%ld\n", (long) getpid());
     if (write(fd, buf, strlen(buf)) != strlen(buf))
         fatal("Writing to PID file '%s'", pidpath);
-    
+
     // setup signal handlers
     struct sigaction act;
     sigemptyset(&act.sa_mask);
     act.sa_sigaction = handleSIGUSR1;
     act.sa_flags = SA_SIGINFO;
-    
+
     if (sigaction(SIGUSR1, &act, NULL) == -1)
         fatal("sigaction");
 
@@ -714,7 +753,7 @@ void sfs_destroy(void *userdata) {
     char pidpath[PATH_MAX];
 
     snprintf(pidpath, PATH_MAX, "/var/run/syncedfs/fs/%s.pid", config.resource);
-    
+
     if (unlink(pidpath) == -1)
         errExit("Deleting PID file '%s'", pidpath);
 }
@@ -761,10 +800,13 @@ int sfs_create(const char *path, mode_t mode, struct fuse_file_info *fi) {
     char fpath[PATH_MAX];
     int fd;
 
-    // TODO: log
     sfs_fullpath(fpath, path);
 
     fd = creat(fpath, mode);
+
+    if (fd != -1) // log only successful attempts
+        logCreate(path, mode);
+
     if (fd < 0)
         retstat = sfs_error("sfs_create creat");
 
@@ -788,9 +830,12 @@ int sfs_create(const char *path, mode_t mode, struct fuse_file_info *fi) {
 int sfs_ftruncate(const char *path, off_t offset, struct fuse_file_info *fi) {
     int retstat = 0;
 
-    // TODO: log as truncate
-
     retstat = ftruncate(fi->fh, offset);
+
+    // TODO: check if path is properly populated
+    if (retstat != -1) // log only successful attempts as truncate operation
+        logTruncate(path, offset);
+
     if (retstat < 0)
         retstat = sfs_error("sfs_ftruncate ftruncate");
 
@@ -873,7 +918,7 @@ int main(int argc, char** argv) {
 
     if (argc != 2)
         usageErr("syncedfs resource-name\n");
-    
+
     if ((getuid() == 0) || (geteuid() == 0))
         fatal("We don't want to run syncedfs as root.");
 

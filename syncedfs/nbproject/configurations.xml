@@ -47,6 +47,8 @@
       </logicalFolder>
       <itemPath>../syncedfs-common/config_functions.c</itemPath>
       <itemPath>../syncedfs-common/config_functions.h</itemPath>
+      <itemPath>../syncedfs-common/message_functions.c</itemPath>
+      <itemPath>../syncedfs-common/message_functions.h</itemPath>
       <itemPath>../syncedfs-common/path_functions.c</itemPath>
       <itemPath>../syncedfs-common/path_functions.h</itemPath>
     </logicalFolder>

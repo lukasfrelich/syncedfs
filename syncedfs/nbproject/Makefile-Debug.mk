@@ -34,6 +34,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/_ext/1275677342/message_functions.o \
 	${OBJECTDIR}/_ext/1275677342/path_functions.o \
 	${OBJECTDIR}/_ext/988793768/error_functions.o \
 	${OBJECTDIR}/_ext/988793768/region_locking.o \
@@ -72,6 +73,11 @@ LDLIBSOPTIONS=`pkg-config --libs fuse` `pkg-config --libs libprotobuf-c` `pkg-co
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs ${OBJECTFILES} ${LDLIBSOPTIONS} 
+
+${OBJECTDIR}/_ext/1275677342/message_functions.o: ../syncedfs-common/message_functions.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342
+	${RM} $@.d
+	$(COMPILE.c) -g `pkg-config --cflags fuse` `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1275677342/message_functions.o ../syncedfs-common/message_functions.c
 
 ${OBJECTDIR}/_ext/1275677342/path_functions.o: ../syncedfs-common/path_functions.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342

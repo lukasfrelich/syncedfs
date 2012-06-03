@@ -1,24 +1,24 @@
 /* 
- * File:   common.c
+ * File:   message_functions.c
  * Author: lfr
  *
  * Created on May 16, 2012, 4:44 PM
  */
 
-#include "common.h"
+#include "message_functions.h"
 #include "../syncedfs-common/protobuf/syncedfs.pb-c.h"
 #include <stdlib.h>
 #include <limits.h>
 #include "string.h"
 #include <arpa/inet.h>
-#include "config.h"
 
 //------------------------------------------------------------------------------
 // File system
 //------------------------------------------------------------------------------
+// TODO: move to path_functions
 char *getAbsolutePath(char *relpath) {
     static char absolutepath[PATH_MAX];
-    (void) strcpy(absolutepath, config.rootdir);
+    //(void) strcpy(absolutepath, config.rootdir);
     (void) strcat(absolutepath, relpath);
 
     return absolutepath;

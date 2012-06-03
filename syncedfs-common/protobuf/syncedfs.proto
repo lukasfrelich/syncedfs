@@ -19,76 +19,94 @@ message GenericOperation {
 	optional int32 id = 1;
 
 	enum OperationType {
-		MKNOD = 3;
-		MKDIR = 4;
-		SYMLINK = 5;
-		UNLINK = 6;
-		RMDIR = 7;
-		RENAME = 8;
-		LINK = 9;
-		CHMOD = 10;
-		CHOWN = 11;
-		TRUNCATE = 12;
-		WRITE = 13;
+		CREATE = 3;		
+		MKNOD = 4;
+		MKDIR = 5;
+		SYMLINK = 6;
+		LINK = 7;
+		WRITE = 8;
+		UNLINK = 9;
+		RMDIR = 10;
+		TRUNCATE = 11;
+		CHMOD = 12;
+		CHOWN = 13;
+		RENAME = 14;
+		SETXATTR = 15;
+		REMOVEXATTR = 16;
 	}
 
-	optional OperationType type = 2;
+	required OperationType type = 2;
 
-	optional MknodOperation mknod_op = 3;
-	optional MkdirOperation mkdir_op = 4;
-	optional SymlinkOperation symlink_op = 5;
-	optional UnlinkOperation unlink_op = 6;
-	optional RmdirOperation rmdir_op = 7;
-	optional RenameOperation rename_op = 8;
-	optional LinkOperation link_op = 9;
-	optional ChmodOperation chmod_op = 10;
-	optional ChownOperation chown_op = 11;
-	optional TruncateOperation truncate_op = 12;
-	optional WriteOperation write_op = 13;
+	optional CreateOperation create_op = 3;
+	optional MknodOperation mknod_op = 4;
+	optional MkdirOperation mkdir_op = 5;
+	optional SymlinkOperation symlink_op = 6;
+	optional LinkOperation link_op = 7;
+	optional WriteOperation write_op = 8;
+	optional UnlinkOperation unlink_op = 9;
+	optional RmdirOperation rmdir_op = 10;
+	optional TruncateOperation truncate_op = 11;
+	optional ChmodOperation chmod_op = 12;
+	optional ChownOperation chown_op = 13;
+	optional RenameOperation rename_op = 14;
+	optional SetxattrOperation setxattr_op = 15;
+	optional RemovexattrOperation removexattr_op = 16;
+}
+
+message CreateOperation {
+	required int32 mode = 1;
 }
 
 message MknodOperation {
-	optional int32 dummy = 3;
+	required int32 mode = 1;
+	required int64 dev = 2;
 }
 
 message MkdirOperation {
-	optional int32 dummy = 4;
+	required int32 mode = 1;
 }
 
 message SymlinkOperation {
-	optional int32 dummy = 5;
-}
-
-message UnlinkOperation {
-	optional int32 dummy = 6;
-}
-
-message RmdirOperation {
-	optional int32 dummy = 7;
-}
-
-message RenameOperation {
-	optional int32 dummy = 8;
+	required string target = 1;
 }
 
 message LinkOperation {
-	optional int32 dummy = 9;
-}
-
-message ChmodOperation {
-	optional int32 dummy = 10;
-}
-
-message ChownOperation {
-	optional int32 dummy = 11;
-}
-
-message TruncateOperation {
-	optional int32 dummy = 12;
+	required string newpath = 1;
 }
 
 message WriteOperation {
 	required int64 offset = 1;
 	required int32 size = 2;
 	optional bytes data = 3;
+}
+
+message UnlinkOperation {
+}
+
+message RmdirOperation {
+}
+
+message TruncateOperation {
+	required int64 newsize = 1;
+}
+
+message ChmodOperation {
+	required int32 mode = 1;
+}
+
+message ChownOperation {
+	required int32 uid = 1;
+	required int32 gid = 2;
+}
+
+message RenameOperation {
+	required string newpath = 1;
+}
+
+message SetxattrOperation {
+	optional int32 dummy = 16;
+}
+
+message RemovexattrOperation {
+	optional int32 dummy = 17;
 }

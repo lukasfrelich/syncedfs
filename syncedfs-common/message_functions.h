@@ -1,12 +1,12 @@
 /* 
- * File:   common.h
+ * File:   message_functions.h
  * Author: lfr
  *
  * Created on May 16, 2012, 4:44 PM
  */
 
-#ifndef COMMON_H
-#define	COMMON_H
+#ifndef MESSAGE_FUNCTIONS_H
+#define	MESSAGE_FUNCTIONS_H
 
 enum messagetype {
     SyncInitializationType,
@@ -34,4 +34,4 @@ void freePackedMessage(uint8_t *buffer);
 void *getMessageFromSocket(int cfd, enum messagetype msgtype,
         long long *bytesread);
 
-#endif	/* COMMON_H */
+#endif	/* MESSAGE_FUNCTIONS_H */
