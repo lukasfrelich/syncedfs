@@ -104,9 +104,9 @@ message RenameOperation {
 }
 
 message SetxattrOperation {
-	optional int32 dummy = 16;
+	optional int32 dummy = 15;
 }
 
 message RemovexattrOperation {
-	optional int32 dummy = 17;
+	optional int32 dummy = 16;
 }

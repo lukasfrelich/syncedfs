@@ -270,7 +270,7 @@ int sfs_link(const char *path, const char *newpath) {
     retstat = link(fpath, fnewpath);
 
     if (retstat != -1) // log only successful attempts
-        logLink(path, newpath);
+        logLink(newpath, path);
 
     if (retstat < 0)
         retstat = sfs_error("sfs_link link");

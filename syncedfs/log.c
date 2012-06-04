@@ -95,6 +95,26 @@ void switchLog(void) {
         errExit("Could not create new log file.");
 }
 
+void logGeneric(const char *relpath, GenericOperation genop) {
+    uint32_t msglen;
+    uint8_t *buf;
+    FileOperation fileop = FILE_OPERATION__INIT;
+
+    fileop.relative_path = (char *) relpath;
+    fileop.op = &genop;
+
+    packMessage(FileOperationType, &fileop, &buf, &msglen);
+
+    // critical section
+    writepending = 1;
+    if (write(logfd, buf, msglen) != msglen)
+        errMsg("Could not write message.");
+    writepending = 0;
+    
+    if (switchpending == 1)
+        handleSIGUSR1(0, NULL, NULL);
+}
+
 //------------------------------------------------------------------------------
 // Operation handlers
 //------------------------------------------------------------------------------
@@ -148,11 +168,11 @@ void logSymlink(const char *relpath, const char *target) {
     logGeneric(relpath, genop);
 }
 
-void logLink(const char *relpath, const char *newpath) {
+void logLink(const char *relpath, const char *target) {
     GenericOperation genop = GENERIC_OPERATION__INIT;
     LinkOperation linkop = LINK_OPERATION__INIT;
 
-    linkop.newpath = (char *) newpath;
+    linkop.newpath = (char *) target;
 
     genop.type = GENERIC_OPERATION__OPERATION_TYPE__LINK;
     genop.link_op = &linkop;
@@ -166,6 +186,7 @@ void logWrite(const char *relpath, size_t size, off_t offset) {
 
     writeop.offset = (int64_t) offset;
     writeop.size = (int32_t) size;
+    // we don't store data (to save space on disk)
 
     genop.type = GENERIC_OPERATION__OPERATION_TYPE__WRITE;
     genop.write_op = &writeop;
@@ -240,26 +261,6 @@ void logRename(const char *relpath, const char *newpath) {
     genop.rename_op = &renameop;
 
     logGeneric(relpath, genop);
-}
-
-void logGeneric(const char *relpath, GenericOperation genop) {
-    uint32_t msglen;
-    uint8_t *buf;
-    FileOperation fileop = FILE_OPERATION__INIT;
-
-    fileop.relative_path = (char *) relpath;
-    fileop.op = &genop;
-
-    packMessage(FileOperationType, &fileop, &buf, &msglen);
-
-    // critical section
-    writepending = 1;
-    if (write(logfd, buf, msglen) != msglen)
-        errMsg("Could not write message.");
-    writepending = 0;
-
-    if (switchpending == 1)
-        handleSIGUSR1(0, NULL, NULL);
 }
 
 /*void logWrite(const char *relpath, size_t size, off_t offset) {

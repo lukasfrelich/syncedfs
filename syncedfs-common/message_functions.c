@@ -10,12 +10,14 @@
 #include <stdlib.h>
 #include <limits.h>
 #include "string.h"
+#include "lib/error_functions.h"
 #include <arpa/inet.h>
 
 //------------------------------------------------------------------------------
 // File system
 //------------------------------------------------------------------------------
 // TODO: move to path_functions
+
 char *getAbsolutePath(char *relpath) {
     static char absolutepath[PATH_MAX];
     //(void) strcpy(absolutepath, config.rootdir);
@@ -27,43 +29,64 @@ char *getAbsolutePath(char *relpath) {
 //------------------------------------------------------------------------------
 // Packing messages
 //------------------------------------------------------------------------------
+
 int packMessage(enum messagetype msgtype, void *message, uint8_t **buffer,
         uint32_t *length) {
-    uint32_t msglen;
-    uint32_t totallen;
-    uint8_t *buf;
-    uint32_t *bufbegin;
 
+    uint32_t msglen;
+    static uint32_t totallen = 0; // size of buffer
+    uint8_t *buf;
+    static uint32_t *bufbegin = NULL; // buffer used across all calls
+    
     switch (msgtype) {
         case SyncInitializationType:
-            msglen = (uint32_t) sync_initialization__get_packed_size((SyncInitialization *) message);
+            msglen = (uint32_t) sync_initialization__get_packed_size
+                    ((SyncInitialization *) message);
             break;
         case FileChunkType:
-            msglen = (uint32_t) file_chunk__get_packed_size((FileChunk *) message);
+            msglen = (uint32_t) file_chunk__get_packed_size
+                    ((FileChunk *) message);
             break;
         case FileOperationType:
+            msglen = (uint32_t) file_operation__get_packed_size
+                    ((FileOperation *) message);
             break;
         default:
-            return -1; // unsupported message type
+            errMsg("Unsupported message type.");
+            return -1;
     }
 
-    totallen = msglen + sizeof (uint32_t);
-    bufbegin = malloc(totallen);
-    if (bufbegin == NULL) {
-        return -2; // memory allocation failed
+    // we might need to increase size of the buffer
+    if (msglen + sizeof (uint32_t) > totallen) {
+        if (bufbegin != NULL)
+            free(bufbegin);
+        
+        bufbegin = malloc(msglen + sizeof (uint32_t));
+        if (bufbegin == NULL) {
+            errMsg("Failed to allocate memory for packing a message.");
+            return -1;
+        }
     }
+    totallen = msglen + sizeof (uint32_t);
     *bufbegin = htonl(msglen);
     buf = (uint8_t *) (bufbegin + 1);
 
+    int ret;
     switch (msgtype) {
         case SyncInitializationType:
-            (void) sync_initialization__pack((SyncInitialization *) message, buf);
+            ret = sync_initialization__pack((SyncInitialization *) message, buf);
             break;
         case FileChunkType:
-            (void) file_chunk__pack((FileChunk *) message, buf);
+            ret = file_chunk__pack((FileChunk *) message, buf);
             break;
         case FileOperationType:
+            ret = file_operation__pack((FileOperation *) message, buf);
             break;
+    }
+
+    if (ret != msglen) {
+        errMsg("Pack operation failed.");
+        return -1;
     }
 
     *buffer = (uint8_t *) bufbegin;
@@ -72,14 +95,19 @@ int packMessage(enum messagetype msgtype, void *message, uint8_t **buffer,
     return 0;
 }
 
+/*
 void freePackedMessage(uint8_t *buffer) {
     free(buffer);
 }
+ */
 
 //------------------------------------------------------------------------------
 // Unpacking messages
 //------------------------------------------------------------------------------
-void *getMessageFromSocket(int cfd, enum messagetype msgtype, long long *bytesread) {
+
+void *getMessageFromSocket(int cfd, enum messagetype msgtype,
+        long long *bytesread) {
+
     size_t s;
     uint8_t *buf;
     uint32_t msglen;

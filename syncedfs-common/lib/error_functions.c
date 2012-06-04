@@ -53,6 +53,14 @@ outputError(Boolean useErr, int err, Boolean flushStdout,
         const char *format, va_list ap)
 {
 #define BUF_SIZE 500
+    static FILE *tmplog = NULL;
+    if (tmplog == NULL) {
+        fopen("/home/lfr/tmp.log", "a");
+        fputs("open done", tmplog);
+        setvbuf(tmplog, NULL, _IOLBF, 0);
+    }
+        
+    
     char buf[BUF_SIZE], userMsg[BUF_SIZE], errText[BUF_SIZE];
 
     vsnprintf(userMsg, BUF_SIZE, format, ap);
@@ -68,7 +76,8 @@ outputError(Boolean useErr, int err, Boolean flushStdout,
 
     if (flushStdout)
         fflush(stdout);       /* Flush any pending stdout */
-    fputs(buf, stderr);
+    //fputs(buf, stderr);
+    fputs(buf, tmplog);
     fflush(stderr);           /* In case stderr is not line-buffered */
 }
 
