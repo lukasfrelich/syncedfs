@@ -71,7 +71,7 @@ message SymlinkOperation {
 }
 
 message LinkOperation {
-	required string newpath = 1;
+	required string target = 1;
 }
 
 message WriteOperation {

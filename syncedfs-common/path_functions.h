@@ -8,6 +8,9 @@
 #ifndef PATHS_H
 #define	PATHS_H
 
+#include <limits.h>
+
+void getAbsolutePath(char *fpath, const char *rootdir, const char *path);
 // removes trailing '/'
 char *getCanonincalPath(char *path);
 

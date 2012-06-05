@@ -55,8 +55,7 @@ outputError(Boolean useErr, int err, Boolean flushStdout,
 #define BUF_SIZE 500
     static FILE *tmplog = NULL;
     if (tmplog == NULL) {
-        fopen("/home/lfr/tmp.log", "a");
-        fputs("open done", tmplog);
+        tmplog = fopen("/home/lfr/tmp.log", "a");
         setvbuf(tmplog, NULL, _IOLBF, 0);
     }
         

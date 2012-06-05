@@ -14,19 +14,6 @@
 #include <arpa/inet.h>
 
 //------------------------------------------------------------------------------
-// File system
-//------------------------------------------------------------------------------
-// TODO: move to path_functions
-
-char *getAbsolutePath(char *relpath) {
-    static char absolutepath[PATH_MAX];
-    //(void) strcpy(absolutepath, config.rootdir);
-    (void) strcat(absolutepath, relpath);
-
-    return absolutepath;
-}
-
-//------------------------------------------------------------------------------
 // Packing messages
 //------------------------------------------------------------------------------
 
@@ -136,7 +123,7 @@ void *getMessageFromSocket(int cfd, enum messagetype msgtype,
             message = file_chunk__unpack(NULL, msglen, buf);
             break;
         case FileOperationType:
-            break;
+            break;      // we should never get this message type from a socket
     }
 
     free(buf);

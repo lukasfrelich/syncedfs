@@ -155,7 +155,7 @@ struct  _SymlinkOperation
 struct  _LinkOperation
 {
   ProtobufCMessage base;
-  char *newpath;
+  char *target;
 };
 #define LINK_OPERATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&link_operation__descriptor) \

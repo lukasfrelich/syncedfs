@@ -172,7 +172,7 @@ void logLink(const char *relpath, const char *target) {
     GenericOperation genop = GENERIC_OPERATION__INIT;
     LinkOperation linkop = LINK_OPERATION__INIT;
 
-    linkop.newpath = (char *) target;
+    linkop.target = (char *) target;
 
     genop.type = GENERIC_OPERATION__OPERATION_TYPE__LINK;
     genop.link_op = &linkop;

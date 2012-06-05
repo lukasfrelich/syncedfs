@@ -1413,12 +1413,12 @@ const ProtobufCMessageDescriptor symlink_operation__descriptor =
 static const ProtobufCFieldDescriptor link_operation__field_descriptors[1] =
 {
   {
-    "newpath",
+    "target",
     1,
     PROTOBUF_C_LABEL_REQUIRED,
     PROTOBUF_C_TYPE_STRING,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(LinkOperation, newpath),
+    PROTOBUF_C_OFFSETOF(LinkOperation, target),
     NULL,
     NULL,
     0,            /* packed */
@@ -1426,7 +1426,7 @@ static const ProtobufCFieldDescriptor link_operation__field_descriptors[1] =
   },
 };
 static const unsigned link_operation__field_indices_by_name[] = {
-  0,   /* field[0] = newpath */
+  0,   /* field[0] = target */
 };
 static const ProtobufCIntRange link_operation__number_ranges[1 + 1] =
 {
@@ -1717,7 +1717,7 @@ static const ProtobufCFieldDescriptor setxattr_operation__field_descriptors[1] =
 {
   {
     "dummy",
-    16,
+    15,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_INT32,
     PROTOBUF_C_OFFSETOF(SetxattrOperation, has_dummy),
@@ -1733,7 +1733,7 @@ static const unsigned setxattr_operation__field_indices_by_name[] = {
 };
 static const ProtobufCIntRange setxattr_operation__number_ranges[1 + 1] =
 {
-  { 16, 0 },
+  { 15, 0 },
   { 0, 1 }
 };
 const ProtobufCMessageDescriptor setxattr_operation__descriptor =
@@ -1755,7 +1755,7 @@ static const ProtobufCFieldDescriptor removexattr_operation__field_descriptors[1
 {
   {
     "dummy",
-    17,
+    16,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_INT32,
     PROTOBUF_C_OFFSETOF(RemovexattrOperation, has_dummy),
@@ -1771,7 +1771,7 @@ static const unsigned removexattr_operation__field_indices_by_name[] = {
 };
 static const ProtobufCIntRange removexattr_operation__number_ranges[1 + 1] =
 {
-  { 17, 0 },
+  { 16, 0 },
   { 0, 1 }
 };
 const ProtobufCMessageDescriptor removexattr_operation__descriptor =
