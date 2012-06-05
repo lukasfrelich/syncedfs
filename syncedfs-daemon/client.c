@@ -10,6 +10,7 @@
 #include "config.h"
 #include "client.h"
 #include "../syncedfs-common/message_functions.h"
+#include "../syncedfs-common/path_functions.h"
 #include "../syncedfs-common/lib/inet_sockets.h"
 #include "../syncedfs-common/lib/create_pid_file.h"
 #include "../syncedfs-common/lib/uthash.h"
@@ -50,10 +51,9 @@ void synchronize(void) {
         }
     }
 
-
-    //processLog(logfd);
+    loadLog(logfd);
     //printLog();
-    //transfer(config.host, config.port);
+    transfer(config.host, config.port);
 
     close(logfd);
     // delete pid file
@@ -61,13 +61,15 @@ void synchronize(void) {
         errExit("Deleting PID file '%s'", pidpath);
 
     // delete log
+    if (unlink(logpath) == -1)
+        errExit("Deleting log file '%s'", logpath);
 }
 
 //------------------------------------------------------------------------------
 // Log processing
 //------------------------------------------------------------------------------
 
-void processLog(int logfd) {
+void loadLog(int logfd) {
     uint8_t *buf;
     uint32_t msglen;
     FileOperation *fileop;
@@ -77,14 +79,15 @@ void processLog(int logfd) {
 
         buf = malloc(msglen);
         if (buf == NULL)
-            perror("malloc buf");
+            errMsg("malloc buf");
         if (read(logfd, buf, msglen) != msglen)
-            perror("read message");
+            errMsg("read message");
 
         fileop = file_operation__unpack(NULL, msglen, buf);
 
         addOperation(fileop->relative_path, fileop->op);
 
+        // memory leak, need to store allocated addresses and free them later
         //file_operation__free_unpacked(fileop, NULL);
         free(buf);
     }
@@ -100,12 +103,63 @@ void printLog(void) {
 
         for (int i = 0; i < f->nelem; i++) {
             op = *(f->operations + i);
-            printf("Operation %d, type: %d, offset: %d, size: %d\n",
-                    i, (int) op->type, (int) op->write_op->offset,
-                    (int) op->write_op->size);
+
+            switch (op->type) {
+                case GENERIC_OPERATION__OPERATION_TYPE__CREATE:
+                    printf("Operation %d, type: create, mode: %d\n",
+                            i, (int) op->create_op->mode);
+                    break;
+                case GENERIC_OPERATION__OPERATION_TYPE__MKNOD:
+                    printf("Operation %d, type: mknod, mode: %d, dev: %ld\n",
+                            i, (int) op->mknod_op->mode,
+                            (long int) op->mknod_op->dev);
+                    break;
+                case GENERIC_OPERATION__OPERATION_TYPE__MKDIR:
+                    printf("Operation %d, type: mkdir, mode: %d\n",
+                            i, (int) op->mkdir_op->mode);
+                    break;
+                case GENERIC_OPERATION__OPERATION_TYPE__SYMLINK:
+                    printf("Operation %d, type: symlink, target: %s\n",
+                            i, op->symlink_op->target);
+                    break;
+                case GENERIC_OPERATION__OPERATION_TYPE__LINK:
+                    printf("Operation %d, type: link, target: %s\n",
+                            i, op->link_op->target);
+                    break;
+                case GENERIC_OPERATION__OPERATION_TYPE__WRITE:
+                    printf("Operation %d, type: write, offset: %ld, size: %d\n",
+                            i, (long int) op->write_op->offset,
+                            (int) op->write_op->size);
+                    break;
+                case GENERIC_OPERATION__OPERATION_TYPE__UNLINK:
+                    printf("Operation %d, type: unlink\n", i);
+                    break;
+                case GENERIC_OPERATION__OPERATION_TYPE__RMDIR:
+                    printf("Operation %d, type: rmdir\n", i);
+                    break;
+                case GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE:
+                    printf("Operation %d, type: truncate, newsize: %d\n",
+                            i, (int) op->truncate_op->newsize);
+                    break;
+                case GENERIC_OPERATION__OPERATION_TYPE__CHMOD:
+                    printf("Operation %d, type: chmod, mode: %d\n",
+                            i, (int) op->chmod_op->mode);
+                    break;
+                case GENERIC_OPERATION__OPERATION_TYPE__CHOWN:
+                    printf("Operation %d, type: chown, uid: %d, gid: %d\n",
+                            i, (int) op->chown_op->uid,
+                            (int) op->chown_op->gid);
+                    break;
+                case GENERIC_OPERATION__OPERATION_TYPE__RENAME:
+                    printf("Operation %d, type: rename, newpath: %s\n",
+                            i, op->rename_op->newpath);
+                    break;
+                case GENERIC_OPERATION__OPERATION_TYPE__SETXATTR:
+                case GENERIC_OPERATION__OPERATION_TYPE__REMOVEXATTR:
+                    break;
+            }
         }
     }
-
 }
 
 void addOperation(char *relpath, GenericOperation *genop) {
@@ -156,11 +210,9 @@ void transfer(char *host, char *port) {
     int sfd; // server socket
     fileop_t *fileop; // contains all operations for a file
     GenericOperation *genop; // current operation
-    int fd; // descriptor for file we will process
 
-    dyndata_t ddata = {0}; // used for dynamically allocated data (to lower
-    // number of malloc calls)
-    //int nbytes;          // how many bytes in ddata are used
+    // used for dynamically allocated data (to lower number of malloc calls)
+    dyndata_t ddata = {0};
     GenericOperation **opstart; //first operation to be send in the message
     int nops; // how many GenericOperations are in the message
 
@@ -178,7 +230,9 @@ void transfer(char *host, char *port) {
 
     // iterate over files in correct order
     HASH_SORT(files, sortByOrder);
-    for (fileop = files; fileop != NULL; fileop = (fileop_t*) (fileop->hh.next)) {
+    for (fileop = files; fileop != NULL;
+            fileop = (fileop_t*) (fileop->hh.next)) {
+
         nops = 0;
         ddata.size = 0;
         ddata.offset = 0;
@@ -186,18 +240,15 @@ void transfer(char *host, char *port) {
 
         optimizeOperations(fileop);
 
-        // TODO: what about deleted files
-        fd = open(getAbsolutePath(fileop->filename), O_RDONLY);
-        if (fd == -1)
-            errExit("Couldn't open source file.\n");
-
         for (int i = 0; i < fileop->nelem; i++) {
             // Fetch next operation
             genop = *(fileop->operations + i);
 
-            // load data for the operation
-            if (cHandleGenericOperation(fd, genop, &ddata) != 0)
-                fatal("Couldn't load required data.\n");
+            // load data for write operation
+            if (genop->type == GENERIC_OPERATION__OPERATION_TYPE__WRITE) {
+                if (loadWriteData(fileop->filename, genop->write_op, &ddata) != 0)
+                    errMsg("Couldn't load required data.\n");
+            }
             nops++;
 
             if (ddata.size >= MESSAGE_MAX) {
@@ -208,7 +259,7 @@ void transfer(char *host, char *port) {
                     transferChunk(sfd, fileop, opstart, nops, 0);
 
                 // reset counters
-                opstart = fileop->operations + i;
+                opstart = fileop->operations + i + 1;
                 nops = 0;
                 ddata.offset = 0;
                 ddata.size = 0;
@@ -219,8 +270,10 @@ void transfer(char *host, char *port) {
             transferChunk(sfd, fileop, opstart, nops, 1);
         }
 
-        if (close(fd) == -1)
-            perror("close file");
+        /*
+                if (close(fd) == -1)
+                    perror("close file");
+         */
     }
 }
 
@@ -239,7 +292,7 @@ void initiateSync(int sfd, int numfiles) {
         perror("send init");
     }
 
-    freePackedMessage(buf);
+    //free(buf);
 
     // wait for response
     // TODO
@@ -263,16 +316,16 @@ void transferChunk(int sfd, fileop_t *fileop, GenericOperation **opstart,
     }
     // wait for ACK?
 
-    freePackedMessage(buf);
+    //freePackedMessage(buf);
 }
 
 //------------------------------------------------------------------------------
 // Operation handlers
 //------------------------------------------------------------------------------
 
-int cHandleGenericOperation(int fd, GenericOperation *genop,
+/*int cHandleGenericOperation(int fd, GenericOperation *genop,
         dyndata_t *dyndata) {
-    
+
     int ret;
 
     switch (genop->type) {
@@ -298,9 +351,30 @@ int cHandleGenericOperation(int fd, GenericOperation *genop,
     }
 
     return ret;
-}
+}*/
 
-int cHandleWrite(int fd, WriteOperation *writeop, dyndata_t *dyndata) {
+int loadWriteData(char *relpath, WriteOperation *writeop, dyndata_t *dyndata) {
+    static char storedpath[PATH_MAX];
+    char fpath[PATH_MAX];
+    static int fd = -1;
+
+    // if we are loading data the first time from this file, open it
+    if (strcmp(relpath, storedpath) != 0) {
+        (void) strcpy(storedpath, relpath);
+
+        if (fd != -1) {
+            if (close(fd) == -1)
+                errMsg("Error closing file %s\n", relpath);
+        }
+
+        getAbsolutePath(fpath, config.rootdir, relpath);
+        fd = open(fpath, O_RDONLY);
+        if (fd == -1) {
+            errMsg("Couldn't open source file.\n");
+            return -1;
+        }
+    }
+
     // realloc, if necessary
     if (writeop->size > dyndata->size - dyndata->offset) {
         int nsize = dyndata->size + writeop->size;
@@ -409,7 +483,7 @@ int switchLog(void) {
         errMsg("Received SIGUSR1 from wrong process");
         return -1;
     }
-    
+
     // restore signal mask
     if (sigprocmask(SIG_SETMASK, &origmask, NULL) == -1) {
         errMsg("Could not restore signal mask.");

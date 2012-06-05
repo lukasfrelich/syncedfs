@@ -32,7 +32,7 @@ void synchronize(void);
 //------------------------------------------------------------------------------
 // Log processing
 //------------------------------------------------------------------------------
-void processLog(int logfd);
+void loadLog(int logfd);
 void printLog(void);
 void addOperation(char *relpath, GenericOperation *genop);
 void optimizeOperations(fileop_t *fileop);
@@ -48,9 +48,9 @@ void transferChunk(int sfd, fileop_t *fileop, GenericOperation **opstart,
 //------------------------------------------------------------------------------
 // Operation handlers
 //------------------------------------------------------------------------------
-int cHandleGenericOperation(int fd, GenericOperation *genop,
-        dyndata_t *dyndata);
-int cHandleWrite(int fd, WriteOperation *writeop, dyndata_t *dyndata);
+int loadWriteData(char *relpath, WriteOperation *writeop, dyndata_t *dyndata);
+/*int cHandleGenericOperation(int fd, GenericOperation *genop,
+        dyndata_t *dyndata);*/
 
 //------------------------------------------------------------------------------
 // Auxiliary functions

@@ -28,6 +28,7 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}" server 2222</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" client localhost 2222</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" client r0</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" r0 server</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" r0 client</runcommandpicklistitem>
         </runcommandpicklist>
         <runcommand>"${OUTPUT_PATH}" r0 client</runcommand>

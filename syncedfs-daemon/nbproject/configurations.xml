@@ -5,7 +5,6 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>client.h</itemPath>
-      <itemPath>common.h</itemPath>
       <itemPath>config.h</itemPath>
       <itemPath>server.h</itemPath>
     </logicalFolder>
