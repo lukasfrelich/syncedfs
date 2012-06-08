@@ -36,7 +36,6 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/1275677342/message_functions.o \
 	${OBJECTDIR}/_ext/1275677342/path_functions.o \
-	${OBJECTDIR}/_ext/988793768/error_functions.o \
 	${OBJECTDIR}/_ext/988793768/region_locking.o \
 	${OBJECTDIR}/_ext/1275677342/config_functions.o \
 	${OBJECTDIR}/log.o \
@@ -47,7 +46,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/syncedfs.o \
 	${OBJECTDIR}/_ext/988793768/create_pid_file.o \
 	${OBJECTDIR}/sighandlers.o \
-	${OBJECTDIR}/config.o
+	${OBJECTDIR}/config.o \
+	${OBJECTDIR}/_ext/1275677342/logging_functions.o
 
 
 # C Compiler Flags
@@ -83,11 +83,6 @@ ${OBJECTDIR}/_ext/1275677342/path_functions.o: ../syncedfs-common/path_functions
 	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342
 	${RM} $@.d
 	$(COMPILE.c) -g `pkg-config --cflags fuse` `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1275677342/path_functions.o ../syncedfs-common/path_functions.c
-
-${OBJECTDIR}/_ext/988793768/error_functions.o: ../syncedfs-common/lib/error_functions.c 
-	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
-	${RM} $@.d
-	$(COMPILE.c) -g `pkg-config --cflags fuse` `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/error_functions.o ../syncedfs-common/lib/error_functions.c
 
 ${OBJECTDIR}/_ext/988793768/region_locking.o: ../syncedfs-common/lib/region_locking.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
@@ -143,6 +138,11 @@ ${OBJECTDIR}/config.o: config.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -g `pkg-config --cflags fuse` `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/config.o config.c
+
+${OBJECTDIR}/_ext/1275677342/logging_functions.o: ../syncedfs-common/logging_functions.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342
+	${RM} $@.d
+	$(COMPILE.c) -g `pkg-config --cflags fuse` `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1275677342/logging_functions.o ../syncedfs-common/logging_functions.c
 
 # Subprojects
 .build-subprojects:

@@ -12,11 +12,8 @@
 #include <fcntl.h>
 #include "../syncedfs-common/protobuf/syncedfs.pb-c.h"
 
-void openTmpLog(void);
-void tmpLog(char *msg);
-
-int openLog(void);
-void switchLog(void);
+int openOpLog(void);
+int switchLog(void);
 void logGeneric(const char *relpath, GenericOperation genop);
 
 //------------------------------------------------------------------------------
@@ -34,6 +31,5 @@ void logTruncate(const char *relpath, off_t newsize);
 void logChmod(const char *relpath, mode_t mode);
 void logChown(const char *relpath, uid_t uid, gid_t gid);
 void logRename(const char *relpath, const char *newpath);
-
 
 #endif	/* LOG_H */

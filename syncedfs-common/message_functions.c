@@ -5,13 +5,13 @@
  * Created on May 16, 2012, 4:44 PM
  */
 
-#include "message_functions.h"
-#include "../syncedfs-common/protobuf/syncedfs.pb-c.h"
 #include <stdlib.h>
 #include <limits.h>
 #include "string.h"
-#include "lib/error_functions.h"
 #include <arpa/inet.h>
+#include "message_functions.h"
+#include "../syncedfs-common/protobuf/syncedfs.pb-c.h"
+#include "logging_functions.h"
 
 //------------------------------------------------------------------------------
 // Packing messages
@@ -39,7 +39,7 @@ int packMessage(enum messagetype msgtype, void *message, uint8_t **buffer,
                     ((FileOperation *) message);
             break;
         default:
-            errMsg("Unsupported message type.");
+            errMsg(LOG_ERR, "Unsupported message type.");
             return -1;
     }
 
@@ -50,7 +50,7 @@ int packMessage(enum messagetype msgtype, void *message, uint8_t **buffer,
         
         bufbegin = malloc(msglen + sizeof (uint32_t));
         if (bufbegin == NULL) {
-            errMsg("Failed to allocate memory for packing a message.");
+            errMsg(LOG_ERR, "Failed to allocate memory for packing a message.");
             return -1;
         }
     }
@@ -72,7 +72,7 @@ int packMessage(enum messagetype msgtype, void *message, uint8_t **buffer,
     }
 
     if (ret != msglen) {
-        errMsg("Pack operation failed.");
+        errMsg(LOG_ERR, "Pack operation failed.");
         return -1;
     }
 
@@ -123,6 +123,8 @@ void *getMessageFromSocket(int cfd, enum messagetype msgtype,
             message = file_chunk__unpack(NULL, msglen, buf);
             break;
         case FileOperationType:
+            errMsg(LOG_ERR, "Received unsupported message type.");
+            return NULL;
             break;      // we should never get this message type from a socket
     }
 

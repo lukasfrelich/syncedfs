@@ -10,7 +10,8 @@
 #include "config.h"
 #include "log.h"
 #include "sighandlers.h"
-#include "../syncedfs-common/lib/error_functions.h"
+#include "../syncedfs-common/logging_functions.h"
+#include "../syncedfs-common/lib/create_pid_file.h"
 
 #include <ctype.h>
 #include <dirent.h>
@@ -30,8 +31,10 @@
 
 // Report errors to logfile and give -errno to caller
 
-static int sfs_error(char *str) {
+static inline int sfs_error(char *str) {
     int ret = -errno;
+
+    // TODO: do we care about those errors? If yes, use errMsg
 
     //log_msg("    ERROR %s: %s\n", str, strerror(errno));
 
@@ -714,21 +717,15 @@ int sfs_fsyncdir(const char *path, int datasync, struct fuse_file_info *fi) {
 // FUSE).
 
 void *sfs_init(struct fuse_conn_info *conn) {
-    int fd;
     char pidpath[PATH_MAX];
-    char buf[RESOURCE_MAX];
+
+    // open syslog
+    openlog(config.ident, 0, LOG_DAEMON);
 
     // write PID into .pid file
     // we can't do it in main(), because fuse clones this process
     snprintf(pidpath, PATH_MAX, "/var/run/syncedfs/fs/%s.pid", config.resource);
-    fd = open(pidpath, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-
-    if (ftruncate(fd, 0) == -1)
-        errExit("Could not truncate PID file '%s'", pidpath);
-
-    snprintf(buf, RESOURCE_MAX, "%ld\n", (long) getpid());
-    if (write(fd, buf, strlen(buf)) != strlen(buf))
-        fatal("Writing to PID file '%s'", pidpath);
+    config.pidfd = createPidFile(config.ident, pidpath, 0);
 
     // setup signal handlers
     struct sigaction act;
@@ -737,7 +734,7 @@ void *sfs_init(struct fuse_conn_info *conn) {
     act.sa_flags = SA_SIGINFO;
 
     if (sigaction(SIGUSR1, &act, NULL) == -1)
-        fatal("sigaction");
+        errMsg(LOG_ERR, "Could not setup signal handlers.");
 
     return NULL;
 }
@@ -754,8 +751,7 @@ void sfs_destroy(void *userdata) {
 
     snprintf(pidpath, PATH_MAX, "/var/run/syncedfs/fs/%s.pid", config.resource);
 
-    if (unlink(pidpath) == -1)
-        errExit("Deleting PID file '%s'", pidpath);
+    deletePidFile(config.pidfd, pidpath);
 }
 
 /**
@@ -917,14 +913,14 @@ int main(int argc, char** argv) {
     char** fargv;
 
     if (argc != 2)
-        usageErr("syncedfs resource-name\n");
+        stderrExit("usage: syncedfs resource-name\n");
 
     if ((getuid() == 0) || (geteuid() == 0))
-        fatal("We don't want to run syncedfs as root.");
+        stderrExit("We do not want to run syncedfs as root.\n");
 
     // read configuration
     if (readConfig(argv[1]) != 0)
-        fatal("Error reading configuration file.");
+        stderrExit("Error reading configuration file.\n", argv[1]);
 
     /*
         printf("resource: %s\n", config.resource);
@@ -933,15 +929,17 @@ int main(int argc, char** argv) {
         printf("logdir: %s\n", config.logdir);
      */
 
+    openlog(config.ident, 0, LOG_DAEMON);
+    
     // open log
-    if (openLog() != 0)
-        errExit("Could not open log file.");
+    if (openOpLog() != 0)
+        stderrExit("syncedfs could not been started.\n");
 
     // add -o nonempty,use_ino (maybe also allow_other,default_permissions?)
     fargc = 5;
     fargv = malloc((fargc + 1) * sizeof (char *));
     if (fargv == NULL)
-        fatal("Cannot allocate memory for fuse arguments.\n");
+        stderrExit("Cannot allocate memory for fuse arguments.\n");
 
     fargv[0] = argv[0];
     fargv[1] = config.mountdir; // mount point

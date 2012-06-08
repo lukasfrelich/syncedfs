@@ -30,14 +30,16 @@ int readConfig(char *resource) {
         fprintf(stderr, "%s:%d - %s\n", config_error_file(&cfg),
                 config_error_line(&cfg), config_error_text(&cfg));
         config_destroy(&cfg);
-        return -2;
+        return -1;
     }
 
     int ret = 0;
     ret |= setConfigString(&cfg, "rootdir", str, config.rootdir, PATH_MAX, 1);
     ret |= setConfigString(&cfg, "mountdir", str, config.mountdir, PATH_MAX, 1);
     ret |= setConfigString(&cfg, "logdir", str, config.logdir, PATH_MAX, 1);
+    
     config.rootdir_len = strlen(config.rootdir);
+    sprintf(config.ident, "syncedfs %s", config.resource);
     
     config_destroy(&cfg);
     return ret;

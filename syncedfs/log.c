@@ -17,82 +17,61 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <signal.h>
-#include "../syncedfs-common/lib/error_functions.h"
+#include "../syncedfs-common/logging_functions.h"
 #include "../syncedfs-common/protobuf/syncedfs.pb-c.h"
 #include "../syncedfs-common/path_functions.h"
 #include "../syncedfs-common/message_functions.h"
 #include "log.h"
 #include "sighandlers.h"
 
-//static FILE *tmplogfd;
-//log_t olog;
 static int logfd;
 volatile sig_atomic_t switchpending = 0;
 volatile sig_atomic_t writepending = 0;
 
-/*FILE *log_open() {
-    FILE *logfile;
-    
-    // very first thing, open up the logfile and mark that we got in
-    // here.  If we can't open the logfile, we're dead.
-    logfile = fopen("/home/lfr/syncedfs.log", "w");
-    if (logfile == NULL) {
-        perror("logfile");
-        exit(EXIT_FAILURE);
-    }
-    
-    // set logfile to line buffering
-    setvbuf(logfile, NULL, _IOLBF, 0);
-
-    return logfile;*
-    return NULL;
-}*/
-
-/*void log_msg(const char *format, ...) {
-    va_list ap;
-    va_start(ap, format);
-
-    vfprintf(SFS_DATA->logfile, format, ap);
-}
-
-void openTmpLog(void) {
-    tmplogfd = fopen("/home/lukes/tmp.log", "a");
-    setvbuf(tmplogfd, NULL, _IOLBF, 0);
-}
-
-void tmpLog(char *msg) {
-    fprintf(tmplogfd, "%s", msg);
-}*/
-
-int openLog() {
+int openOpLog() {
     char logpath[PATH_MAX];
     snprintf(logpath, PATH_MAX, "%s/%s.log", config.logdir, config.resource);
-    //printf("%s", logpath);
 
     // O_SYNC absolutely kills the performance
     logfd = open(logpath, O_WRONLY | O_APPEND | O_CREAT, /*O_SYNC,*/
             S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
-    if (logfd == -1)
+    if (logfd == -1) {
+        errnoMsg(LOG_CRIT, "Could not open operations log file %s", logpath);
         return -1;
+    }
 
     return 0;
 }
 
-void switchLog(void) {
+int switchLog(void) {
     // switch log by renaming current log and opening a new log
     char oldpath[PATH_MAX], newpath[PATH_MAX];
+    int errflag = 0;
     snprintf(oldpath, PATH_MAX, "%s/%s.log", config.logdir, config.resource);
     snprintf(newpath, PATH_MAX, "%s/%s.sync", config.logdir, config.resource);
 
-    if (close(logfd) == -1)
-        errExit("Could not close log file %s.", oldpath);
+    if (close(logfd) == -1) {
+        errnoMsg(LOG_CRIT, "Could not close log file %s.", oldpath);
+        errflag = 1;
+    }
 
-    if (rename(oldpath, newpath) == -1)
-        fatal("Could not rename log file %s to %s", oldpath, newpath);
+    if (rename(oldpath, newpath) == -1) {
+        errnoMsg(LOG_CRIT, "Could not rename log file %s to %s", oldpath,
+                newpath);
+        errflag = 1;
+    }
 
-    if (openLog() != 0)
-        errExit("Could not create new log file.");
+    if (openOpLog() != 0)
+        errflag = 1;
+    
+    if (errflag == 1) {
+        errMsg(LOG_CRIT, "Cannot log operations anymore, setting dirty flag.");
+        // set dirty flag
+        return -1;
+    }
+    
+    return 0;
 }
 
 void logGeneric(const char *relpath, GenericOperation genop) {
@@ -100,6 +79,10 @@ void logGeneric(const char *relpath, GenericOperation genop) {
     uint8_t *buf;
     FileOperation fileop = FILE_OPERATION__INIT;
 
+    // we are in panic mode, rsync will be required anyway
+    if (logfd == -1)
+        return;
+    
     fileop.relative_path = (char *) relpath;
     fileop.op = &genop;
 
@@ -107,8 +90,10 @@ void logGeneric(const char *relpath, GenericOperation genop) {
 
     // critical section
     writepending = 1;
-    if (write(logfd, buf, msglen) != msglen)
-        errMsg("Could not write message.");
+    if (write(logfd, buf, msglen) != msglen) {
+        errnoMsg(LOG_CRIT, "Could not write message.");
+        // set dirty flag?
+    }
     writepending = 0;
     
     if (switchpending == 1)
@@ -262,31 +247,3 @@ void logRename(const char *relpath, const char *newpath) {
 
     logGeneric(relpath, genop);
 }
-
-/*void logWrite(const char *relpath, size_t size, off_t offset) {
-    writepending = 1;
-
-    uint32_t msglen;
-    uint8_t *buf;
-    FileOperation fileop = FILE_OPERATION__INIT;
-    GenericOperation genop = GENERIC_OPERATION__INIT;
-    WriteOperation writeop = WRITE_OPERATION__INIT;
-
-    writeop.offset = (int64_t) offset;
-    writeop.size = (int32_t) size;
-
-    genop.type = GENERIC_OPERATION__OPERATION_TYPE__WRITE;
-    genop.write_op = &writeop;
-
-    fileop.relative_path = (char *) relpath;
-    fileop.op = &genop;
-
-    packMessage(FileOperationType, &fileop, &buf, &msglen);
-
-    if (write(logfd, buf, msglen) != msglen)
-        errMsg("Could not write message.");
-
-    writepending = 0;
-    if (switchpending == 1)
-        handleSIGUSR1(0, NULL, NULL);
-}*/

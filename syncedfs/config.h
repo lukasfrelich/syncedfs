@@ -24,6 +24,8 @@ typedef struct configuration_t {
     int rootdir_len;
     char mountdir[PATH_MAX];
     char logdir[PATH_MAX];
+    int pidfd;
+    char ident[RESOURCE_MAX + 10];
 } configuration_t;
 
 extern configuration_t config;

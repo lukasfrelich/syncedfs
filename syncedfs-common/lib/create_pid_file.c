@@ -1,24 +1,25 @@
 /**********************************************************************\
-*                Copyright (C) Michael Kerrisk, 2010.                  *
-*                                                                      *
-* This program is free software. You may use, modify, and redistribute *
-* it under the terms of the GNU Affero General Public License as       *
-* published by the Free Software Foundation, either version 3 or (at   *
-* your option) any later version. This program is distributed without  *
-* any warranty. See the file COPYING for details.                      *
+ *                Copyright (C) Michael Kerrisk, 2010.                  *
+ *                                                                      *
+ * This program is free software. You may use, modify, and redistribute *
+ * it under the terms of the GNU Affero General Public License as       *
+ * published by the Free Software Foundation, either version 3 or (at   *
+ * your option) any later version. This program is distributed without  *
+ * any warranty. See the file COPYING for details.                      *
 \**********************************************************************/
 
 /* create_pid_file.c
 
    Implement a function that can be used by a daemon (or indeed any program)
    to ensure that only one instance of the program is running.
-*/
+ */
 #include <sys/stat.h>
 #include <fcntl.h>
 #include "region_locking.h"             /* For lockRegion() */
 #include "create_pid_file.h"            /* Declares createPidFile() and
                                            defines CPF_CLOEXEC */
 #include "tlpi_hdr.h"
+#include "../logging_functions.h"
 
 #define BUF_SIZE 100            /* Large enough to hold maximum PID as string */
 
@@ -32,14 +33,15 @@
    error, then we print an appropriate diagnostic and terminate. */
 
 int
-createPidFile(const char *progName, const char *pidFile, int flags)
-{
+createPidFile(const char *progName, const char *pidFile, int flags) {
     int fd;
     char buf[BUF_SIZE];
 
     fd = open(pidFile, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-    if (fd == -1)
-        errExit("Could not open PID file %s", pidFile);
+    if (fd == -1) {
+        errnoMsg(LOG_ERR, "Could not open PID file %s", pidFile);
+        return -1;
+    }
 
     if (flags & CPF_CLOEXEC) {
 
@@ -50,30 +52,53 @@ createPidFile(const char *progName, const char *pidFile, int flags)
            O_CLOEXEC (which was only standardized in SUSv4), so instead we use
            fcntl() to set the close-on-exec flag after opening the file */
 
-        flags = fcntl(fd, F_GETFD);                     /* Fetch flags */
+        flags = fcntl(fd, F_GETFD); /* Fetch flags */
         if (flags == -1)
-            errExit("Could not get flags for PID file %s", pidFile);
+            errnoMsg(LOG_ERR, "Could not get flags for PID file %s", pidFile);
 
-        flags |= FD_CLOEXEC;                            /* Turn on FD_CLOEXEC */
+        flags |= FD_CLOEXEC; /* Turn on FD_CLOEXEC */
 
-        if (fcntl(fd, F_SETFD, flags) == -1)            /* Update flags */
-            errExit("Could not set flags for PID file %s", pidFile);
+        if (fcntl(fd, F_SETFD, flags) == -1) { /* Update flags */
+            errnoMsg(LOG_ERR, "Could not set flags for PID file %s", pidFile);
+            return -1;
+        }
     }
 
     if (lockRegion(fd, F_WRLCK, SEEK_SET, 0, 0) == -1) {
-        if (errno  == EAGAIN || errno == EACCES)
-            fatal("PID file '%s' is locked; probably "
-                     "'%s' is already running", pidFile, progName);
+        if (errno == EAGAIN || errno == EACCES)
+            errMsg(LOG_ERR, "PID file '%s' is locked; probably "
+                "'%s' is already running", pidFile, progName);
         else
-            errExit("Unable to lock PID file '%s'", pidFile);
+            errMsg(LOG_ERR, "Unable to lock PID file '%s'", pidFile);
+        return -1;
     }
 
-    if (ftruncate(fd, 0) == -1)
-        errExit("Could not truncate PID file '%s'", pidFile);
+    if (ftruncate(fd, 0) == -1) {
+        errnoMsg(LOG_ERR, "Could not truncate PID file '%s'", pidFile);
+        return -1;
+    }
 
     snprintf(buf, BUF_SIZE, "%ld\n", (long) getpid());
-    if (write(fd, buf, strlen(buf)) != strlen(buf))
-        fatal("Writing to PID file '%s'", pidFile);
+    if (write(fd, buf, strlen(buf)) != strlen(buf)) {
+        errnoMsg(LOG_ERR, "Could not write to PID file '%s'", pidFile);
+        return -1;
+    }
 
     return fd;
+}
+
+int deletePidFile(int fd, const char *pidFile) {
+    if (fd == -1)
+        return 0;
+
+    // close automatically removes lock
+    if (close(fd) == -1) {
+        errnoMsg(LOG_ERR, "Could not close PID file '%s'", pidFile);
+    }
+
+    if (unlink(pidFile) == -1) {
+        errnoMsg(LOG_ERR, "Deleting PID file '%s'", pidFile);
+    }
+    
+    return 0;
 }

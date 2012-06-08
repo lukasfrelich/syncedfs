@@ -7,13 +7,13 @@
 
 #define _GNU_SOURCE
 
-#include <signal.h>
+#include <stdint.h>
 #include <unistd.h>
+#include <signal.h>
 #include "config.h"
 #include "sighandlers.h"
-#include "../syncedfs-common/lib/error_functions.h"
+#include "../syncedfs-common/logging_functions.h"
 #include "log.h"
-#include <stdint.h>
 
 extern sig_atomic_t switchpending;
 extern sig_atomic_t writepending;
@@ -28,7 +28,8 @@ void handleSIGUSR1(int sig, siginfo_t *siginfo, void *ucontext) {
         return;
     }
     
-    switchLog();
+    if (switchLog() == -1)
+        return;
     switchpending = 0;
     
     // if we were called directly by operating system, we know pid from siginfo
