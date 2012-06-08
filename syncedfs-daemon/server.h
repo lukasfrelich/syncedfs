@@ -12,7 +12,7 @@
 #include "../syncedfs-common/protobuf/syncedfs.pb-c.h"
 
 void startServer(void);
-void handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen);
+int handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen);
 int createSnapshot(void);
 void printOp(const char *relpath, const char *fpath, GenericOperation *op);
 

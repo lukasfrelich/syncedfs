@@ -27,6 +27,7 @@ typedef struct configuration_t {
     char logdir[PATH_MAX];
     char host[NI_MAXHOST];
     char port[NI_MAXSERV];
+    char ident[RESOURCE_MAX + 10];
 } configuration_t;
 
 extern configuration_t config;

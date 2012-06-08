@@ -13,38 +13,55 @@
 #include <sys/stat.h>
 #include "../syncedfs-common/path_functions.h"
 #include "../syncedfs-common/message_functions.h"
+#include "../syncedfs-common/logging_functions.h"
+#include "../syncedfs-common/lib/create_pid_file.h"
 #include "../syncedfs-common/lib/inet_sockets.h"
 #include "../syncedfs-common/lib/tlpi_hdr.h"
 
 void startServer(void) {
+    int pidfd;
+    char pidpath[PATH_MAX];
     int lfd, cfd;
     socklen_t addrlen;
     struct sockaddr claddr;
 
     lfd = inetListen(config.port, 0, &addrlen);
-    printf("Server booted.\n");
+    if (lfd == -1) {
+        errMsg(LOG_ERR, "Could not listen on port %s.", config.port);
+        return;
+    }
+
+    snprintf(pidpath, PATH_MAX, "/var/run/syncedfs/server/%s.pid",
+            config.resource);
+    pidfd = createPidFile(config.ident, pidpath, 0);
+    if (pidfd == -1) {
+        errMsg(LOG_ERR, "Could not create pid file %s, Exiting server.", pidpath);
+        return;
+    }
+
+    errMsg(LOG_INFO, "Server booted.");
 
     //setup signal handler to stop handling requests
     for (;;) {
         cfd = accept(lfd, (struct sockaddr *) &claddr, &addrlen);
 
         if (cfd == -1) {
-            errMsg("accept");
+            errnoMsg(LOG_ERR, "Error accepting client.");
             continue;
         }
         handleClient(cfd, &claddr, &addrlen);
     }
+
+    // delete pid file
+    if (deletePidFile(pidfd, pidpath) == -1)
+        errExit(LOG_ERR, "Deleting PID file '%s'", pidpath);
 }
 
-void handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
+int handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
     long long nbytes = 0;
     char addrstr[IS_ADDR_STR_LEN];
 
-    if (cfd == -1) {
-        errMsg("accept");
-        return;
-    }
-    printf("Connection from %s\n", inetAddressStr(claddr, *addrlen,
+    errMsg(LOG_INFO, "Connection from %s", inetAddressStr(claddr, *addrlen,
             addrstr, IS_ADDR_STR_LEN));
 
     // sync-init
@@ -52,18 +69,20 @@ void handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
     syncinit = (SyncInitialization *)
             getMessageFromSocket(cfd, SyncInitializationType, &nbytes);
     if (syncinit == NULL) {
-        errExit("Couldn't read message from client.\n");
+        errMsg(LOG_ERR, "Could not read initialization message from client.");
+        return -1;
     }
 
     // check sync-id
     // check resource (must match)
     if (strcmp(syncinit->resource, config.resource) != 0) {
         // TODO: set fail flag
-        return;
+        return -1;
     }
 
     int32_t nfiles;
     nfiles = syncinit->number_files;
+    errMsg(LOG_INFO, "Server: Number of files: %d", nfiles);
 
     // TODO: send response
 
@@ -78,11 +97,14 @@ void handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
         // we are guaranteed to get at least one chunk for each file
         chunk = (FileChunk *) getMessageFromSocket(cfd, FileChunkType, &nbytes);
         if (chunk == NULL) {
-            errExit("Couldn't read message from client.\n");
+            errMsg(LOG_ERR, "Could not read message from client.");
+            return -1;
         }
 
         for (;;) {
             for (int k = 0; k < chunk->n_ops; k++) {
+                // TODO
+                // in case of a failure inform client to do an rsync based sync
                 handleGenericOperation(&fd, chunk->relative_path, chunk->ops[k]);
             }
 
@@ -94,20 +116,23 @@ void handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
                 chunk = (FileChunk *) getMessageFromSocket(cfd, FileChunkType,
                         &nbytes);
                 if (chunk == NULL) {
-                    errExit("Couldn't read message from client.\n");
+                    errMsg(LOG_ERR, "Could not read message from client.");
+                    return -1;
                 }
             }
         }
 
         if (fd != -1) {
             if (close(fd) == -1)
-                errExit("Couldn't close file.\n");
+                errMsg(LOG_WARNING, "Could not close file.");
         }
 
     }
     if (close(cfd) == -1)
-        errMsg("close socket");
-    printf("Transfered bytes: %lld \n", nbytes);
+        errMsg(LOG_WARNING, "Could not close socket.");
+
+    errMsg(LOG_INFO, "Transfered bytes: %lld", nbytes);
+    return 0;
 }
 
 int createSnapshot(void) {
@@ -174,7 +199,7 @@ void printOp(const char *relpath, const char *fpath, GenericOperation *op) {
         case GENERIC_OPERATION__OPERATION_TYPE__REMOVEXATTR:
             break;
     }
-    
+
     i++;
 }
 
@@ -193,19 +218,19 @@ int handleGenericOperation(int *fd, const char *relpath,
 
     switch (genop->type) {
         case GENERIC_OPERATION__OPERATION_TYPE__CREATE:
-            handleCreate(fpath, fd, genop->create_op);
+            ret = handleCreate(fpath, fd, genop->create_op);
             break;
         case GENERIC_OPERATION__OPERATION_TYPE__MKNOD:
-            handleMknod(fpath, genop->mknod_op);
+            ret = handleMknod(fpath, genop->mknod_op);
             break;
         case GENERIC_OPERATION__OPERATION_TYPE__MKDIR:
-            handleMkdir(fpath, genop->mkdir_op);
+            ret = handleMkdir(fpath, genop->mkdir_op);
             break;
         case GENERIC_OPERATION__OPERATION_TYPE__SYMLINK:
-            handleSymlink(fpath, genop->symlink_op);
+            ret = handleSymlink(fpath, genop->symlink_op);
             break;
         case GENERIC_OPERATION__OPERATION_TYPE__LINK:
-            handleLink(fpath, genop->link_op);
+            ret = handleLink(fpath, genop->link_op);
             break;
         case GENERIC_OPERATION__OPERATION_TYPE__WRITE:
             ret = handleWrite(fpath, fd, genop->write_op);
@@ -240,7 +265,7 @@ int handleCreate(const char *fpath, int *fd, CreateOperation *createop) {
     *fd = creat(fpath, createop->mode);
 
     if (*fd == -1) {
-        errMsg("Could not create file %s", fpath);
+        errnoMsg(LOG_ERR, "Could not create file %s", fpath);
         return -1;
     }
 
@@ -252,23 +277,23 @@ int handleMknod(const char *fpath, MknodOperation *mknodop) {
         int tfd;
         tfd = open(fpath, O_CREAT | O_EXCL | O_WRONLY, mknodop->mode);
         if (tfd == -1) {
-            errMsg("Could not create file %s", fpath);
+            errnoMsg(LOG_ERR, "Could not create file %s", fpath);
             return -1;
         } else {
             if (close(tfd) == -1) {
-                errMsg("Could not close file %s", fpath);
+                errnoMsg(LOG_ERR, "Could not close file %s", fpath);
                 return -1;
             }
         }
     } else {
         if (S_ISFIFO(mknodop->mode)) {
             if (mkfifo(fpath, mknodop->mode) == -1) {
-                errMsg("Could not create named pipe %s", fpath);
+                errnoMsg(LOG_ERR, "Could not create named pipe %s", fpath);
                 return -1;
             }
         } else {
             if (mknod(fpath, mknodop->mode, mknodop->dev) == -1) {
-                errMsg("Could not create node %s", fpath);
+                errnoMsg(LOG_ERR, "Could not create node %s", fpath);
                 return -1;
             }
         }
@@ -279,7 +304,7 @@ int handleMknod(const char *fpath, MknodOperation *mknodop) {
 
 int handleMkdir(const char *fpath, MkdirOperation *mkdirop) {
     if (mkdir(fpath, mkdirop->mode) == -1) {
-        errMsg("Could not create directory %s", fpath);
+        errnoMsg(LOG_ERR, "Could not create directory %s", fpath);
         return -1;
     }
 
@@ -288,11 +313,11 @@ int handleMkdir(const char *fpath, MkdirOperation *mkdirop) {
 
 int handleSymlink(const char *fpath, SymlinkOperation *symlinkop) {
     //char ftarget[PATH_MAX];
-    
+
     //getAbsolutePath(ftarget, config.rootdir, symlinkop->target);
-    
+
     if (symlink(symlinkop->target, fpath) == -1) {
-        errMsg("Could not create symlink %s", fpath);
+        errnoMsg(LOG_ERR, "Could not create symlink %s", fpath);
         return -1;
     }
 
@@ -301,11 +326,11 @@ int handleSymlink(const char *fpath, SymlinkOperation *symlinkop) {
 
 int handleLink(const char *fpath, LinkOperation *linkop) {
     char ftarget[PATH_MAX];
-    
+
     getAbsolutePath(ftarget, config.rootdir, linkop->target);
-    
+
     if (link(ftarget, fpath) == -1) {
-        errMsg("Could not create link %s", fpath);
+        errnoMsg(LOG_ERR, "Could not create link %s", fpath);
         return -1;
     }
 
@@ -317,17 +342,20 @@ int handleWrite(const char *path, int *fd, WriteOperation *writeop) {
     if (*fd == -1) {
         *fd = open(path, O_WRONLY);
         if (*fd == -1) {
-            errMsg("Could not open file %s", path);
+            errnoMsg(LOG_ERR, "Could not open file %s", path);
             return -1;
         }
     }
 
+    // TODO
     if (writeop->has_data != 1)
         return -1;
 
     if (pwrite(*fd, writeop->data.data, writeop->size, writeop->offset)
-            != writeop->size)
+            != writeop->size) {
+        errnoMsg(LOG_ERR, "pwrite has failed on file %s", path);
         return -1;
+    }
 
     return 0;
 }
@@ -336,12 +364,12 @@ int handleUnlink(const char *fpath, int *fd, UnlinkOperation *unlinkop) {
     // close file, if it is open
     if (*fd != -1) {
         if (close(*fd) == -1)
-            errMsg("Could not close file %s", fpath);
+            errnoMsg(LOG_ERR, "Could not close file %s", fpath);
         else
             *fd = -1;
     }
     if (unlink(fpath) == -1) {
-        errMsg("Could not unlink file %s", fpath);
+        errnoMsg(LOG_ERR, "Could not unlink file %s", fpath);
         return -1;
     }
 
@@ -350,7 +378,7 @@ int handleUnlink(const char *fpath, int *fd, UnlinkOperation *unlinkop) {
 
 int handleRmdir(const char *fpath, RmdirOperation *rmdirop) {
     if (rmdir(fpath) == -1) {
-        errMsg("Could not unlink file %s", fpath);
+        errnoMsg(LOG_ERR, "Could not unlink file %s", fpath);
         return -1;
     }
 
@@ -359,7 +387,7 @@ int handleRmdir(const char *fpath, RmdirOperation *rmdirop) {
 
 int handleTruncate(const char *fpath, TruncateOperation *truncateop) {
     if (truncate(fpath, truncateop->newsize) == -1) {
-        errMsg("Could not truncate file %s", fpath);
+        errnoMsg(LOG_ERR, "Could not truncate file %s", fpath);
         return -1;
     }
 
@@ -368,7 +396,7 @@ int handleTruncate(const char *fpath, TruncateOperation *truncateop) {
 
 int handleChmod(const char *fpath, ChmodOperation *chmodop) {
     if (chmod(fpath, chmodop->mode) == -1) {
-        errMsg("Could not chmod file %s", fpath);
+        errnoMsg(LOG_ERR, "Could not chmod file %s", fpath);
         return -1;
     }
 
@@ -377,7 +405,7 @@ int handleChmod(const char *fpath, ChmodOperation *chmodop) {
 
 int handleChown(const char *fpath, ChownOperation *chownop) {
     if (chown(fpath, chownop->uid, chownop->gid) == -1) {
-        errMsg("Could not chown file %s", fpath);
+        errnoMsg(LOG_ERR, "Could not chown file %s", fpath);
         return -1;
     }
 
@@ -386,11 +414,11 @@ int handleChown(const char *fpath, ChownOperation *chownop) {
 
 int handleRename(const char *fpath, RenameOperation *renameop) {
     char fnewpath[PATH_MAX];
-    
+
     getAbsolutePath(fnewpath, config.rootdir, renameop->newpath);
-    
+
     if (rename(fpath, fnewpath) == -1) {
-        errMsg("Could not rename file %s", fpath);
+        errnoMsg(LOG_ERR, "Could not rename file %s", fpath);
         return -1;
     }
 

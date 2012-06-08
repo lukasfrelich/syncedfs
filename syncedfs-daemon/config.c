@@ -45,6 +45,8 @@ int readConfig(char *resource) {
     ret |= setConfigString(&cfg, "host", str, config.host, NI_MAXHOST, 0);
     ret |= setConfigString(&cfg, "port", str, config.port, NI_MAXSERV, 0);
     
+    sprintf(config.ident, "syncedfsd %s", config.resource);
+    
     config_destroy(&cfg);
     return ret;
 }

@@ -27,30 +27,29 @@ typedef struct dyndata {
     int size;
 } dyndata_t;
 
-void synchronize(void);
+int synchronize(void);
 
 //------------------------------------------------------------------------------
 // Log processing
 //------------------------------------------------------------------------------
-void loadLog(int logfd);
+int loadLog(int logfd);
 void printLog(void);
-void addOperation(char *relpath, GenericOperation *genop);
+int addOperation(char *relpath, GenericOperation *genop);
 void optimizeOperations(fileop_t *fileop);
 
 //------------------------------------------------------------------------------
 // Transfer
 //------------------------------------------------------------------------------
-void transfer(char *host, char *port);
-void initiateSync(int sfd, int numfiles);
-void transferChunk(int sfd, fileop_t *fileop, GenericOperation **opstart,
+int transfer(char *host, char *port);
+int initiateSync(int sfd, int numfiles);
+int transferFile(int sfd, fileop_t *fileop);
+int transferChunk(int sfd, fileop_t *fileop, GenericOperation **opstart,
         int nops, int numchunks);
 
 //------------------------------------------------------------------------------
 // Operation handlers
 //------------------------------------------------------------------------------
 int loadWriteData(char *relpath, WriteOperation *writeop, dyndata_t *dyndata);
-/*int cHandleGenericOperation(int fd, GenericOperation *genop,
-        dyndata_t *dyndata);*/
 
 //------------------------------------------------------------------------------
 // Auxiliary functions
