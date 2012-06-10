@@ -40,6 +40,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/1275677342/config_functions.o \
 	${OBJECTDIR}/log.o \
 	${OBJECTDIR}/_ext/988793768/get_num.o \
+	${OBJECTDIR}/_ext/988793768/become_daemon.o \
 	${OBJECTDIR}/_ext/813881960/syncedfs.pb-c.o \
 	${OBJECTDIR}/_ext/988793768/inet_sockets.o \
 	${OBJECTDIR}/_ext/988793768/alt_functions.o \
@@ -103,6 +104,11 @@ ${OBJECTDIR}/_ext/988793768/get_num.o: ../syncedfs-common/lib/get_num.c
 	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
 	${RM} $@.d
 	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/get_num.o ../syncedfs-common/lib/get_num.c
+
+${OBJECTDIR}/_ext/988793768/become_daemon.o: ../syncedfs-common/lib/become_daemon.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/become_daemon.o ../syncedfs-common/lib/become_daemon.c
 
 ${OBJECTDIR}/_ext/813881960/syncedfs.pb-c.o: ../syncedfs-common/protobuf/syncedfs.pb-c.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/813881960
