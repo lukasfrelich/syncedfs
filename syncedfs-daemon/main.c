@@ -28,6 +28,8 @@ int main(int argc, char** argv) {
 
     if (readConfig(argv[1]) != 0)
         stderrExit("Error reading configuration file %s\n", argv[1]);
+
+    // TODO: daemonize here
     
     openlog(config.ident, 0, LOG_DAEMON);
 
@@ -44,6 +46,9 @@ int main(int argc, char** argv) {
     printf("port: %s\n", config.port);*/
 
     if (strcmp(argv[2], "server") == 0) {
+        // at this momement only daemonize server
+        if (becomeDaemon(0) != 0)
+            stderrExit("Could not become a daemon.\n", argv[1]);
         startServer();
     }
 

@@ -135,12 +135,6 @@ int handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
     return 0;
 }
 
-int createSnapshot(void) {
-    // btrfs subvolume snapshot -r machine1 machine1-snapshot
-    // fork + exec
-    return 0;
-}
-
 void printOp(const char *relpath, const char *fpath, GenericOperation *op) {
     static int i = 0;
     printf("relpath: %s fpath: %s", relpath, fpath);
@@ -213,6 +207,8 @@ int handleGenericOperation(int *fd, const char *relpath,
     int ret;
     char fpath[PATH_MAX];
 
+    // optimistic approach: we are writing the changes right in root directory
+    // in case of a failure, we revert back to a snapshot
     getAbsolutePath(fpath, config.rootdir, relpath);
     //printOp(relpath, fpath, genop);
 

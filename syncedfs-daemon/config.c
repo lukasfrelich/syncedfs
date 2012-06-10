@@ -25,6 +25,24 @@ int readConfig(char *resource) {
 
     strncpy(config.resource, resource, RESOURCE_MAX);
     
+    // read main config
+    config_init(&cfg);
+    // Read the file. If there is an error, report it and exit
+    if (!config_read_file(&cfg, "/etc/syncedfs.conf")) {
+        fprintf(stderr, "%s:%d - %s\n", config_error_file(&cfg),
+                config_error_line(&cfg), config_error_text(&cfg));
+        config_destroy(&cfg);
+        return -1;
+    }
+
+    int ret = 0;
+    ret |= setConfigString(&cfg, "btrfs", str, config.btfsbin, PATH_MAX, 1);
+
+    sprintf(config.ident, "syncedfsd %s", config.resource);
+
+    config_destroy(&cfg);
+
+    // read resource config
     snprintf(cfgpath, PATH_MAX, "%s%s%s",
             "/etc/syncedfs.d/", resource, ".conf");
 
@@ -34,19 +52,18 @@ int readConfig(char *resource) {
         fprintf(stderr, "%s:%d - %s\n", config_error_file(&cfg),
                 config_error_line(&cfg), config_error_text(&cfg));
         config_destroy(&cfg);
-        return -2;
+        return -1;
     }
 
-    int ret = 0;
     ret |= setConfigString(&cfg, "rootdir", str, config.rootdir, PATH_MAX, 1);
     ret |= setConfigString(&cfg, "snapshot", str, config.snapshot, PATH_MAX, 1);
     ret |= setConfigString(&cfg, "logdir", str, config.logdir, PATH_MAX, 1);
 
     ret |= setConfigString(&cfg, "host", str, config.host, NI_MAXHOST, 0);
     ret |= setConfigString(&cfg, "port", str, config.port, NI_MAXSERV, 0);
-    
+
     sprintf(config.ident, "syncedfsd %s", config.resource);
-    
+
     config_destroy(&cfg);
     return ret;
 }

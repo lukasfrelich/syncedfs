@@ -41,12 +41,14 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/1275677342/config_functions.o \
 	${OBJECTDIR}/_ext/988793768/get_num.o \
 	${OBJECTDIR}/_ext/813881960/syncedfs.pb-c.o \
+	${OBJECTDIR}/_ext/988793768/become_daemon.o \
 	${OBJECTDIR}/server.o \
 	${OBJECTDIR}/_ext/988793768/inet_sockets.o \
 	${OBJECTDIR}/_ext/988793768/alt_functions.o \
 	${OBJECTDIR}/_ext/988793768/create_pid_file.o \
 	${OBJECTDIR}/config.o \
 	${OBJECTDIR}/main.o \
+	${OBJECTDIR}/snapshot.o \
 	${OBJECTDIR}/_ext/1275677342/logging_functions.o
 
 
@@ -109,6 +111,11 @@ ${OBJECTDIR}/_ext/813881960/syncedfs.pb-c.o: ../syncedfs-common/protobuf/syncedf
 	${RM} $@.d
 	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/813881960/syncedfs.pb-c.o ../syncedfs-common/protobuf/syncedfs.pb-c.c
 
+${OBJECTDIR}/_ext/988793768/become_daemon.o: ../syncedfs-common/lib/become_daemon.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/988793768
+	${RM} $@.d
+	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/988793768/become_daemon.o ../syncedfs-common/lib/become_daemon.c
+
 ${OBJECTDIR}/server.o: server.c 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
@@ -138,6 +145,11 @@ ${OBJECTDIR}/main.o: main.c
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} $@.d
 	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/main.o main.c
+
+${OBJECTDIR}/snapshot.o: snapshot.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/snapshot.o snapshot.c
 
 ${OBJECTDIR}/_ext/1275677342/logging_functions.o: ../syncedfs-common/logging_functions.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342

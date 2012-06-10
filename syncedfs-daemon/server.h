@@ -13,7 +13,6 @@
 
 void startServer(void);
 int handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen);
-int createSnapshot(void);
 void printOp(const char *relpath, const char *fpath, GenericOperation *op);
 
 //------------------------------------------------------------------------------

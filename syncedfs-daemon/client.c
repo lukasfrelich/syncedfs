@@ -15,6 +15,7 @@
 #include "../syncedfs-common/lib/inet_sockets.h"
 #include "../syncedfs-common/lib/create_pid_file.h"
 #include "../syncedfs-common/lib/uthash.h"
+#include "snapshot.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -47,6 +48,7 @@ int synchronize(void) {
     errMsg(LOG_INFO, "logpath: %s", logpath);
     logfd = open(logpath, O_RDONLY);
     if (logfd == -1) {
+        // if this is a new sync, switch log
         if (switchLog() != 0) {
             errMsg(LOG_ERR, "Could not switch log file. Stopping.");
             return -1;
@@ -55,6 +57,15 @@ int synchronize(void) {
         logfd = open(logpath, O_RDONLY);
         if (logfd == -1) {
             errnoMsg(LOG_ERR, "Could not open log file %s", logpath);
+            return -1;
+        }
+        
+        // TODO: this might need to be called outside this if as well
+        // (create snapshot might have failed last time
+        // and create a read only snapshot
+        if (createSnapshot(config.rootdir, config.snapshot, 1) == -1) {
+            errMsg(LOG_ERR, "Could not create snapshot of %s to %s Stopping.",
+                    config.rootdir, config.snapshot);
             return -1;
         }
     }
@@ -74,6 +85,10 @@ int synchronize(void) {
         close(logfd);
         if (unlink(logpath) == -1)
             errExit(LOG_ERR, "Deleting log file '%s'", logpath);
+        
+        // delete snapshot
+        if (deleteSnapshot(config.snapshot) == -1)
+            errMsg(LOG_ERR, "Could not delete snapshot %s", config.snapshot);
     }
 
     // delete pid file
@@ -413,7 +428,7 @@ int loadWriteData(char *relpath, WriteOperation *writeop, dyndata_t *dyndata) {
                 errnoMsg(LOG_WARNING, "Could not close file %s", relpath);
         }
 
-        getAbsolutePath(fpath, config.rootdir, relpath);
+        getAbsolutePath(fpath, config.snapshot, relpath);
         fd = open(fpath, O_RDONLY);
         if (fd == -1) {
             errnoMsg(LOG_ERR, "Could not open source file %s", relpath);
