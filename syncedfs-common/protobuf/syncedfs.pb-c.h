@@ -8,7 +8,9 @@
 PROTOBUF_C_BEGIN_DECLS
 
 
-typedef struct _SyncInitialization SyncInitialization;
+typedef struct _SyncInit SyncInit;
+typedef struct _SyncInitResponse SyncInitResponse;
+typedef struct _SyncFinish SyncFinish;
 typedef struct _FileChunk FileChunk;
 typedef struct _FileOperation FileOperation;
 typedef struct _GenericOperation GenericOperation;
@@ -49,16 +51,40 @@ typedef enum _GenericOperation__OperationType {
 
 /* --- messages --- */
 
-struct  _SyncInitialization
+struct  _SyncInit
 {
   ProtobufCMessage base;
   char *sync_id;
   char *resource;
   int32_t number_files;
 };
-#define SYNC_INITIALIZATION__INIT \
- { PROTOBUF_C_MESSAGE_INIT (&sync_initialization__descriptor) \
+#define SYNC_INIT__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&sync_init__descriptor) \
     , NULL, NULL, 0 }
+
+
+struct  _SyncInitResponse
+{
+  ProtobufCMessage base;
+  protobuf_c_boolean continue_;
+  protobuf_c_boolean has_already_synced;
+  protobuf_c_boolean already_synced;
+  char *error_message;
+};
+#define SYNC_INIT_RESPONSE__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&sync_init_response__descriptor) \
+    , 0, 0,0, NULL }
+
+
+struct  _SyncFinish
+{
+  ProtobufCMessage base;
+  protobuf_c_boolean has_transferred_bytes;
+  int64_t transferred_bytes;
+};
+#define SYNC_FINISH__INIT \
+ { PROTOBUF_C_MESSAGE_INIT (&sync_finish__descriptor) \
+    , 0,0 }
 
 
 struct  _FileChunk
@@ -256,24 +282,62 @@ struct  _RemovexattrOperation
     , 0,0 }
 
 
-/* SyncInitialization methods */
-void   sync_initialization__init
-                     (SyncInitialization         *message);
-size_t sync_initialization__get_packed_size
-                     (const SyncInitialization   *message);
-size_t sync_initialization__pack
-                     (const SyncInitialization   *message,
+/* SyncInit methods */
+void   sync_init__init
+                     (SyncInit         *message);
+size_t sync_init__get_packed_size
+                     (const SyncInit   *message);
+size_t sync_init__pack
+                     (const SyncInit   *message,
                       uint8_t             *out);
-size_t sync_initialization__pack_to_buffer
-                     (const SyncInitialization   *message,
+size_t sync_init__pack_to_buffer
+                     (const SyncInit   *message,
                       ProtobufCBuffer     *buffer);
-SyncInitialization *
-       sync_initialization__unpack
+SyncInit *
+       sync_init__unpack
                      (ProtobufCAllocator  *allocator,
                       size_t               len,
                       const uint8_t       *data);
-void   sync_initialization__free_unpacked
-                     (SyncInitialization *message,
+void   sync_init__free_unpacked
+                     (SyncInit *message,
+                      ProtobufCAllocator *allocator);
+/* SyncInitResponse methods */
+void   sync_init_response__init
+                     (SyncInitResponse         *message);
+size_t sync_init_response__get_packed_size
+                     (const SyncInitResponse   *message);
+size_t sync_init_response__pack
+                     (const SyncInitResponse   *message,
+                      uint8_t             *out);
+size_t sync_init_response__pack_to_buffer
+                     (const SyncInitResponse   *message,
+                      ProtobufCBuffer     *buffer);
+SyncInitResponse *
+       sync_init_response__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   sync_init_response__free_unpacked
+                     (SyncInitResponse *message,
+                      ProtobufCAllocator *allocator);
+/* SyncFinish methods */
+void   sync_finish__init
+                     (SyncFinish         *message);
+size_t sync_finish__get_packed_size
+                     (const SyncFinish   *message);
+size_t sync_finish__pack
+                     (const SyncFinish   *message,
+                      uint8_t             *out);
+size_t sync_finish__pack_to_buffer
+                     (const SyncFinish   *message,
+                      ProtobufCBuffer     *buffer);
+SyncFinish *
+       sync_finish__unpack
+                     (ProtobufCAllocator  *allocator,
+                      size_t               len,
+                      const uint8_t       *data);
+void   sync_finish__free_unpacked
+                     (SyncFinish *message,
                       ProtobufCAllocator *allocator);
 /* FileChunk methods */
 void   file_chunk__init
@@ -600,8 +664,14 @@ void   removexattr_operation__free_unpacked
                       ProtobufCAllocator *allocator);
 /* --- per-message closures --- */
 
-typedef void (*SyncInitialization_Closure)
-                 (const SyncInitialization *message,
+typedef void (*SyncInit_Closure)
+                 (const SyncInit *message,
+                  void *closure_data);
+typedef void (*SyncInitResponse_Closure)
+                 (const SyncInitResponse *message,
+                  void *closure_data);
+typedef void (*SyncFinish_Closure)
+                 (const SyncFinish *message,
                   void *closure_data);
 typedef void (*FileChunk_Closure)
                  (const FileChunk *message,
@@ -660,7 +730,9 @@ typedef void (*RemovexattrOperation_Closure)
 
 /* --- descriptors --- */
 
-extern const ProtobufCMessageDescriptor sync_initialization__descriptor;
+extern const ProtobufCMessageDescriptor sync_init__descriptor;
+extern const ProtobufCMessageDescriptor sync_init_response__descriptor;
+extern const ProtobufCMessageDescriptor sync_finish__descriptor;
 extern const ProtobufCMessageDescriptor file_chunk__descriptor;
 extern const ProtobufCMessageDescriptor file_operation__descriptor;
 extern const ProtobufCMessageDescriptor generic_operation__descriptor;

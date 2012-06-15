@@ -56,6 +56,7 @@ int loadWriteData(char *relpath, WriteOperation *writeop, dyndata_t *dyndata);
 //------------------------------------------------------------------------------
 int sortByOrder(fileop_t *a, fileop_t *b);
 int switchLog(void);
+int generateSyncId(char *id, int maxlength);
 
 #endif	/* CLIENT_H */
 

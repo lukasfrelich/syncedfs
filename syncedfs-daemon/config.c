@@ -23,8 +23,9 @@ int readConfig(char *resource) {
     config_t cfg;
     const char *str;
 
+    // TODO resource should only contain [a-Z] [0-9] or - characters
     strncpy(config.resource, resource, RESOURCE_MAX);
-    
+
     // read main config
     config_init(&cfg);
     // Read the file. If there is an error, report it and exit
@@ -66,21 +67,4 @@ int readConfig(char *resource) {
 
     config_destroy(&cfg);
     return ret;
-}
-
-char *getSyncId(void) {
-    static char syncid[SYNCID_MAX];
-
-    if (strlen(syncid) == 0) {
-        time_t t;
-        struct tm *tm;
-        size_t s;
-
-        t = time(NULL);
-        tm = gmtime(&t);
-        s = strftime(syncid, SYNCID_MAX, "%D_%T", tm);
-        (void) strncpy(syncid + s, config.resource, SYNCID_MAX - s);
-    }
-
-    return syncid;
 }

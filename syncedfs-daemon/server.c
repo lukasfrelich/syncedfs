@@ -5,14 +5,18 @@
  * Created on May 2, 2012, 9:53 AM
  */
 
+#define ERRMSG_MAX 500
+
 #include "config.h"
 #include "server.h"
+#include "snapshot.h"
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include "../syncedfs-common/path_functions.h"
 #include "../syncedfs-common/message_functions.h"
+#include "../syncedfs-common/syncid.h"
 #include "../syncedfs-common/logging_functions.h"
 #include "../syncedfs-common/lib/create_pid_file.h"
 #include "../syncedfs-common/lib/inet_sockets.h"
@@ -58,44 +62,26 @@ void startServer(void) {
 }
 
 int handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
-    long long nbytes = 0;
+    long long tbytes = 0; // total number of transfered bytes
     char addrstr[IS_ADDR_STR_LEN];
 
     errMsg(LOG_INFO, "Connection from %s", inetAddressStr(claddr, *addrlen,
             addrstr, IS_ADDR_STR_LEN));
 
-    // sync-init
-    SyncInitialization *syncinit;
-    syncinit = (SyncInitialization *)
-            getMessageFromSocket(cfd, SyncInitializationType, &nbytes);
-    if (syncinit == NULL) {
-        errMsg(LOG_ERR, "Could not read initialization message from client.");
-        return -1;
-    }
-
-    // check sync-id
-    // check resource (must match)
-    if (strcmp(syncinit->resource, config.resource) != 0) {
-        // TODO: set fail flag
-        return -1;
-    }
-
+    // sync-init, return value is number of files
     int32_t nfiles;
-    nfiles = syncinit->number_files;
-    errMsg(LOG_INFO, "Server: Number of files: %d", nfiles);
+    nfiles = syncInit(cfd, &tbytes);
+    if (nfiles == -1)
+        return -1;
 
-    // TODO: send response
-
-
-    sync_initialization__free_unpacked(syncinit, NULL);
-
+    errMsg(LOG_INFO, "Number of files to synchronize: %d", nfiles);
     // outer loop: files, inner loop: chunks
     for (int i = 0; i < nfiles; i++) {
         FileChunk *chunk;
         int fd = -1;
 
         // we are guaranteed to get at least one chunk for each file
-        chunk = (FileChunk *) getMessageFromSocket(cfd, FileChunkType, &nbytes);
+        chunk = (FileChunk *) recvMessage(cfd, FileChunkType, &tbytes);
         if (chunk == NULL) {
             errMsg(LOG_ERR, "Could not read message from client.");
             return -1;
@@ -113,8 +99,7 @@ int handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
                 break;
             } else {
                 file_chunk__free_unpacked(chunk, NULL);
-                chunk = (FileChunk *) getMessageFromSocket(cfd, FileChunkType,
-                        &nbytes);
+                chunk = (FileChunk *) recvMessage(cfd, FileChunkType, &tbytes);
                 if (chunk == NULL) {
                     errMsg(LOG_ERR, "Could not read message from client.");
                     return -1;
@@ -131,8 +116,35 @@ int handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
     if (close(cfd) == -1)
         errMsg(LOG_WARNING, "Could not close socket.");
 
-    errMsg(LOG_INFO, "Transfered bytes: %lld", nbytes);
-    return 0;
+    errMsg(LOG_INFO, "Received bytes: %lld", tbytes);
+
+    // transfer was successful, we can delete snapshot (created in syncInit())
+    if (deleteSnapshot(config.snapshot) == -1) {
+        errMsg(LOG_ERR, "Could not delete snapshot %s", config.snapshot);
+        return -1;
+    }
+
+    // rename resource.syncid to resource.syncid.last
+    char lastsyncidpath[PATH_MAX];
+    char syncidpath[PATH_MAX];
+    snprintf(lastsyncidpath, PATH_MAX, "%s/%s.syncid.last", config.logdir,
+            config.resource);
+    snprintf(syncidpath, PATH_MAX, "%s/%s.syncid", config.logdir,
+            config.resource);
+    
+    if (rename(syncidpath, lastsyncidpath) == -1) {
+        errnoMsg(LOG_CRIT, "Could not rename sync-id file to sync-id.last.");
+        return -1;
+    }
+    
+    // and finally send confirmation to client
+    SyncFinish conf = SYNC_FINISH__INIT;
+    conf.has_transferred_bytes = 1;
+    conf.transferred_bytes = (uint64_t) tbytes;
+    if (sendMessage(cfd, SyncFinishType, &conf) == 0)
+        return 0;
+    else
+        return -1;
 }
 
 void printOp(const char *relpath, const char *fpath, GenericOperation *op) {
@@ -195,6 +207,126 @@ void printOp(const char *relpath, const char *fpath, GenericOperation *op) {
     }
 
     i++;
+}
+
+//------------------------------------------------------------------------------
+// Transfer
+//------------------------------------------------------------------------------
+
+int syncInit(int cfd, long long *tbytes) {
+    char errmsg[ERRMSG_MAX] = {0};
+    SyncInit *syncinit;
+    SyncInitResponse response = SYNC_INIT_RESPONSE__INIT;
+
+    syncinit = (SyncInit *) recvMessage(cfd, SyncInitType, tbytes);
+    if (syncinit == NULL) {
+        errMsg(LOG_ERR, "Could not read initialization message from client.");
+        return -1;
+    }
+
+    // initial checks
+    // check resource (must match)
+    if (strcmp(syncinit->resource, config.resource) != 0) {
+        snprintf(errmsg, ERRMSG_MAX, "Received resource %s does not match."
+                "local resource %s", syncinit->resource, config.resource);
+        response.continue_ = 0;
+        response.error_message = errmsg;
+        sendMessage(cfd, SyncInitResponseType, &response);
+        return -1;
+    }
+
+    // check sync-id
+    char lastsyncid[SYNCID_MAX];
+    char lastsyncidpath[PATH_MAX];
+    char syncid[SYNCID_MAX];
+    char syncidpath[PATH_MAX];
+
+    // if we receive syncid, we already marked as successfully done
+    // only sending confirmation has failed last time
+    snprintf(lastsyncidpath, PATH_MAX, "%s/%s.syncid.last", config.logdir,
+            config.resource);
+    if (fileExists(lastsyncidpath) &&
+            (readSyncId(lastsyncidpath, lastsyncid, SYNCID_MAX) == 0)) {
+        if (lastsyncid == syncinit->sync_id) {
+            // send the confirmation, don't sync
+            response.continue_ = 0;
+            response.has_already_synced = 1;
+            response.already_synced = 1;
+            sendMessage(cfd, SyncInitResponseType, &response);
+            return 0; // no files to be synchronized
+        }
+    }
+
+    int errflag = 0;
+    // if we have can read syncid file, last sync did not finish properly
+    // revert snapshot
+    snprintf(syncidpath, PATH_MAX, "%s/%s.syncid", config.logdir,
+            config.resource);
+    if (fileExists(syncidpath) &&
+            (readSyncId(syncidpath, syncid, SYNCID_MAX) == 0)) {
+        if (syncid == syncinit->sync_id) {
+            // TODO: here we should support resume
+        }
+
+        // revert last snapshot, check for its existence is necessary, but
+        // is done nevertheless
+        if (fileExists(config.snapshot) == 1) {
+            // do as one block, this should not fail, if yes, we are in trouble
+            int ret = 0;
+
+            ret = deleteSnapshot(config.rootdir);
+            ret |= createSnapshot(config.snapshot, config.rootdir, 0);
+            ret |= deleteSnapshot(config.snapshot);
+
+            if (ret != 0) {
+                errflag = 1;
+                snprintf(errmsg, ERRMSG_MAX, "Reverting to last snapshot"
+                        "has failed.");
+            }
+        }
+    }
+
+    // create snapshot
+    // snapshot might exists (if last time program crash before sync-id was
+    // written or before it was deleted), but in this case we don't need to
+    // revert it
+    if (!errflag && fileExists(config.snapshot)) {
+        errMsg(LOG_INFO, "Snapshot %s unexpectedly exists, deleting.",
+                config.snapshot);
+        if (deleteSnapshot(config.snapshot) == -1) {
+            errMsg(LOG_ERR, "Could not delete snapshot %s", config.snapshot);
+            errflag = 1;
+        }
+    }
+    if (!errflag &&
+            (createSnapshot(config.rootdir, config.snapshot, 1) != 0)) {
+        errMsg(LOG_ERR, "Could not create snapshot %s", config.snapshot);
+        errflag = 1;
+    }
+
+    // write syncid
+    if (!errflag && (writeSyncId(syncidpath, syncinit->sync_id) != 0)) {
+        errMsg(LOG_ERR, "Could not write sync-id. Stopping.");
+        errflag = 1;
+    }
+
+    // send response
+    int ret;
+    if (errflag) {
+        response.continue_ = 0;
+        snprintf(errmsg, ERRMSG_MAX, "Error in snapshot operation.");
+        response.error_message = errmsg;
+        ret = -1;
+    } else {
+        response.continue_ = 1;
+        ret = syncinit->number_files;
+    }
+    sync_init__free_unpacked(syncinit, NULL);
+
+    if (sendMessage(cfd, SyncInitResponseType, &response) == 0)
+        return ret;
+    else
+        return -1;
 }
 
 //------------------------------------------------------------------------------

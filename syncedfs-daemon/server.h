@@ -16,6 +16,10 @@ int handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen);
 void printOp(const char *relpath, const char *fpath, GenericOperation *op);
 
 //------------------------------------------------------------------------------
+// Transfer
+//------------------------------------------------------------------------------
+int syncInit(int sfd, long long *tbytes);
+//------------------------------------------------------------------------------
 // Operation handlers
 //------------------------------------------------------------------------------
 int handleGenericOperation(int *fd, const char *relpath,

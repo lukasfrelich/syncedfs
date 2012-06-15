@@ -39,6 +39,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/client.o \
 	${OBJECTDIR}/_ext/988793768/region_locking.o \
 	${OBJECTDIR}/_ext/1275677342/config_functions.o \
+	${OBJECTDIR}/_ext/1275677342/syncid.o \
 	${OBJECTDIR}/_ext/988793768/get_num.o \
 	${OBJECTDIR}/_ext/813881960/syncedfs.pb-c.o \
 	${OBJECTDIR}/_ext/988793768/become_daemon.o \
@@ -100,6 +101,11 @@ ${OBJECTDIR}/_ext/1275677342/config_functions.o: ../syncedfs-common/config_funct
 	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342
 	${RM} $@.d
 	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1275677342/config_functions.o ../syncedfs-common/config_functions.c
+
+${OBJECTDIR}/_ext/1275677342/syncid.o: ../syncedfs-common/syncid.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342
+	${RM} $@.d
+	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1275677342/syncid.o ../syncedfs-common/syncid.c
 
 ${OBJECTDIR}/_ext/988793768/get_num.o: ../syncedfs-common/lib/get_num.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/988793768

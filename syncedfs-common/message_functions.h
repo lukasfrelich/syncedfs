@@ -9,24 +9,19 @@
 #define	MESSAGE_FUNCTIONS_H
 
 enum messagetype {
-    SyncInitializationType,
+    SyncInitType,
+    SyncInitResponseType,
+    SyncFinishType,
     FileChunkType,
     FileOperationType
 };
 
 #include <inttypes.h>
 
-//------------------------------------------------------------------------------
-// Packing messages
-//------------------------------------------------------------------------------
 int packMessage(enum messagetype msgtype, void *message, uint8_t **buffer,
         uint32_t *length);
-void freePackedMessage(uint8_t *buffer);
 
-//------------------------------------------------------------------------------
-// Unpacking messages
-//------------------------------------------------------------------------------
-void *getMessageFromSocket(int cfd, enum messagetype msgtype,
-        long long *bytesread);
+void *recvMessage(int fd, enum messagetype msgtype, long long *bytesread);
+int sendMessage(int fd, enum messagetype msgtype, void *message);
 
 #endif	/* MESSAGE_FUNCTIONS_H */

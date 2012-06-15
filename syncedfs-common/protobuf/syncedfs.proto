@@ -1,7 +1,17 @@
-message SyncInitialization {
+message SyncInit {
 	required string sync_id = 1;
 	required string resource = 2;
 	required int32 number_files = 3;
+}
+
+message SyncInitResponse {
+	required bool continue = 1;
+	optional bool already_synced = 2;
+	optional string error_message = 3;
+}
+
+message SyncFinish {
+	optional int64 transferred_bytes = 1;
 }
 
 message FileChunk {

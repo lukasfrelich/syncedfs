@@ -12,6 +12,7 @@
 #include "../syncedfs-common/logging_functions.h"
 #include "../syncedfs-common/lib/inet_sockets.h"
 #include "../syncedfs-common/protobuf/syncedfs.pb-c.h"
+#include "../syncedfs-common/lib/become_daemon.h"
 #include "config.h"
 #include "client.h"
 #include "server.h"

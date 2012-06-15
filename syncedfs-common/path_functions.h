@@ -14,6 +14,8 @@ void getAbsolutePath(char *fpath, const char *rootdir, const char *path);
 // removes trailing '/'
 char *getCanonincalPath(char *path);
 
+int fileExists(char *path);
+
 //void getFullpath(char fpath[PATH_MAX], config_t *cfg, const char *path);
 
 #endif	/* PATHS_H */

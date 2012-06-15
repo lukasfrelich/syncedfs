@@ -13,16 +13,17 @@
 #include "../syncedfs-common/message_functions.h"
 #include "../syncedfs-common/path_functions.h"
 #include "../syncedfs-common/lib/inet_sockets.h"
+#include "../syncedfs-common/syncid.h"
 #include "../syncedfs-common/lib/create_pid_file.h"
 #include "../syncedfs-common/lib/uthash.h"
 #include "snapshot.h"
 #include <stdio.h>
+#include <time.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <signal.h>
-#include <sys/time.h>
 #include <syslog.h>
 
 fileop_t *files = NULL; // Hash map
@@ -32,6 +33,7 @@ int synchronize(void) {
     char pidpath[PATH_MAX];
     int logfd;
     char logpath[PATH_MAX];
+    int newsync = 0;
 
     // make sure, that there isn't another client process for this resource
     // already running
@@ -43,12 +45,11 @@ int synchronize(void) {
         return -1;
     }
 
-    // new sync or resume?
+    // if sync log does not exist, switch log
     snprintf(logpath, PATH_MAX, "%s/%s.sync", config.logdir, config.resource);
     errMsg(LOG_INFO, "logpath: %s", logpath);
     logfd = open(logpath, O_RDONLY);
     if (logfd == -1) {
-        // if this is a new sync, switch log
         if (switchLog() != 0) {
             errMsg(LOG_ERR, "Could not switch log file. Stopping.");
             return -1;
@@ -59,10 +60,29 @@ int synchronize(void) {
             errnoMsg(LOG_ERR, "Could not open log file %s", logpath);
             return -1;
         }
-        
-        // TODO: this might need to be called outside this if as well
-        // (create snapshot might have failed last time
-        // and create a read only snapshot
+        newsync = 1;
+    }
+
+
+    // sync-id
+    char id[SYNCID_MAX];
+    char idpath[PATH_MAX];
+    snprintf(idpath, PATH_MAX, "%s/%s.id", config.logdir, config.resource);
+
+    // second part of the condition covers weird states after crash etc.
+    if (newsync == 1 || readSyncId(id, idpath, SYNCID_MAX) != 0) {
+        if (generateSyncId(id, SYNCID_MAX) != 0) {
+            errMsg(LOG_ERR, "Could not get sync-id. Stopping.");
+            return -1;
+        }
+        if (writeSyncId(id, idpath) != 0) {
+            errMsg(LOG_ERR, "Could not write sync-id. Stopping.");
+            return -1;
+        }
+    }
+
+    // create snapshot
+    if (newsync == 1 || fileExists(config.snapshot) == -1) {
         if (createSnapshot(config.rootdir, config.snapshot, 1) == -1) {
             errMsg(LOG_ERR, "Could not create snapshot of %s to %s Stopping.",
                     config.rootdir, config.snapshot);
@@ -70,26 +90,35 @@ int synchronize(void) {
         }
     }
 
+    // load log
     if (loadLog(logfd) != 0) {
         errMsg(LOG_ERR, "Could not load log %s", logpath);
         return -1;
     }
 
-    //return -1;
-    //printLog();
-
+    // transfer changes
     if (transfer(config.host, config.port) == -1) {
         errMsg(LOG_ERR, "Error in transfer. Exiting sync.");
-    } else {
-        // delete log
-        close(logfd);
-        if (unlink(logpath) == -1)
-            errExit(LOG_ERR, "Deleting log file '%s'", logpath);
-        
-        // delete snapshot
-        if (deleteSnapshot(config.snapshot) == -1)
-            errMsg(LOG_ERR, "Could not delete snapshot %s", config.snapshot);
+
+        // in case of failure only delete pid file
+        if (deletePidFile(pidfd, pidpath) == -1)
+            errExit(LOG_ERR, "Deleting PID file '%s'", pidpath);
+
+        return -1;
     }
+
+    // delete snapshot
+    if (deleteSnapshot(config.snapshot) == -1)
+        errMsg(LOG_ERR, "Could not delete snapshot %s", config.snapshot);
+
+    // delete syncid
+    if (unlink(idpath) == -1)
+        errExit(LOG_ERR, "Deleting sync-id file '%s'", idpath);
+
+    // delete sync log
+    close(logfd);
+    if (unlink(logpath) == -1)
+        errExit(LOG_ERR, "Deleting log file '%s'", logpath);
 
     // delete pid file
     if (deletePidFile(pidfd, pidpath) == -1)
@@ -284,8 +313,14 @@ int transfer(char *host, char *port) {
 
     // initiate sync (sync-id, resource, number of files)
     errMsg(LOG_INFO, "Number of files: %d", HASH_COUNT(files));
-    if (initiateSync(sfd, HASH_COUNT(files)) != 0)
-        return -1;
+    switch (initiateSync(sfd, HASH_COUNT(files))) {
+        case -1: // error
+            return -1;
+        case -2: // there's nothing to synchronize
+            return 0;
+        default:
+            break;
+    }
 
     // iterate over files in correct order
     HASH_SORT(files, sortByOrder);
@@ -298,28 +333,56 @@ int transfer(char *host, char *port) {
             return -1;
         }
     }
-    // TODO: wait for ACK
+
+    // wait for ACK
+    SyncFinish *conf;
+    conf = (SyncFinish *) recvMessage(sfd, SyncFinishType, NULL);
+    if (conf == NULL) {
+        errMsg(LOG_ERR, "Could not get transfer confirmation.");
+        return -1;
+    }
     return 0;
 }
 
 int initiateSync(int sfd, int numfiles) {
-    SyncInitialization syncinit = SYNC_INITIALIZATION__INIT;
-    uint8_t *buf;
-    uint32_t msglen;
+    SyncInit syncinit = SYNC_INIT__INIT;
+    SyncInitResponse *response;
+    char syncid[SYNCID_MAX];
+    char idpath[PATH_MAX];
 
     syncinit.number_files = numfiles;
-    syncinit.sync_id = getSyncId();
+    snprintf(idpath, PATH_MAX, "%s/%s.id", config.logdir, config.resource);
+
+    if (readSyncId(syncid, idpath, SYNCID_MAX) == -1) {
+        errMsg(LOG_ERR, "Could not read sync-id %s.");
+        return -1;
+    }
+    syncinit.sync_id = syncid;
     syncinit.resource = config.resource;
 
-    packMessage(SyncInitializationType, &syncinit, &buf, &msglen);
-
-    if (send(sfd, buf, msglen, MSG_NOSIGNAL) == -1) {
-        errnoMsg(LOG_ERR, "Sending sync initialization message has failed.");
+    if (sendMessage(sfd, SyncInitType, &syncinit) != 0) {
         return -1;
     }
 
-    // wait for response
-    // TODO
+    response = (SyncInitResponse *)
+            recvMessage(sfd, SyncInitResponseType, NULL);
+    if (response == NULL) {
+        errMsg(LOG_ERR, "Could not read initialization response from server.");
+        return -1;
+    }
+
+    if (response->continue_ == 0) {
+        if (response->has_already_synced && response->already_synced) {
+            return -2; // special case, which has to be handled in transfer()
+        } else {
+            if (strlen(response->error_message) > 0) {
+                errMsg(LOG_ERR, "Could not initiate sync."
+                        "Response from server: %s", response->error_message);
+            }
+            return -1;
+        }
+    }
+
     return 0;
 }
 
@@ -486,7 +549,7 @@ int switchLog(void) {
     }
 
     // read PID
-    if (fgets(buf, RESOURCE_MAX - 1, pidfile) == NULL) {
+    if (fgets(buf, RESOURCE_MAX, pidfile) == NULL) {
         errnoMsg(LOG_ERR, "Error reading syncedfs PID file: %s", pidpath);
         return -1;
     }
@@ -552,5 +615,25 @@ int switchLog(void) {
     if (sigprocmask(SIG_SETMASK, &origmask, NULL) == -1) {
         errMsg(LOG_WARNING, "Could not restore signal mask.");
     }
+    return 0;
+}
+
+int generateSyncId(char *id, int maxlength) {
+    time_t t;
+    struct tm *tm;
+    char stime[SYNCID_MAX] = {0};
+    int rnum;
+
+    if (maxlength > SYNCID_MAX)
+        maxlength = SYNCID_MAX;
+
+    t = time(NULL);
+    tm = gmtime(&t);
+    strftime(stime, SYNCID_MAX, "%D_%T", tm);
+
+    srand(time(NULL));
+    rnum = rand();
+
+    snprintf(id, SYNCID_MAX, "%s-%s-%d", config.resource, stime, rnum);
     return 0;
 }

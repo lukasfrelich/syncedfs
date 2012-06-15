@@ -6,6 +6,7 @@
  */
 
 #include <string.h>
+#include <sys/stat.h>
 #include "path_functions.h"
 
 void getAbsolutePath(char *fpath, const char *rootdir, const char *path) {
@@ -34,4 +35,13 @@ char *getCanonincalPath(char *path) {
     }
 
     return path;
+}
+
+int fileExists(char *path) {
+    struct stat st;
+ 
+    if (stat(path, &st) == -1)
+        return 0;
+    else
+        return 1;
 }

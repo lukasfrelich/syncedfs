@@ -9,7 +9,6 @@
 #define	CONFIG_H
 
 #define RESOURCE_MAX 32
-#define SYNCID_MAX 64
 #define MAX_WRITE_LEN 4096
 #define MESSAGE_MAX 524288
 
@@ -35,8 +34,6 @@ extern configuration_t config;
 
 
 int readConfig(char *resource);
-
-char *getSyncId(void);
 
 #endif	/* CONFIG_H */
 

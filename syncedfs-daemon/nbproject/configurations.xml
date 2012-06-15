@@ -55,6 +55,8 @@
       <itemPath>../syncedfs-common/message_functions.h</itemPath>
       <itemPath>../syncedfs-common/path_functions.c</itemPath>
       <itemPath>../syncedfs-common/path_functions.h</itemPath>
+      <itemPath>../syncedfs-common/syncid.c</itemPath>
+      <itemPath>../syncedfs-common/syncid.h</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
