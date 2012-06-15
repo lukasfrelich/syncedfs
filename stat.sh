@@ -1,4 +1,4 @@
-wc -l \
+wc \
 ./syncedfs-daemon/config.h \
 ./syncedfs-daemon/server.c \
 ./syncedfs-daemon/client.h \
