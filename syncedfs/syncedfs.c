@@ -930,7 +930,7 @@ int main(int argc, char** argv) {
      */
 
     openlog(config.ident, 0, LOG_DAEMON);
-    
+
     // open log
     if (openOpLog() != 0)
         stderrExit("syncedfs could not been started.\n");
@@ -945,11 +945,9 @@ int main(int argc, char** argv) {
     fargv[1] = config.mountdir; // mount point
     fargv[2] = "-s"; // single thread
     fargv[3] = "-o"; // options
-    fargv[4] = "nonempty,use_ino";
+    fargv[4] = "big_writes,nonempty,use_ino";
     fargv[5] = NULL;
 
-    // argument parsing: so far only add options and pass to fuse
-    // TODO: proper processing
     fuse_stat = fuse_main(fargc, fargv, &sfs_oper, NULL);
     return (fuse_stat);
 }

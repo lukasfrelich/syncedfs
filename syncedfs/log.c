@@ -40,7 +40,7 @@ int openOpLog() {
         errnoMsg(LOG_CRIT, "Could not open operations log file %s", logpath);
         return -1;
     }
-
+    
     return 0;
 }
 
