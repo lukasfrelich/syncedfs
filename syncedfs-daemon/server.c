@@ -73,7 +73,7 @@ int handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
     nfiles = syncInit(cfd, &tbytes);
     if (nfiles == -1)
         return -1;
-
+    
     errMsg(LOG_INFO, "Number of files to synchronize: %d", nfiles);
     // outer loop: files, inner loop: chunks
     for (int i = 0; i < nfiles; i++) {
@@ -113,14 +113,13 @@ int handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
         }
 
     }
-    if (close(cfd) == -1)
-        errMsg(LOG_WARNING, "Could not close socket.");
 
     errMsg(LOG_INFO, "Received bytes: %lld", tbytes);
 
     // transfer was successful, we can delete snapshot (created in syncInit())
     if (deleteSnapshot(config.snapshot) == -1) {
         errMsg(LOG_ERR, "Could not delete snapshot %s", config.snapshot);
+        close(cfd);
         return -1;
     }
 
@@ -131,20 +130,26 @@ int handleClient(int cfd, struct sockaddr *claddr, socklen_t *addrlen) {
             config.resource);
     snprintf(syncidpath, PATH_MAX, "%s/%s.syncid", config.logdir,
             config.resource);
-    
+
     if (rename(syncidpath, lastsyncidpath) == -1) {
         errnoMsg(LOG_CRIT, "Could not rename sync-id file to sync-id.last.");
+        close(cfd);
         return -1;
     }
-    
+
     // and finally send confirmation to client
     SyncFinish conf = SYNC_FINISH__INIT;
     conf.has_transferred_bytes = 1;
     conf.transferred_bytes = (uint64_t) tbytes;
-    if (sendMessage(cfd, SyncFinishType, &conf) == 0)
-        return 0;
-    else
+    if (sendMessage(cfd, SyncFinishType, &conf) != 0) {
+        close(cfd);
         return -1;
+    }
+
+    if (close(cfd) == -1)
+        errMsg(LOG_WARNING, "Could not close socket.");
+    
+    return 0;
 }
 
 void printOp(const char *relpath, const char *fpath, GenericOperation *op) {
@@ -246,7 +251,7 @@ int syncInit(int cfd, long long *tbytes) {
     snprintf(lastsyncidpath, PATH_MAX, "%s/%s.syncid.last", config.logdir,
             config.resource);
     if (fileExists(lastsyncidpath) &&
-            (readSyncId(lastsyncidpath, lastsyncid, SYNCID_MAX) == 0)) {
+            (readSyncId(lastsyncid, lastsyncidpath, SYNCID_MAX) == 0)) {
         if (lastsyncid == syncinit->sync_id) {
             // send the confirmation, don't sync
             response.continue_ = 0;
@@ -258,12 +263,12 @@ int syncInit(int cfd, long long *tbytes) {
     }
 
     int errflag = 0;
-    // if we have can read syncid file, last sync did not finish properly
+    // if we can read syncid file, last sync did not finish properly
     // revert snapshot
     snprintf(syncidpath, PATH_MAX, "%s/%s.syncid", config.logdir,
             config.resource);
     if (fileExists(syncidpath) &&
-            (readSyncId(syncidpath, syncid, SYNCID_MAX) == 0)) {
+            (readSyncId(syncid, syncidpath, SYNCID_MAX) == 0)) {
         if (syncid == syncinit->sync_id) {
             // TODO: here we should support resume
         }
@@ -272,6 +277,7 @@ int syncInit(int cfd, long long *tbytes) {
         // is done nevertheless
         if (fileExists(config.snapshot) == 1) {
             // do as one block, this should not fail, if yes, we are in trouble
+            errMsg(LOG_INFO, "Reverting snapshot.");
             int ret = 0;
 
             ret = deleteSnapshot(config.rootdir);
@@ -305,7 +311,7 @@ int syncInit(int cfd, long long *tbytes) {
     }
 
     // write syncid
-    if (!errflag && (writeSyncId(syncidpath, syncinit->sync_id) != 0)) {
+    if (!errflag && (writeSyncId(syncinit->sync_id, syncidpath) != 0)) {
         errMsg(LOG_ERR, "Could not write sync-id. Stopping.");
         errflag = 1;
     }

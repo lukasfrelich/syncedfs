@@ -36,7 +36,7 @@ int main(int argc, char** argv) {
 
     // temp soulution
     if (strcmp(argv[2], "server") == 0) {
-        (void) strcpy(config.rootdir, "/home/lfr/syncedfs/secondary/physical");
+        (void) strcpy(config.resource, "r0");
     }
     /*printf("resource: %s\n", config.resource);
     printf("rootdir: %s\n", config.rootdir);
@@ -48,8 +48,8 @@ int main(int argc, char** argv) {
 
     if (strcmp(argv[2], "server") == 0) {
         // at this momement only daemonize server
-        if (becomeDaemon(0) != 0)
-            stderrExit("Could not become a daemon.\n", argv[1]);
+        //if (becomeDaemon(0) != 0)
+        //    stderrExit("Could not become a daemon.\n", argv[1]);
         startServer();
     }
 

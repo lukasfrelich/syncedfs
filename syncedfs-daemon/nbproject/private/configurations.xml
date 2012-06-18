@@ -30,8 +30,9 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}" client r0</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" r0 server</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" r0 client</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" r0s server</runcommandpicklistitem>
         </runcommandpicklist>
-        <runcommand>"${OUTPUT_PATH}" r0 client</runcommand>
+        <runcommand>"${OUTPUT_PATH}" r0s server</runcommand>
         <rundir></rundir>
         <buildfirst>true</buildfirst>
         <terminal-type>0</terminal-type>

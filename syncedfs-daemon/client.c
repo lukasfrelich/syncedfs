@@ -82,7 +82,7 @@ int synchronize(void) {
     }
 
     // create snapshot
-    if (newsync == 1 || fileExists(config.snapshot) == -1) {
+    if (newsync || !fileExists(config.snapshot)) {
         if (createSnapshot(config.rootdir, config.snapshot, 1) == -1) {
             errMsg(LOG_ERR, "Could not create snapshot of %s to %s Stopping.",
                     config.rootdir, config.snapshot);
@@ -350,13 +350,13 @@ int initiateSync(int sfd, int numfiles) {
     char syncid[SYNCID_MAX];
     char idpath[PATH_MAX];
 
-    syncinit.number_files = numfiles;
     snprintf(idpath, PATH_MAX, "%s/%s.id", config.logdir, config.resource);
-
     if (readSyncId(syncid, idpath, SYNCID_MAX) == -1) {
         errMsg(LOG_ERR, "Could not read sync-id %s.");
         return -1;
     }
+
+    syncinit.number_files = numfiles;
     syncinit.sync_id = syncid;
     syncinit.resource = config.resource;
 
@@ -376,7 +376,7 @@ int initiateSync(int sfd, int numfiles) {
             return -2; // special case, which has to be handled in transfer()
         } else {
             if (strlen(response->error_message) > 0) {
-                errMsg(LOG_ERR, "Could not initiate sync."
+                errMsg(LOG_ERR, "Could not initiate sync. "
                         "Response from server: %s", response->error_message);
             }
             return -1;
@@ -399,8 +399,6 @@ int transferFile(int sfd, fileop_t *fileop) {
         return -1;
     }
     ddata.size = MESSAGE_MAX;
-
-    ddata.size = 0;
     ddata.offset = 0;
     opstart = fileop->operations;
 
@@ -412,14 +410,31 @@ int transferFile(int sfd, fileop_t *fileop) {
 
         // load data for write operation
         if (genop->type == GENERIC_OPERATION__OPERATION_TYPE__WRITE) {
+            // prevent buffer overflow
+            if (genop->write_op->size + ddata.offset > ddata.size) {
+                if (transferChunk(sfd, fileop, opstart, nops, 0) == -1) {
+                    errMsg(LOG_ERR, "Transfer of a chunk has failed.");
+                    return -1;
+                }
+
+                // reset counters
+                opstart = fileop->operations + i;       // only + i
+                nops = 0;
+                ddata.offset = 0;
+            }
+
             if (loadWriteData(fileop->filename, genop->write_op, &ddata) != 0)
                 // TODO: when optimizeOperations is done change to LOG_ERR
                 // and return -1;
                 errMsg(LOG_WARNING, "Could not load required data.");
+            // if this was the last operation: close file, which might have been
+            // opened
+            if (i == fileop->nelem - 1)
+                loadWriteData(NULL, NULL, NULL);
         }
         nops++;
 
-        if (ddata.size >= MESSAGE_MAX) {
+        if (ddata.offset >= MESSAGE_MAX) {
             // if we have just added last operation, set last_chunk flag
             if (transferChunk(sfd, fileop, opstart, nops,
                     (i == fileop->nelem - 1) ? 1 : 0 /*last_chunk*/) == -1) {
@@ -428,10 +443,10 @@ int transferFile(int sfd, fileop_t *fileop) {
             }
 
             // reset counters
-            opstart = fileop->operations + i + 1;
+            opstart = fileop->operations + i + 1;       // i + 1
             nops = 0;
             ddata.offset = 0;
-            ddata.size = 0;
+            //ddata.size = 0;
         }
     }
     // Transfer last chunk (if there is still some data left)
@@ -442,6 +457,8 @@ int transferFile(int sfd, fileop_t *fileop) {
         }
     }
 
+    free(ddata.buf);
+
     return 0;
 }
 
@@ -449,23 +466,15 @@ int transferChunk(int sfd, fileop_t *fileop, GenericOperation **opstart,
         int nops, int lastchunk) {
 
     FileChunk fchunk = FILE_CHUNK__INIT;
-    uint8_t *buf;
-    uint32_t msglen;
 
     fchunk.relative_path = fileop->filename;
     fchunk.last_chunk = lastchunk;
     fchunk.n_ops = nops;
     fchunk.ops = opstart;
 
-    if (packMessage(FileChunkType, &fchunk, &buf, &msglen) == -1) {
-        errMsg(LOG_ERR, "Could not pack a message.");
+    if (sendMessage(sfd, FileChunkType, &fchunk) != 0)
         return -1;
-    }
 
-    if (send(sfd, buf, msglen, MSG_NOSIGNAL) == -1) {
-        errnoMsg(LOG_ERR, "Sending file chunk has failed.");
-        return -1;
-    }
     // wait for ACK?
 
     //freePackedMessage(buf);
@@ -480,6 +489,13 @@ int loadWriteData(char *relpath, WriteOperation *writeop, dyndata_t *dyndata) {
     static char storedpath[PATH_MAX];
     char fpath[PATH_MAX];
     static int fd = -1;
+
+    // a mean for closing files
+    if (relpath == NULL && fd != -1) {
+        if (close(fd) == -1)
+            errnoMsg(LOG_WARNING, "Could not close file %s", relpath);
+        return 0;
+    }
 
     // if we are loading data the first time from this file, open it
     // last file might remain open
@@ -499,8 +515,9 @@ int loadWriteData(char *relpath, WriteOperation *writeop, dyndata_t *dyndata) {
         }
     }
 
-    // realloc, if necessary
-    if (writeop->size > dyndata->size - dyndata->offset) {
+    // realloc, if necessary (i.e. only if one operation is larger than buffer)
+    // other buffer overflow cases are being taken care of in transferFile()
+    if (writeop->size > dyndata->size) {
         int nsize = dyndata->size + writeop->size;
 
         dyndata->buf = realloc(dyndata->buf, nsize);
@@ -629,11 +646,11 @@ int generateSyncId(char *id, int maxlength) {
 
     t = time(NULL);
     tm = gmtime(&t);
-    strftime(stime, SYNCID_MAX, "%D_%T", tm);
+    strftime(stime, SYNCID_MAX, "%y-%m-%d--%H-%M-%S", tm);
 
     srand(time(NULL));
     rnum = rand();
 
-    snprintf(id, SYNCID_MAX, "%s-%s-%d", config.resource, stime, rnum);
+    snprintf(id, SYNCID_MAX, "%s_%s_%d", config.resource, stime, rnum);
     return 0;
 }
