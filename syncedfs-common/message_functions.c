@@ -145,7 +145,7 @@ int sendMessage(int fd, enum messagetype msgtype, void *message) {
     uint8_t *buf;
     uint32_t msglen;
     
-    if (packMessage(msgtype, &message, &buf, &msglen) == -1) {
+    if (packMessage(msgtype, message, &buf, &msglen) == -1) {
         errMsg(LOG_ERR, "Could not pack a InitializationResponse message.");
         return -1;
     }
