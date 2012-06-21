@@ -12,6 +12,7 @@
 #include "sighandlers.h"
 #include "../syncedfs-common/logging_functions.h"
 #include "../syncedfs-common/lib/create_pid_file.h"
+#include "../syncedfs-common/path_functions.h"
 
 #include <ctype.h>
 #include <dirent.h>
@@ -253,8 +254,12 @@ int sfs_rename(const char *path, const char *newpath) {
 
     retstat = rename(fpath, fnewpath);
 
-    if (retstat != -1) // log only successful attempts
-        logRename(path, newpath);
+    if (retstat != -1) { // logonly successful attempts
+        // don't log if rename did not remove oldpath (which means we tried to
+        // rename one link of a file to another link
+        if (!fileExists(fpath))
+            logRename(path, newpath);
+    }
 
     if (retstat < 0)
         retstat = sfs_error("sfs_rename rename");
