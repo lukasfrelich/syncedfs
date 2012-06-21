@@ -248,8 +248,21 @@ int addOperation(char *relpath, GenericOperation *genop) {
 
     genop->id = id++;
 
+    // handle rename
+    // remove all operations for newpath, add this rename operation to newpath,
+    // add all operations from oldpath to newpath
+    
+    
+    // handle unlink/rmdir
+    // remove all operations and add unlink/rmdir
+    // there might be latter a problem: (file) test -> delete test -> create
+    // folder test -> delete test, would leave rmdir operation, but we should
+    // do in fact an unlink
+    
+    
+    // handle all other cases
     HASH_FIND_STR(files, relpath, f);
-
+    
     // key not found
     if (f == NULL) {
         f = (fileop_t*) malloc(sizeof (fileop_t));
