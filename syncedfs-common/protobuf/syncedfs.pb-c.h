@@ -253,11 +253,12 @@ struct  _ChownOperation
 struct  _RenameOperation
 {
   ProtobufCMessage base;
+  char *oldpath;
   char *newpath;
 };
 #define RENAME_OPERATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&rename_operation__descriptor) \
-    , NULL }
+    , NULL, NULL }
 
 
 struct  _SetxattrOperation

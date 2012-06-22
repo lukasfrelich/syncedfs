@@ -110,7 +110,8 @@ message ChownOperation {
 }
 
 message RenameOperation {
-	required string newpath = 1;
+	required string oldpath = 1;
+	required string newpath = 2;
 }
 
 message SetxattrOperation {

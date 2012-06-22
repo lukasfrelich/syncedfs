@@ -1863,11 +1863,23 @@ const ProtobufCMessageDescriptor chown_operation__descriptor =
   (ProtobufCMessageInit) chown_operation__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor rename_operation__field_descriptors[1] =
+static const ProtobufCFieldDescriptor rename_operation__field_descriptors[2] =
 {
   {
-    "newpath",
+    "oldpath",
     1,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(RenameOperation, oldpath),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "newpath",
+    2,
     PROTOBUF_C_LABEL_REQUIRED,
     PROTOBUF_C_TYPE_STRING,
     0,   /* quantifier_offset */
@@ -1879,12 +1891,13 @@ static const ProtobufCFieldDescriptor rename_operation__field_descriptors[1] =
   },
 };
 static const unsigned rename_operation__field_indices_by_name[] = {
-  0,   /* field[0] = newpath */
+  1,   /* field[1] = newpath */
+  0,   /* field[0] = oldpath */
 };
 static const ProtobufCIntRange rename_operation__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 1 }
+  { 0, 2 }
 };
 const ProtobufCMessageDescriptor rename_operation__descriptor =
 {
@@ -1894,7 +1907,7 @@ const ProtobufCMessageDescriptor rename_operation__descriptor =
   "RenameOperation",
   "",
   sizeof(RenameOperation),
-  1,
+  2,
   rename_operation__field_descriptors,
   rename_operation__field_indices_by_name,
   1,  rename_operation__number_ranges,
