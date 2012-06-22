@@ -240,6 +240,7 @@ void logRename(const char *relpath, const char *newpath) {
     GenericOperation genop = GENERIC_OPERATION__INIT;
     RenameOperation renameop = RENAME_OPERATION__INIT;
 
+    renameop.oldpath = (char *) relpath;
     renameop.newpath = (char *) newpath;
 
     genop.type = GENERIC_OPERATION__OPERATION_TYPE__RENAME;
