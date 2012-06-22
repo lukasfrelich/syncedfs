@@ -246,23 +246,81 @@ int addOperation(char *relpath, GenericOperation *genop) {
     static int id = 0;
     fileop_t *f;
 
+    // TODO: has ID
     genop->id = id++;
+    HASH_FIND_STR(files, relpath, f);
+    
+    // TODO: handle link
 
     // handle rename
     // remove all operations for newpath, add this rename operation to newpath,
     // add all operations from oldpath to newpath
-    
-    
+    if (genop->type == GENERIC_OPERATION__OPERATION_TYPE__RENAME) {
+        fileop_t *newf;
+        HASH_FIND_STR(files, genop->rename_op->newpath, newf);
+
+        // make sure, that newfile exists in the hash table and operations
+        // is not allocated
+        if (newf == NULL) {
+            newf = (fileop_t*) malloc(sizeof (fileop_t));
+            if (newf == NULL) {
+                errMsg(LOG_ERR, "Could not allocate memory for file operations.");
+                return -1;
+            }
+
+            (void) strcpy(newf->filename, genop->rename_op->newpath);
+            newf->order = fileorder++;
+
+            HASH_ADD_STR(files, filename, newf);
+        } else {
+            free(newf->operations);
+        }
+
+        // allocate memory for newpath ops
+        int newcap = (f == NULL) ? VECTOR_INIT_CAPACITY : f->capacity + 1;
+        newf->capacity = newcap;
+        newf->operations = malloc((newcap) * sizeof (GenericOperation*));
+        if (newf->operations == NULL) {
+            errMsg(LOG_ERR, "Could not allocate memory for file operations.");
+            return -1;
+        }
+
+        //  copy ops from oldpath to newpath
+        if (f != NULL)
+            memcpy(newf->operations + 1, f->operations,
+                f->nelem * sizeof (GenericOperation*));
+
+        // add rename op and the beginning of newpath ops
+        *(newf->operations) = genop;
+
+        // remove oldpath op
+        if (f != NULL) {
+            free(f->operations);
+            HASH_DEL(files, f);
+            free(f);
+        }
+
+        return 0;
+    }
+
+
     // handle unlink/rmdir
     // remove all operations and add unlink/rmdir
     // there might be latter a problem: (file) test -> delete test -> create
     // folder test -> delete test, would leave rmdir operation, but we should
     // do in fact an unlink
-    
-    
+    if (genop->type == GENERIC_OPERATION__OPERATION_TYPE__UNLINK ||
+            genop->type == GENERIC_OPERATION__OPERATION_TYPE__RMDIR) {
+        if (f != NULL) {
+            free(f->operations);
+            HASH_DEL(files, f);
+            free(f);
+        }
+
+        // don't return, add the operation normally
+    }
+
     // handle all other cases
-    HASH_FIND_STR(files, relpath, f);
-    
     // key not found
     if (f == NULL) {
         f = (fileop_t*) malloc(sizeof (fileop_t));
@@ -274,7 +332,7 @@ int addOperation(char *relpath, GenericOperation *genop) {
         (void) strcpy(f->filename, relpath);
         f->order = fileorder++;
         f->capacity = VECTOR_INIT_CAPACITY;
-        f->operations = malloc(VECTOR_INIT_CAPACITY * sizeof (fileop_t*));
+        f->operations = malloc(VECTOR_INIT_CAPACITY * sizeof (GenericOperation*));
 
         if (f->operations == NULL) {
             errMsg(LOG_ERR, "Could not allocate memory for file operations.");
@@ -288,11 +346,12 @@ int addOperation(char *relpath, GenericOperation *genop) {
     if (f->nelem == (f->capacity - 1)) {
         f->capacity = f->capacity * 2;
         f->operations = realloc(f->operations,
-                f->capacity * sizeof (fileop_t*));
+                f->capacity * sizeof (GenericOperation*));
 
         if (f->operations == NULL) {
             errMsg(LOG_ERR, "Could not allocate memory for file operations. "
-                    "Requested memory: %d", f->capacity * sizeof (fileop_t*));
+                    "Requested memory: %d", f->capacity *
+                    sizeof (GenericOperation*));
             return -1;
         }
     }
@@ -300,13 +359,20 @@ int addOperation(char *relpath, GenericOperation *genop) {
     *(f->operations + f->nelem) = genop;
     f->nelem++;
 
+    // if this file was previously deleted, assign new fileorder
+    if (f->order == -1) {
+        if (genop->type != GENERIC_OPERATION__OPERATION_TYPE__UNLINK &&
+                genop->type != GENERIC_OPERATION__OPERATION_TYPE__RMDIR)
+            f->order = fileorder++;
+    }
+
     return 0;
 }
 
 void optimizeOperations(fileop_t *fileop) {
-    // TODO: Interval tree algorithm
-    // Detect deletions
-    // etc.
+    // sort operations (write should go at the end, create, link etc. at the
+    // beginning...)
+    // remove duplicates
     return;
 }
 
@@ -431,7 +497,7 @@ int transferFile(int sfd, fileop_t *fileop) {
                 }
 
                 // reset counters
-                opstart = fileop->operations + i;       // only + i
+                opstart = fileop->operations + i; // only + i
                 nops = 0;
                 ddata.offset = 0;
             }
@@ -456,7 +522,7 @@ int transferFile(int sfd, fileop_t *fileop) {
             }
 
             // reset counters
-            opstart = fileop->operations + i + 1;       // i + 1
+            opstart = fileop->operations + i + 1; // i + 1
             nops = 0;
             ddata.offset = 0;
             //ddata.size = 0;

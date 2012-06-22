@@ -547,11 +547,13 @@ int handleChown(const char *fpath, ChownOperation *chownop) {
 }
 
 int handleRename(const char *fpath, RenameOperation *renameop) {
+    char foldpath[PATH_MAX];
     char fnewpath[PATH_MAX];
 
+    getAbsolutePath(foldpath, config.rootdir, renameop->oldpath);
     getAbsolutePath(fnewpath, config.rootdir, renameop->newpath);
 
-    if (rename(fpath, fnewpath) == -1) {
+    if (rename(foldpath, fnewpath) == -1) {
         errnoMsg(LOG_ERR, "Could not rename file %s", fpath);
         return -1;
     }
