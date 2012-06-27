@@ -77,11 +77,13 @@ message MkdirOperation {
 }
 
 message SymlinkOperation {
-	required string target = 1;
+	required string oldpath = 1;
+	required string newpath = 2;
 }
 
 message LinkOperation {
-	required string target = 1;
+	required string oldpath = 1;
+	required string newpath = 2;
 }
 
 message WriteOperation {
@@ -91,6 +93,8 @@ message WriteOperation {
 }
 
 message UnlinkOperation {
+	required bool last_link = 1;
+	required int64 inode = 2;
 }
 
 message RmdirOperation {
@@ -112,6 +116,8 @@ message ChownOperation {
 message RenameOperation {
 	required string oldpath = 1;
 	required string newpath = 2;
+	required bool last_link = 3;
+	required int64 inode = 4;
 }
 
 message SetxattrOperation {

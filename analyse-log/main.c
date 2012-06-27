@@ -152,12 +152,12 @@ void printLog(void) {
                             i, (int) op->mkdir_op->mode);
                     break;
                 case GENERIC_OPERATION__OPERATION_TYPE__SYMLINK:
-                    printf("Operation %d, type: symlink, target: %s\n",
-                            i, op->symlink_op->target);
+                    printf("Operation %d, type: symlink, newpath: %s\n",
+                            i, op->symlink_op->newpath);
                     break;
                 case GENERIC_OPERATION__OPERATION_TYPE__LINK:
-                    printf("Operation %d, type: link, target: %s\n",
-                            i, op->link_op->target);
+                    printf("Operation %d, type: link, newpath: %s\n",
+                            i, op->link_op->newpath);
                     break;
                 case GENERIC_OPERATION__OPERATION_TYPE__WRITE:
                     printf("Operation %d, type: write, offset: %ld, size: %d\n",

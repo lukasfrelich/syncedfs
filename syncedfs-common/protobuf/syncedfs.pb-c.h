@@ -171,21 +171,23 @@ struct  _MkdirOperation
 struct  _SymlinkOperation
 {
   ProtobufCMessage base;
-  char *target;
+  char *oldpath;
+  char *newpath;
 };
 #define SYMLINK_OPERATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&symlink_operation__descriptor) \
-    , NULL }
+    , NULL, NULL }
 
 
 struct  _LinkOperation
 {
   ProtobufCMessage base;
-  char *target;
+  char *oldpath;
+  char *newpath;
 };
 #define LINK_OPERATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&link_operation__descriptor) \
-    , NULL }
+    , NULL, NULL }
 
 
 struct  _WriteOperation
@@ -204,10 +206,12 @@ struct  _WriteOperation
 struct  _UnlinkOperation
 {
   ProtobufCMessage base;
+  protobuf_c_boolean last_link;
+  int32_t inode;
 };
 #define UNLINK_OPERATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&unlink_operation__descriptor) \
-     }
+    , 0, 0 }
 
 
 struct  _RmdirOperation
@@ -255,10 +259,12 @@ struct  _RenameOperation
   ProtobufCMessage base;
   char *oldpath;
   char *newpath;
+  protobuf_c_boolean last_link;
+  int32_t inode;
 };
 #define RENAME_OPERATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&rename_operation__descriptor) \
-    , NULL, NULL }
+    , NULL, NULL, 0, 0 }
 
 
 struct  _SetxattrOperation

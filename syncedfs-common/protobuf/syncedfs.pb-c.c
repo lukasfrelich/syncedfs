@@ -1560,15 +1560,27 @@ const ProtobufCMessageDescriptor mkdir_operation__descriptor =
   (ProtobufCMessageInit) mkdir_operation__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor symlink_operation__field_descriptors[1] =
+static const ProtobufCFieldDescriptor symlink_operation__field_descriptors[2] =
 {
   {
-    "target",
+    "oldpath",
     1,
     PROTOBUF_C_LABEL_REQUIRED,
     PROTOBUF_C_TYPE_STRING,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(SymlinkOperation, target),
+    PROTOBUF_C_OFFSETOF(SymlinkOperation, oldpath),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "newpath",
+    2,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(SymlinkOperation, newpath),
     NULL,
     NULL,
     0,            /* packed */
@@ -1576,12 +1588,13 @@ static const ProtobufCFieldDescriptor symlink_operation__field_descriptors[1] =
   },
 };
 static const unsigned symlink_operation__field_indices_by_name[] = {
-  0,   /* field[0] = target */
+  1,   /* field[1] = newpath */
+  0,   /* field[0] = oldpath */
 };
 static const ProtobufCIntRange symlink_operation__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 1 }
+  { 0, 2 }
 };
 const ProtobufCMessageDescriptor symlink_operation__descriptor =
 {
@@ -1591,22 +1604,34 @@ const ProtobufCMessageDescriptor symlink_operation__descriptor =
   "SymlinkOperation",
   "",
   sizeof(SymlinkOperation),
-  1,
+  2,
   symlink_operation__field_descriptors,
   symlink_operation__field_indices_by_name,
   1,  symlink_operation__number_ranges,
   (ProtobufCMessageInit) symlink_operation__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor link_operation__field_descriptors[1] =
+static const ProtobufCFieldDescriptor link_operation__field_descriptors[2] =
 {
   {
-    "target",
+    "oldpath",
     1,
     PROTOBUF_C_LABEL_REQUIRED,
     PROTOBUF_C_TYPE_STRING,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(LinkOperation, target),
+    PROTOBUF_C_OFFSETOF(LinkOperation, oldpath),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "newpath",
+    2,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(LinkOperation, newpath),
     NULL,
     NULL,
     0,            /* packed */
@@ -1614,12 +1639,13 @@ static const ProtobufCFieldDescriptor link_operation__field_descriptors[1] =
   },
 };
 static const unsigned link_operation__field_indices_by_name[] = {
-  0,   /* field[0] = target */
+  1,   /* field[1] = newpath */
+  0,   /* field[0] = oldpath */
 };
 static const ProtobufCIntRange link_operation__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 1 }
+  { 0, 2 }
 };
 const ProtobufCMessageDescriptor link_operation__descriptor =
 {
@@ -1629,7 +1655,7 @@ const ProtobufCMessageDescriptor link_operation__descriptor =
   "LinkOperation",
   "",
   sizeof(LinkOperation),
-  1,
+  2,
   link_operation__field_descriptors,
   link_operation__field_indices_by_name,
   1,  link_operation__number_ranges,
@@ -1700,9 +1726,42 @@ const ProtobufCMessageDescriptor write_operation__descriptor =
   (ProtobufCMessageInit) write_operation__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-#define unlink_operation__field_descriptors NULL
-#define unlink_operation__field_indices_by_name NULL
-#define unlink_operation__number_ranges NULL
+static const ProtobufCFieldDescriptor unlink_operation__field_descriptors[2] =
+{
+  {
+    "last_link",
+    1,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(UnlinkOperation, last_link),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "inode",
+    2,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(UnlinkOperation, inode),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+};
+static const unsigned unlink_operation__field_indices_by_name[] = {
+  1,   /* field[1] = inode */
+  0,   /* field[0] = last_link */
+};
+static const ProtobufCIntRange unlink_operation__number_ranges[1 + 1] =
+{
+  { 1, 0 },
+  { 0, 2 }
+};
 const ProtobufCMessageDescriptor unlink_operation__descriptor =
 {
   PROTOBUF_C_MESSAGE_DESCRIPTOR_MAGIC,
@@ -1711,10 +1770,10 @@ const ProtobufCMessageDescriptor unlink_operation__descriptor =
   "UnlinkOperation",
   "",
   sizeof(UnlinkOperation),
-  0,
+  2,
   unlink_operation__field_descriptors,
   unlink_operation__field_indices_by_name,
-  0,  unlink_operation__number_ranges,
+  1,  unlink_operation__number_ranges,
   (ProtobufCMessageInit) unlink_operation__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
@@ -1863,7 +1922,7 @@ const ProtobufCMessageDescriptor chown_operation__descriptor =
   (ProtobufCMessageInit) chown_operation__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor rename_operation__field_descriptors[2] =
+static const ProtobufCFieldDescriptor rename_operation__field_descriptors[4] =
 {
   {
     "oldpath",
@@ -1889,15 +1948,41 @@ static const ProtobufCFieldDescriptor rename_operation__field_descriptors[2] =
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "last_link",
+    3,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_BOOL,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(RenameOperation, last_link),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "inode",
+    4,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_INT32,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(RenameOperation, inode),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned rename_operation__field_indices_by_name[] = {
+  3,   /* field[3] = inode */
+  2,   /* field[2] = last_link */
   1,   /* field[1] = newpath */
   0,   /* field[0] = oldpath */
 };
 static const ProtobufCIntRange rename_operation__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 2 }
+  { 0, 4 }
 };
 const ProtobufCMessageDescriptor rename_operation__descriptor =
 {
@@ -1907,7 +1992,7 @@ const ProtobufCMessageDescriptor rename_operation__descriptor =
   "RenameOperation",
   "",
   sizeof(RenameOperation),
-  2,
+  4,
   rename_operation__field_descriptors,
   rename_operation__field_indices_by_name,
   1,  rename_operation__number_ranges,
