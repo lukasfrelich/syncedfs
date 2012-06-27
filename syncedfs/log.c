@@ -40,7 +40,7 @@ int openOpLog() {
         errnoMsg(LOG_CRIT, "Could not open operations log file %s", logpath);
         return -1;
     }
-    
+
     return 0;
 }
 
@@ -64,13 +64,13 @@ int switchLog(void) {
 
     if (openOpLog() != 0)
         errflag = 1;
-    
+
     if (errflag == 1) {
         errMsg(LOG_CRIT, "Cannot log operations anymore, setting dirty flag.");
         // set dirty flag
         return -1;
     }
-    
+
     return 0;
 }
 
@@ -82,7 +82,7 @@ void logGeneric(const char *relpath, GenericOperation genop) {
     // we are in panic mode, rsync will be required anyway
     if (logfd == -1)
         return;
-    
+
     fileop.relative_path = (char *) relpath;
     fileop.op = &genop;
 
@@ -95,7 +95,7 @@ void logGeneric(const char *relpath, GenericOperation genop) {
         // set dirty flag?
     }
     writepending = 0;
-    
+
     if (switchpending == 1)
         handleSIGUSR1(0, NULL, NULL);
 }
@@ -141,11 +141,12 @@ void logMkdir(const char *relpath, mode_t mode) {
     logGeneric(relpath, genop);
 }
 
-void logSymlink(const char *relpath, const char *target) {
+void logSymlink(const char *relpath, const char *newpath) {
     GenericOperation genop = GENERIC_OPERATION__INIT;
     SymlinkOperation symlinkop = SYMLINK_OPERATION__INIT;
 
-    symlinkop.target = (char *) target;
+    symlinkop.oldpath = (char *) relpath;
+    symlinkop.newpath = (char *) newpath;
 
     genop.type = GENERIC_OPERATION__OPERATION_TYPE__SYMLINK;
     genop.symlink_op = &symlinkop;
@@ -153,11 +154,12 @@ void logSymlink(const char *relpath, const char *target) {
     logGeneric(relpath, genop);
 }
 
-void logLink(const char *relpath, const char *target) {
+void logLink(const char *relpath, const char *newpath) {
     GenericOperation genop = GENERIC_OPERATION__INIT;
     LinkOperation linkop = LINK_OPERATION__INIT;
 
-    linkop.target = (char *) target;
+    linkop.oldpath = (char *) relpath;
+    linkop.newpath = (char *) newpath;
 
     genop.type = GENERIC_OPERATION__OPERATION_TYPE__LINK;
     genop.link_op = &linkop;
@@ -179,9 +181,15 @@ void logWrite(const char *relpath, size_t size, off_t offset) {
     logGeneric(relpath, genop);
 }
 
-void logUnlink(const char *relpath) {
+void logUnlink(const char *relpath, nlink_t nlink, ino_t inode) {
     GenericOperation genop = GENERIC_OPERATION__INIT;
     UnlinkOperation unlinkop = UNLINK_OPERATION__INIT;
+
+    unlinkop.inode = (int64_t) inode;
+    if (nlink > 1)
+        unlinkop.last_link = 0;
+    else
+        unlinkop.last_link = 1;
 
     genop.type = GENERIC_OPERATION__OPERATION_TYPE__UNLINK;
     genop.unlink_op = &unlinkop;
@@ -236,12 +244,19 @@ void logChown(const char *relpath, uid_t uid, gid_t gid) {
     logGeneric(relpath, genop);
 }
 
-void logRename(const char *relpath, const char *newpath) {
+void logRename(const char *relpath, const char *newpath, nlink_t nlink,
+        ino_t inode) {
+
     GenericOperation genop = GENERIC_OPERATION__INIT;
     RenameOperation renameop = RENAME_OPERATION__INIT;
 
     renameop.oldpath = (char *) relpath;
     renameop.newpath = (char *) newpath;
+    renameop.inode = (int64_t) inode;
+    if (nlink > 1)
+        renameop.last_link = 0;
+    else
+        renameop.last_link = 1;
 
     genop.type = GENERIC_OPERATION__OPERATION_TYPE__RENAME;
     genop.rename_op = &renameop;

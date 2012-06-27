@@ -22,14 +22,15 @@ void logGeneric(const char *relpath, GenericOperation genop);
 void logCreate(const char *relpath, mode_t mode);
 void logMknod(const char *relpath, mode_t mode, dev_t dev);
 void logMkdir(const char *relpath, mode_t mode);
-void logSymlink(const char *relpath, const char *target);
-void logLink(const char *relpath, const char *target);
+void logSymlink(const char *relpath, const char *newpath);
+void logLink(const char *relpath, const char *newpath);
 void logWrite(const char *relpath, size_t size, off_t offset);
-void logUnlink(const char *relpath);
+void logUnlink(const char *relpath, nlink_t nlink, ino_t inode);
 void logRmdir(const char *relpath);
 void logTruncate(const char *relpath, off_t newsize);
 void logChmod(const char *relpath, mode_t mode);
 void logChown(const char *relpath, uid_t uid, gid_t gid);
-void logRename(const char *relpath, const char *newpath);
+void logRename(const char *relpath, const char *newpath, nlink_t nlink,
+        ino_t inode);
 
 #endif	/* LOG_H */

@@ -186,13 +186,21 @@ int sfs_mkdir(const char *path, mode_t mode) {
 int sfs_unlink(const char *path) {
     int retstat = 0;
     char fpath[PATH_MAX];
+    nlink_t nlink = 0;
+    ino_t ino = 0;
 
     sfs_fullpath(fpath, path);
+
+    struct stat st;
+    if (stat(fpath, &st) != -1) {
+        nlink = st.st_nlink;
+        ino = st.st_ino;
+    }
 
     retstat = unlink(fpath);
 
     if (retstat != -1) // log only successful attempts
-        logUnlink(path);
+        logUnlink(path, nlink, ino);
 
     if (retstat < 0)
         retstat = sfs_error("sfs_unlink unlink");
@@ -248,17 +256,25 @@ int sfs_rename(const char *path, const char *newpath) {
     int retstat = 0;
     char fpath[PATH_MAX];
     char fnewpath[PATH_MAX];
+    nlink_t nlink = 0;
+    ino_t ino = 0 ;
 
     sfs_fullpath(fpath, path);
     sfs_fullpath(fnewpath, newpath);
 
+    struct stat st;
+    if (stat(fnewpath, &st) != -1) {
+        nlink = st.st_nlink;
+        ino = st.st_ino;
+    }
+
     retstat = rename(fpath, fnewpath);
 
     if (retstat != -1) { // logonly successful attempts
-        // don't log if rename did not remove oldpath (which means we tried to
-        // rename one link of a file to another link
+        // don't log if rename did not remove oldpath (which means that both
+        // path and newpath refer to same file
         if (!fileExists(fpath))
-            logRename(path, newpath);
+            logRename(path, newpath, nlink, ino);
     }
 
     if (retstat < 0)
@@ -425,7 +441,7 @@ int sfs_read(const char *path, char *buf, size_t size, off_t offset,
 // documentation for the write() system call.
 
 int sfs_write(const char *path, const char *buf, size_t size, off_t offset,
-        struct fuse_file_info *fi) {
+        struct fuse_file_info* fi) {
     int retstat = 0;
 
     retstat = pwrite(fi->fh, buf, size, offset);
