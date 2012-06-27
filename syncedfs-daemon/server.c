@@ -171,12 +171,12 @@ void printOp(const char *relpath, const char *fpath, GenericOperation *op) {
                     i, (int) op->mkdir_op->mode);
             break;
         case GENERIC_OPERATION__OPERATION_TYPE__SYMLINK:
-            printf("Operation %d, type: symlink, target: %s\n",
-                    i, op->symlink_op->target);
+            printf("Operation %d, type: symlink, newpath: %s\n",
+                    i, op->symlink_op->newpath);
             break;
         case GENERIC_OPERATION__OPERATION_TYPE__LINK:
-            printf("Operation %d, type: link, target: %s\n",
-                    i, op->link_op->target);
+            printf("Operation %d, type: link, newpath: %s\n",
+                    i, op->link_op->newpath);
             break;
         case GENERIC_OPERATION__OPERATION_TYPE__WRITE:
             printf("Operation %d, type: write, offset: %ld, size: %d\n",
@@ -450,7 +450,7 @@ int handleSymlink(const char *fpath, SymlinkOperation *symlinkop) {
 
     //getAbsolutePath(ftarget, config.rootdir, symlinkop->target);
 
-    if (symlink(symlinkop->target, fpath) == -1) {
+    if (symlink(symlinkop->newpath, fpath) == -1) {
         errnoMsg(LOG_ERR, "Could not create symlink %s", fpath);
         return -1;
     }
@@ -459,11 +459,12 @@ int handleSymlink(const char *fpath, SymlinkOperation *symlinkop) {
 }
 
 int handleLink(const char *fpath, LinkOperation *linkop) {
-    char ftarget[PATH_MAX];
+    char fnewpath[PATH_MAX];
 
-    getAbsolutePath(ftarget, config.rootdir, linkop->target);
+    getAbsolutePath(fnewpath, config.rootdir, linkop->newpath);
 
-    if (link(ftarget, fpath) == -1) {
+    // eexist error is ok
+    if (link(fnewpath, fpath) == -1) {
         errnoMsg(LOG_ERR, "Could not create link %s", fpath);
         return -1;
     }

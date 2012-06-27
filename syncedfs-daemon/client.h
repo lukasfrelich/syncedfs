@@ -18,6 +18,7 @@ typedef struct fileop {
     GenericOperation **operations;
     int capacity;
     int nelem;
+    int64_t inode;
     UT_hash_handle hh;
 } fileop_t;
 

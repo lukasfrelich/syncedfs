@@ -27,6 +27,7 @@
 #include <syslog.h>
 
 fileop_t *files = NULL; // Hash map
+fileop_t *orphanedfiles = NULL; // Hash map
 
 int synchronize(void) {
     int pidfd;
@@ -198,12 +199,12 @@ void printLog(void) {
                             i, (int) op->mkdir_op->mode);
                     break;
                 case GENERIC_OPERATION__OPERATION_TYPE__SYMLINK:
-                    printf("Operation %d, type: symlink, target: %s\n",
-                            i, op->symlink_op->target);
+                    printf("Operation %d, type: symlink, newpath: %s\n",
+                            i, op->symlink_op->newpath);
                     break;
                 case GENERIC_OPERATION__OPERATION_TYPE__LINK:
-                    printf("Operation %d, type: link, target: %s\n",
-                            i, op->link_op->target);
+                    printf("Operation %d, type: link, newpath: %s\n",
+                            i, op->link_op->newpath);
                     break;
                 case GENERIC_OPERATION__OPERATION_TYPE__WRITE:
                     printf("Operation %d, type: write, offset: %ld, size: %d\n",
@@ -247,10 +248,56 @@ int addOperation(char *relpath, GenericOperation *genop) {
     fileop_t *f;
 
     // TODO: has ID
+    genop->has_id = 1;
     genop->id = id++;
     HASH_FIND_STR(files, relpath, f);
-    
-    // TODO: handle link
+
+    // handle link
+    if (genop->type == GENERIC_OPERATION__OPERATION_TYPE__LINK) {
+        // we want to add the operation to newpath list
+        // so just get newpath entry and let the generetic handler do the rest
+        HASH_FIND_STR(files, genop->link_op->newpath, f);
+        // this falls through to the last section
+    }
+
+    // handle unlink/rmdir
+    // remove all operations and add unlink/rmdir
+    // there might be latter a problem: (file) test -> delete test -> create
+    // folder test -> delete test, would leave rmdir operation, but we should
+    // do in fact an unlink
+    if (genop->type == GENERIC_OPERATION__OPERATION_TYPE__UNLINK ||
+            genop->type == GENERIC_OPERATION__OPERATION_TYPE__RMDIR) {
+        
+        
+        // if this was not the last link (there cannot be links to a directory)
+        if (genop->type == GENERIC_OPERATION__OPERATION_TYPE__UNLINK &&
+                !genop->unlink_op->last_link) {
+            // operations are valid and we must try to merge them with other
+            // link of the file, links are identified by inode, but inode
+            // number are only known for deleted/unlinked files
+            // so if we can't merge it now, we must keep the operations to merge
+            // them later
+        } else {
+            // if this is was the last link of a file, we shall get rid of all
+            // the operations but the delete it self, but first we have to
+            // merge operations we have for other links of this file
+            // use another hash table indexed by i-node number
+            
+            // if first operation is an unlink or delete, we should keeping this
+            // operation and don't add current unlink/delete
+        }
+        
+        
+        
+        if (f != NULL) {
+            free(f->operations);
+            HASH_DEL(files, f);
+            free(f);
+        }
+
+        // don't return, add the operation normally
+        // TODO
+    }
 
     // handle rename
     // remove all operations for newpath, add this rename operation to newpath,
@@ -303,23 +350,6 @@ int addOperation(char *relpath, GenericOperation *genop) {
         return 0;
     }
 
-
-    // handle unlink/rmdir
-    // remove all operations and add unlink/rmdir
-    // there might be latter a problem: (file) test -> delete test -> create
-    // folder test -> delete test, would leave rmdir operation, but we should
-    // do in fact an unlink
-    if (genop->type == GENERIC_OPERATION__OPERATION_TYPE__UNLINK ||
-            genop->type == GENERIC_OPERATION__OPERATION_TYPE__RMDIR) {
-        if (f != NULL) {
-            free(f->operations);
-            HASH_DEL(files, f);
-            free(f);
-        }
-
-        // don't return, add the operation normally
-    }
-
     // handle all other cases
     // key not found
     if (f == NULL) {
@@ -370,6 +400,7 @@ int addOperation(char *relpath, GenericOperation *genop) {
 }
 
 void optimizeOperations(fileop_t *fileop) {
+    // TODO
     // sort operations (write should go at the end, create, link etc. at the
     // beginning...)
     // remove duplicates
