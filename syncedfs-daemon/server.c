@@ -157,57 +157,57 @@ void printOp(const char *relpath, const char *fpath, GenericOperation *op) {
     printf("relpath: %s fpath: %s", relpath, fpath);
 
     switch (op->type) {
-        case GENERIC_OPERATION__OPERATION_TYPE__CREATE:
+        case GENERIC_OPERATION__TYPE__CREATE:
             printf("Operation %d, type: create, mode: %d\n",
                     i, (int) op->create_op->mode);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__MKNOD:
+        case GENERIC_OPERATION__TYPE__MKNOD:
             printf("Operation %d, type: mknod, mode: %d, dev: %ld\n",
                     i, (int) op->mknod_op->mode,
                     (long int) op->mknod_op->dev);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__MKDIR:
+        case GENERIC_OPERATION__TYPE__MKDIR:
             printf("Operation %d, type: mkdir, mode: %d\n",
                     i, (int) op->mkdir_op->mode);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__SYMLINK:
+        case GENERIC_OPERATION__TYPE__SYMLINK:
             printf("Operation %d, type: symlink, newpath: %s\n",
                     i, op->symlink_op->newpath);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__LINK:
+        case GENERIC_OPERATION__TYPE__LINK:
             printf("Operation %d, type: link, newpath: %s\n",
                     i, op->link_op->newpath);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__WRITE:
+        case GENERIC_OPERATION__TYPE__WRITE:
             printf("Operation %d, type: write, offset: %ld, size: %d\n",
                     i, (long int) op->write_op->offset,
                     (int) op->write_op->size);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__UNLINK:
+        case GENERIC_OPERATION__TYPE__UNLINK:
             printf("Operation %d, type: unlink\n", i);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__RMDIR:
+        case GENERIC_OPERATION__TYPE__RMDIR:
             printf("Operation %d, type: rmdir\n", i);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE:
+        case GENERIC_OPERATION__TYPE__TRUNCATE:
             printf("Operation %d, type: truncate, newsize: %d\n",
                     i, (int) op->truncate_op->newsize);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__CHMOD:
+        case GENERIC_OPERATION__TYPE__CHMOD:
             printf("Operation %d, type: chmod, mode: %d\n",
                     i, (int) op->chmod_op->mode);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__CHOWN:
+        case GENERIC_OPERATION__TYPE__CHOWN:
             printf("Operation %d, type: chown, uid: %d, gid: %d\n",
                     i, (int) op->chown_op->uid,
                     (int) op->chown_op->gid);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__RENAME:
+        case GENERIC_OPERATION__TYPE__RENAME:
             printf("Operation %d, type: rename, newpath: %s\n",
                     i, op->rename_op->newpath);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__SETXATTR:
-        case GENERIC_OPERATION__OPERATION_TYPE__REMOVEXATTR:
+        case GENERIC_OPERATION__TYPE__SETXATTR:
+        case GENERIC_OPERATION__TYPE__REMOVEXATTR:
             break;
     }
 
@@ -351,44 +351,44 @@ int handleGenericOperation(int *fd, const char *relpath,
     //printOp(relpath, fpath, genop);
 
     switch (genop->type) {
-        case GENERIC_OPERATION__OPERATION_TYPE__CREATE:
+        case GENERIC_OPERATION__TYPE__CREATE:
             ret = handleCreate(fpath, fd, genop->create_op);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__MKNOD:
+        case GENERIC_OPERATION__TYPE__MKNOD:
             ret = handleMknod(fpath, genop->mknod_op);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__MKDIR:
+        case GENERIC_OPERATION__TYPE__MKDIR:
             ret = handleMkdir(fpath, genop->mkdir_op);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__SYMLINK:
+        case GENERIC_OPERATION__TYPE__SYMLINK:
             ret = handleSymlink(fpath, genop->symlink_op);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__LINK:
+        case GENERIC_OPERATION__TYPE__LINK:
             ret = handleLink(fpath, genop->link_op);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__WRITE:
+        case GENERIC_OPERATION__TYPE__WRITE:
             ret = handleWrite(fpath, fd, genop->write_op);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__UNLINK:
+        case GENERIC_OPERATION__TYPE__UNLINK:
             ret = handleUnlink(fpath, fd, genop->unlink_op);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__RMDIR:
+        case GENERIC_OPERATION__TYPE__RMDIR:
             ret = handleRmdir(fpath, genop->rmdir_op);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE:
+        case GENERIC_OPERATION__TYPE__TRUNCATE:
             ret = handleTruncate(fpath, genop->truncate_op);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__CHMOD:
+        case GENERIC_OPERATION__TYPE__CHMOD:
             ret = handleChmod(fpath, genop->chmod_op);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__CHOWN:
+        case GENERIC_OPERATION__TYPE__CHOWN:
             ret = handleChown(fpath, genop->chown_op);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__RENAME:
+        case GENERIC_OPERATION__TYPE__RENAME:
             ret = handleRename(fpath, genop->rename_op);
             break;
-        case GENERIC_OPERATION__OPERATION_TYPE__SETXATTR:
-        case GENERIC_OPERATION__OPERATION_TYPE__REMOVEXATTR:
+        case GENERIC_OPERATION__TYPE__SETXATTR:
+        case GENERIC_OPERATION__TYPE__REMOVEXATTR:
             break;
     }
 

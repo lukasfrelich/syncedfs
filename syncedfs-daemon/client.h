@@ -37,6 +37,8 @@ int loadLog(int logfd);
 void printLog(void);
 int addOperation(char *relpath, GenericOperation *genop);
 void optimizeOperations(fileop_t *fileop);
+int mergeOperations(fileop_t *dest, fileop_t *src);
+int addFileToTable(char *key, int order, fileop_t *newentry);
 
 //------------------------------------------------------------------------------
 // Transfer
