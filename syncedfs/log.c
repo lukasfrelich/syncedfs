@@ -110,7 +110,7 @@ void logCreate(const char *relpath, mode_t mode) {
 
     creatop.mode = (uint32_t) mode;
 
-    genop.type = GENERIC_OPERATION__OPERATION_TYPE__CREATE;
+    genop.type = GENERIC_OPERATION__TYPE__CREATE;
     genop.create_op = &creatop;
 
     logGeneric(relpath, genop);
@@ -123,7 +123,7 @@ void logMknod(const char *relpath, mode_t mode, dev_t dev) {
     mknodop.mode = (uint32_t) mode;
     mknodop.dev = (uint64_t) dev;
 
-    genop.type = GENERIC_OPERATION__OPERATION_TYPE__MKNOD;
+    genop.type = GENERIC_OPERATION__TYPE__MKNOD;
     genop.mknod_op = &mknodop;
 
     logGeneric(relpath, genop);
@@ -135,7 +135,7 @@ void logMkdir(const char *relpath, mode_t mode) {
 
     mkdirop.mode = (uint32_t) mode;
 
-    genop.type = GENERIC_OPERATION__OPERATION_TYPE__MKDIR;
+    genop.type = GENERIC_OPERATION__TYPE__MKDIR;
     genop.mkdir_op = &mkdirop;
 
     logGeneric(relpath, genop);
@@ -148,7 +148,7 @@ void logSymlink(const char *relpath, const char *newpath) {
     symlinkop.oldpath = (char *) relpath;
     symlinkop.newpath = (char *) newpath;
 
-    genop.type = GENERIC_OPERATION__OPERATION_TYPE__SYMLINK;
+    genop.type = GENERIC_OPERATION__TYPE__SYMLINK;
     genop.symlink_op = &symlinkop;
 
     logGeneric(relpath, genop);
@@ -161,7 +161,7 @@ void logLink(const char *relpath, const char *newpath) {
     linkop.oldpath = (char *) relpath;
     linkop.newpath = (char *) newpath;
 
-    genop.type = GENERIC_OPERATION__OPERATION_TYPE__LINK;
+    genop.type = GENERIC_OPERATION__TYPE__LINK;
     genop.link_op = &linkop;
 
     logGeneric(relpath, genop);
@@ -175,7 +175,7 @@ void logWrite(const char *relpath, size_t size, off_t offset) {
     writeop.size = (int32_t) size;
     // we don't store data (to save space on disk)
 
-    genop.type = GENERIC_OPERATION__OPERATION_TYPE__WRITE;
+    genop.type = GENERIC_OPERATION__TYPE__WRITE;
     genop.write_op = &writeop;
 
     logGeneric(relpath, genop);
@@ -191,7 +191,7 @@ void logUnlink(const char *relpath, nlink_t nlink, ino_t inode) {
     else
         unlinkop.last_link = 1;
 
-    genop.type = GENERIC_OPERATION__OPERATION_TYPE__UNLINK;
+    genop.type = GENERIC_OPERATION__TYPE__UNLINK;
     genop.unlink_op = &unlinkop;
 
     logGeneric(relpath, genop);
@@ -201,7 +201,7 @@ void logRmdir(const char *relpath) {
     GenericOperation genop = GENERIC_OPERATION__INIT;
     RmdirOperation rmdirop = RMDIR_OPERATION__INIT;
 
-    genop.type = GENERIC_OPERATION__OPERATION_TYPE__RMDIR;
+    genop.type = GENERIC_OPERATION__TYPE__RMDIR;
     genop.rmdir_op = &rmdirop;
 
     logGeneric(relpath, genop);
@@ -213,7 +213,7 @@ void logTruncate(const char *relpath, off_t newsize) {
 
     truncateop.newsize = (int64_t) newsize;
 
-    genop.type = GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE;
+    genop.type = GENERIC_OPERATION__TYPE__TRUNCATE;
     genop.truncate_op = &truncateop;
 
     logGeneric(relpath, genop);
@@ -225,7 +225,7 @@ void logChmod(const char *relpath, mode_t mode) {
 
     chmodop.mode = (uint32_t) mode;
 
-    genop.type = GENERIC_OPERATION__OPERATION_TYPE__CHMOD;
+    genop.type = GENERIC_OPERATION__TYPE__CHMOD;
     genop.chmod_op = &chmodop;
 
     logGeneric(relpath, genop);
@@ -238,7 +238,7 @@ void logChown(const char *relpath, uid_t uid, gid_t gid) {
     chownop.uid = (uint32_t) uid;
     chownop.gid = (uint32_t) gid;
 
-    genop.type = GENERIC_OPERATION__OPERATION_TYPE__CHOWN;
+    genop.type = GENERIC_OPERATION__TYPE__CHOWN;
     genop.chown_op = &chownop;
 
     logGeneric(relpath, genop);
@@ -258,7 +258,7 @@ void logRename(const char *relpath, const char *newpath, nlink_t nlink,
     else
         renameop.last_link = 1;
 
-    genop.type = GENERIC_OPERATION__OPERATION_TYPE__RENAME;
+    genop.type = GENERIC_OPERATION__TYPE__RENAME;
     genop.rename_op = &renameop;
 
     logGeneric(relpath, genop);
