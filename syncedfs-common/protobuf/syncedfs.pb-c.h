@@ -32,22 +32,22 @@ typedef struct _RemovexattrOperation RemovexattrOperation;
 
 /* --- enums --- */
 
-typedef enum _GenericOperation__OperationType {
-  GENERIC_OPERATION__OPERATION_TYPE__CREATE = 3,
-  GENERIC_OPERATION__OPERATION_TYPE__MKNOD = 4,
-  GENERIC_OPERATION__OPERATION_TYPE__MKDIR = 5,
-  GENERIC_OPERATION__OPERATION_TYPE__SYMLINK = 6,
-  GENERIC_OPERATION__OPERATION_TYPE__LINK = 7,
-  GENERIC_OPERATION__OPERATION_TYPE__WRITE = 8,
-  GENERIC_OPERATION__OPERATION_TYPE__UNLINK = 9,
-  GENERIC_OPERATION__OPERATION_TYPE__RMDIR = 10,
-  GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE = 11,
-  GENERIC_OPERATION__OPERATION_TYPE__CHMOD = 12,
-  GENERIC_OPERATION__OPERATION_TYPE__CHOWN = 13,
-  GENERIC_OPERATION__OPERATION_TYPE__RENAME = 14,
-  GENERIC_OPERATION__OPERATION_TYPE__SETXATTR = 15,
-  GENERIC_OPERATION__OPERATION_TYPE__REMOVEXATTR = 16
-} GenericOperation__OperationType;
+typedef enum _GenericOperation__Type {
+  GENERIC_OPERATION__TYPE__CREATE = 3,
+  GENERIC_OPERATION__TYPE__MKNOD = 4,
+  GENERIC_OPERATION__TYPE__MKDIR = 5,
+  GENERIC_OPERATION__TYPE__SYMLINK = 6,
+  GENERIC_OPERATION__TYPE__LINK = 7,
+  GENERIC_OPERATION__TYPE__WRITE = 8,
+  GENERIC_OPERATION__TYPE__UNLINK = 9,
+  GENERIC_OPERATION__TYPE__RMDIR = 10,
+  GENERIC_OPERATION__TYPE__TRUNCATE = 11,
+  GENERIC_OPERATION__TYPE__CHMOD = 12,
+  GENERIC_OPERATION__TYPE__CHOWN = 13,
+  GENERIC_OPERATION__TYPE__RENAME = 14,
+  GENERIC_OPERATION__TYPE__SETXATTR = 15,
+  GENERIC_OPERATION__TYPE__REMOVEXATTR = 16
+} GenericOperation__Type;
 
 /* --- messages --- */
 
@@ -116,7 +116,7 @@ struct  _GenericOperation
   ProtobufCMessage base;
   protobuf_c_boolean has_id;
   int32_t id;
-  GenericOperation__OperationType type;
+  GenericOperation__Type type;
   CreateOperation *create_op;
   MknodOperation *mknod_op;
   MkdirOperation *mkdir_op;
@@ -207,7 +207,7 @@ struct  _UnlinkOperation
 {
   ProtobufCMessage base;
   protobuf_c_boolean last_link;
-  int32_t inode;
+  int64_t inode;
 };
 #define UNLINK_OPERATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&unlink_operation__descriptor) \
@@ -260,7 +260,7 @@ struct  _RenameOperation
   char *oldpath;
   char *newpath;
   protobuf_c_boolean last_link;
-  int32_t inode;
+  int64_t inode;
 };
 #define RENAME_OPERATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&rename_operation__descriptor) \
@@ -743,7 +743,7 @@ extern const ProtobufCMessageDescriptor sync_finish__descriptor;
 extern const ProtobufCMessageDescriptor file_chunk__descriptor;
 extern const ProtobufCMessageDescriptor file_operation__descriptor;
 extern const ProtobufCMessageDescriptor generic_operation__descriptor;
-extern const ProtobufCEnumDescriptor    generic_operation__operation_type__descriptor;
+extern const ProtobufCEnumDescriptor    generic_operation__type__descriptor;
 extern const ProtobufCMessageDescriptor create_operation__descriptor;
 extern const ProtobufCMessageDescriptor mknod_operation__descriptor;
 extern const ProtobufCMessageDescriptor mkdir_operation__descriptor;

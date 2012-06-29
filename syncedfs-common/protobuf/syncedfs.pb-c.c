@@ -1148,27 +1148,27 @@ const ProtobufCMessageDescriptor file_operation__descriptor =
   (ProtobufCMessageInit) file_operation__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-const ProtobufCEnumValue generic_operation__operation_type__enum_values_by_number[14] =
+const ProtobufCEnumValue generic_operation__type__enum_values_by_number[14] =
 {
-  { "CREATE", "GENERIC_OPERATION__OPERATION_TYPE__CREATE", 3 },
-  { "MKNOD", "GENERIC_OPERATION__OPERATION_TYPE__MKNOD", 4 },
-  { "MKDIR", "GENERIC_OPERATION__OPERATION_TYPE__MKDIR", 5 },
-  { "SYMLINK", "GENERIC_OPERATION__OPERATION_TYPE__SYMLINK", 6 },
-  { "LINK", "GENERIC_OPERATION__OPERATION_TYPE__LINK", 7 },
-  { "WRITE", "GENERIC_OPERATION__OPERATION_TYPE__WRITE", 8 },
-  { "UNLINK", "GENERIC_OPERATION__OPERATION_TYPE__UNLINK", 9 },
-  { "RMDIR", "GENERIC_OPERATION__OPERATION_TYPE__RMDIR", 10 },
-  { "TRUNCATE", "GENERIC_OPERATION__OPERATION_TYPE__TRUNCATE", 11 },
-  { "CHMOD", "GENERIC_OPERATION__OPERATION_TYPE__CHMOD", 12 },
-  { "CHOWN", "GENERIC_OPERATION__OPERATION_TYPE__CHOWN", 13 },
-  { "RENAME", "GENERIC_OPERATION__OPERATION_TYPE__RENAME", 14 },
-  { "SETXATTR", "GENERIC_OPERATION__OPERATION_TYPE__SETXATTR", 15 },
-  { "REMOVEXATTR", "GENERIC_OPERATION__OPERATION_TYPE__REMOVEXATTR", 16 },
+  { "CREATE", "GENERIC_OPERATION__TYPE__CREATE", 3 },
+  { "MKNOD", "GENERIC_OPERATION__TYPE__MKNOD", 4 },
+  { "MKDIR", "GENERIC_OPERATION__TYPE__MKDIR", 5 },
+  { "SYMLINK", "GENERIC_OPERATION__TYPE__SYMLINK", 6 },
+  { "LINK", "GENERIC_OPERATION__TYPE__LINK", 7 },
+  { "WRITE", "GENERIC_OPERATION__TYPE__WRITE", 8 },
+  { "UNLINK", "GENERIC_OPERATION__TYPE__UNLINK", 9 },
+  { "RMDIR", "GENERIC_OPERATION__TYPE__RMDIR", 10 },
+  { "TRUNCATE", "GENERIC_OPERATION__TYPE__TRUNCATE", 11 },
+  { "CHMOD", "GENERIC_OPERATION__TYPE__CHMOD", 12 },
+  { "CHOWN", "GENERIC_OPERATION__TYPE__CHOWN", 13 },
+  { "RENAME", "GENERIC_OPERATION__TYPE__RENAME", 14 },
+  { "SETXATTR", "GENERIC_OPERATION__TYPE__SETXATTR", 15 },
+  { "REMOVEXATTR", "GENERIC_OPERATION__TYPE__REMOVEXATTR", 16 },
 };
-static const ProtobufCIntRange generic_operation__operation_type__value_ranges[] = {
+static const ProtobufCIntRange generic_operation__type__value_ranges[] = {
 {3, 0},{0, 14}
 };
-const ProtobufCEnumValueIndex generic_operation__operation_type__enum_values_by_name[14] =
+const ProtobufCEnumValueIndex generic_operation__type__enum_values_by_name[14] =
 {
   { "CHMOD", 9 },
   { "CHOWN", 10 },
@@ -1185,19 +1185,19 @@ const ProtobufCEnumValueIndex generic_operation__operation_type__enum_values_by_
   { "UNLINK", 6 },
   { "WRITE", 5 },
 };
-const ProtobufCEnumDescriptor generic_operation__operation_type__descriptor =
+const ProtobufCEnumDescriptor generic_operation__type__descriptor =
 {
   PROTOBUF_C_ENUM_DESCRIPTOR_MAGIC,
-  "GenericOperation.OperationType",
-  "OperationType",
-  "GenericOperation__OperationType",
+  "GenericOperation.Type",
+  "Type",
+  "GenericOperation__Type",
   "",
   14,
-  generic_operation__operation_type__enum_values_by_number,
+  generic_operation__type__enum_values_by_number,
   14,
-  generic_operation__operation_type__enum_values_by_name,
+  generic_operation__type__enum_values_by_name,
   1,
-  generic_operation__operation_type__value_ranges,
+  generic_operation__type__value_ranges,
   NULL,NULL,NULL,NULL   /* reserved[1234] */
 };
 static const ProtobufCFieldDescriptor generic_operation__field_descriptors[16] =
@@ -1221,7 +1221,7 @@ static const ProtobufCFieldDescriptor generic_operation__field_descriptors[16] =
     PROTOBUF_C_TYPE_ENUM,
     0,   /* quantifier_offset */
     PROTOBUF_C_OFFSETOF(GenericOperation, type),
-    &generic_operation__operation_type__descriptor,
+    &generic_operation__type__descriptor,
     NULL,
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
@@ -1744,7 +1744,7 @@ static const ProtobufCFieldDescriptor unlink_operation__field_descriptors[2] =
     "inode",
     2,
     PROTOBUF_C_LABEL_REQUIRED,
-    PROTOBUF_C_TYPE_INT32,
+    PROTOBUF_C_TYPE_INT64,
     0,   /* quantifier_offset */
     PROTOBUF_C_OFFSETOF(UnlinkOperation, inode),
     NULL,
@@ -1964,7 +1964,7 @@ static const ProtobufCFieldDescriptor rename_operation__field_descriptors[4] =
     "inode",
     4,
     PROTOBUF_C_LABEL_REQUIRED,
-    PROTOBUF_C_TYPE_INT32,
+    PROTOBUF_C_TYPE_INT64,
     0,   /* quantifier_offset */
     PROTOBUF_C_OFFSETOF(RenameOperation, inode),
     NULL,

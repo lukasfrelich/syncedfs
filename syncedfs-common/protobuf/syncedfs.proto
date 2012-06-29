@@ -28,7 +28,7 @@ message FileOperation {
 message GenericOperation {
 	optional int32 id = 1;
 
-	enum OperationType {
+	enum Type {
 		CREATE = 3;		
 		MKNOD = 4;
 		MKDIR = 5;
@@ -45,7 +45,7 @@ message GenericOperation {
 		REMOVEXATTR = 16;
 	}
 
-	required OperationType type = 2;
+	required Type type = 2;
 
 	optional CreateOperation create_op = 3;
 	optional MknodOperation mknod_op = 4;
