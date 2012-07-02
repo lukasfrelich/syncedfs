@@ -290,18 +290,19 @@ int addOperation(char *relpath, GenericOperation *genop) {
             }
         } else {
             // if this is was the last link of a file, we shall get rid of all
-            // the operations but the unlink itself
+            // the operations, with a possible exception for the unlink itself
+            // (if the file was created in older epoch)
 
             // first, if this is an unlink operation, are there any operations
             // for a link of this file, we have deleted? (if there weren't other
-            // links, there is for sure nothing to merge, that's especially
+            // links, there is for sure nothing, that's especially
             // the case for directories)
             if (genop->type == GENERIC_OPERATION__TYPE__UNLINK) {
                 fileop_t *finode;
                 // search in inodefiles hash table
                 HASH_FIND_INT(inodefiles, &genop->unlink_op->inode, finode);
                 if (finode != NULL) {
-                    // remove entry from the hash table
+                    // discard the operations, remove entry from the hash table
                     free(finode->operations);
                     HASH_DEL(inodefiles, finode);
                     free(finode);
@@ -311,8 +312,10 @@ int addOperation(char *relpath, GenericOperation *genop) {
             if (f != NULL) {
                 // if the first operation is an unlink or rmdir, we should keep
                 // it and don't add current unlink/delete
-                if (f->operations->type == GENERIC_OPERATION__TYPE__UNLINK ||
-                        f->operations->type == GENERIC_OPERATION__TYPE__RMDIR) {
+                if (((GenericOperation *) f->operations)->type ==
+                        GENERIC_OPERATION__TYPE__UNLINK ||
+                        ((GenericOperation *) f->operations)->type ==
+                        GENERIC_OPERATION__TYPE__RMDIR) {
                     // shrink the array
                     int alocsize = VECTOR_INIT_CAPACITY *
                             sizeof (GenericOperation*);
@@ -329,20 +332,26 @@ int addOperation(char *relpath, GenericOperation *genop) {
 
                     return 0;
                 }
-                // otherwise simply remove this entry from the hash table
+                // otherwise simply remove this entry from the hash table and
+                // add current operation in the next step
                 free(f->operations);
                 HASH_DEL(files, f);
                 free(f);
             }
-            // at this point entry for current file name in the has table
-            // has either never existed, or we deleted it, now add it with
-            // fileorder = -1
-            if (addFileToTable(char *relpath, -1, f) != 0)
-                return -1;
 
-            *(f->operations) = genop;
-            f->nelem = 1;
-            f->order = -1;
+            // we only add current unlink/rmdir operation if the file was not
+            // created only in this epoch
+            if (!f->created) {
+                // at this point entry for current file name in the has table
+                // has either never existed, or we deleted it, now add it with
+                // fileorder = -1
+                if (addFileToTable(relpath, f) != 0)
+                    return -1;
+
+                *(f->operations) = genop;
+                f->nelem = 1;
+                f->order = -1;
+            }
 
             return 0;
         }
@@ -408,8 +417,24 @@ int addOperation(char *relpath, GenericOperation *genop) {
     // handle all other cases
     // key not found
     if (f == NULL) {
-        if (addFileToTable(char *relpath, fileorder++, f) != 0)
+        if (addFileToTable(relpath, f) != 0)
             return -1;
+
+        f->order = fileorder++;
+
+        // set created flag
+        switch (genop->type) {
+            case GENERIC_OPERATION__TYPE__CREATE:
+            case GENERIC_OPERATION__TYPE__MKNOD:
+            case GENERIC_OPERATION__TYPE__MKDIR:
+            case GENERIC_OPERATION__TYPE__SYMLINK:
+            case GENERIC_OPERATION__TYPE__LINK:
+                //case GENERIC_OPERATION__TYPE__RENAME:
+                f->created = 1;
+                break;
+            default:
+                break;
+        }
     }
 
     // extend vector of operations if needed
@@ -462,7 +487,7 @@ int mergeOperations(fileop_t *dest, fileop_t *src) {
     return 0;
 }
 
-int addFileToTable(char *key, int order, fileop_t *newentry) {
+int addFileToTable(char *key, fileop_t *newentry) {
     fileop_t *f;
 
     f = (fileop_t*) malloc(sizeof (fileop_t));
@@ -472,8 +497,8 @@ int addFileToTable(char *key, int order, fileop_t *newentry) {
     }
 
     (void) strcpy(f->filename, key);
-    f->order = order;
     f->capacity = VECTOR_INIT_CAPACITY;
+    f->created = 0;
     f->operations = malloc(VECTOR_INIT_CAPACITY * sizeof (GenericOperation*));
 
     if (f->operations == NULL) {

@@ -19,6 +19,7 @@ typedef struct fileop {
     int capacity;
     int nelem;
     int64_t inode;
+    int created; // did the file exist already in the last epoch?
     UT_hash_handle hh;
 } fileop_t;
 
@@ -38,7 +39,7 @@ void printLog(void);
 int addOperation(char *relpath, GenericOperation *genop);
 void optimizeOperations(fileop_t *fileop);
 int mergeOperations(fileop_t *dest, fileop_t *src);
-int addFileToTable(char *key, int order, fileop_t *newentry);
+int addFileToTable(char *key, fileop_t *newentry);
 
 //------------------------------------------------------------------------------
 // Transfer
