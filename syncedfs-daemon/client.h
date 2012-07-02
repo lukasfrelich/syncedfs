@@ -13,7 +13,7 @@
 #include "../syncedfs-common/protobuf/syncedfs.pb-c.h"
 
 typedef struct fileop {
-    char filename[PATH_MAX]; // key
+    char relpath[PATH_MAX]; // key
     int order; // files must be transfered in order
     GenericOperation **operations;
     int capacity;
@@ -39,7 +39,7 @@ void printLog(void);
 int addOperation(char *relpath, GenericOperation *genop);
 void optimizeOperations(fileop_t *fileop);
 int mergeOperations(fileop_t *dest, fileop_t *src);
-int addFileToTable(char *key, fileop_t *newentry);
+int initializeFileop(char *relpath, fileop_t *newentry);
 
 //------------------------------------------------------------------------------
 // Transfer
