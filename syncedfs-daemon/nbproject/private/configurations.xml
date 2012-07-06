@@ -29,10 +29,10 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}" client localhost 2222</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" client r0</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" r0 server</runcommandpicklistitem>
-          <runcommandpicklistitem>"${OUTPUT_PATH}" r0 client</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" r0s server</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" r0 client</runcommandpicklistitem>
         </runcommandpicklist>
-        <runcommand>"${OUTPUT_PATH}" r0s server</runcommand>
+        <runcommand>"${OUTPUT_PATH}" r0 client</runcommand>
         <rundir></rundir>
         <buildfirst>true</buildfirst>
         <terminal-type>0</terminal-type>

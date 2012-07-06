@@ -28,6 +28,7 @@ typedef struct configuration_t {
     char port[NI_MAXSERV];
     char ident[RESOURCE_MAX + 10];
     char btfsbin[PATH_MAX];
+    char btfsbinsuid[PATH_MAX];
 } configuration_t;
 
 extern configuration_t config;

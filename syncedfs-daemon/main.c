@@ -48,8 +48,8 @@ int main(int argc, char** argv) {
 
     if (strcmp(argv[2], "server") == 0) {
         // at this momement only daemonize server
-        //if (becomeDaemon(0) != 0)
-        //    stderrExit("Could not become a daemon.\n", argv[1]);
+        if (becomeDaemon(0) != 0)
+            stderrExit("Could not become a daemon.\n", argv[1]);
         startServer();
     }
 

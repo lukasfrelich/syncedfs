@@ -26,7 +26,9 @@
 #include <unistd.h>
 #include <signal.h>
 #include <syslog.h>
+#include <ftw.h>
 
+static int fileorder = 0;
 fileop_t *files = NULL; // Hash map
 fileop_t *inodefiles = NULL; // unlinked files identified by i-node
 
@@ -171,6 +173,10 @@ int loadLog(int logfd) {
     }
 
     free(buf);
+
+    // matchInodefiles
+    matchInodefiles();
+
     return 0;
 }
 
@@ -244,11 +250,9 @@ void printLog(void) {
 }
 
 int addOperation(char *relpath, GenericOperation *genop) {
-    static int fileorder = 0;
     static int id = 0;
     fileop_t *f;
 
-    // TODO: has ID
     genop->has_id = 1;
     genop->id = id++;
     HASH_FIND_STR(files, relpath, f);
@@ -287,14 +291,14 @@ int addOperation(char *relpath, GenericOperation *genop) {
                 // otherwise add new entry to inodefiles (but only if there are
                 // some operations for f)
                 if (f != NULL) {
-                    if (initializeFileop(f->relpath, finode) != 0)
+                    if (initializeFileop(f->relpath, &finode) != 0)
                         return -1;
 
                     if (mergeOperations(finode, f) != 0)
                         return -1;
 
                     finode->order = f->order;
-                    finode->inode = f->inode;
+                    finode->inode = genop->unlink_op->inode;
                     HASH_ADD_INT(inodefiles, inode, finode);
                 }
             }
@@ -337,7 +341,7 @@ int addOperation(char *relpath, GenericOperation *genop) {
                     (firstgenop->type == GENERIC_OPERATION__TYPE__UNLINK ||
                     firstgenop->type == GENERIC_OPERATION__TYPE__RMDIR)) {
 
-                if (initializeFileop(relpath, f) != 0)
+                if (initializeFileop(relpath, &f) != 0)
                     return -1;
 
                 HASH_ADD_STR(files, relpath, f);
@@ -350,16 +354,16 @@ int addOperation(char *relpath, GenericOperation *genop) {
                 // there by us (we check it using created flag)
                 f->created = 0;
                 f->order = -1;
-                
-                return 0;       // we must not enter next block
+
+                return 0; // we must not enter next block
             }
         }
-        
+
         // if the file was created before this epoch, add current
         // unlink/rmdir operation 
-        if (!f->created) {
+        if (f == NULL || !f->created) {
             // if f was part of the hash table we deleted it the last block
-            if (initializeFileop(relpath, f) != 0)
+            if (initializeFileop(relpath, &f) != 0)
                 return -1;
 
             HASH_ADD_STR(files, relpath, f);
@@ -431,7 +435,7 @@ int addOperation(char *relpath, GenericOperation *genop) {
     // handle all other cases
     // key not found
     if (f == NULL) {
-        if (initializeFileop(relpath, f) != 0)
+        if (initializeFileop(relpath, &f) != 0)
             return -1;
 
         HASH_ADD_STR(files, relpath, f);
@@ -502,7 +506,7 @@ int mergeOperations(fileop_t *dest, fileop_t *src) {
     return 0;
 }
 
-int initializeFileop(char *relpath, fileop_t *newentry) {
+int initializeFileop(char *relpath, fileop_t **newentry) {
     fileop_t *f;
 
     f = (fileop_t*) malloc(sizeof (fileop_t));
@@ -524,18 +528,213 @@ int initializeFileop(char *relpath, fileop_t *newentry) {
         return -1;
     }
 
-    newentry = f;
+    *newentry = f;
 
     return 0;
 }
 
-void optimizeOperations(fileop_t *fileop) {
-    // TODO
-    // deal with files we have in inodefiles hash table
-    // sort operations (write should go at the end, create, link etc. at the
+static int matchInode(const char *pathname, const struct stat *sbuf, int type,
+        struct FTW *ftwb) {
+
+    fileop_t *f;
+    fileop_t *finode;
+    char relpath[PATH_MAX];
+    int64_t inode;
+
+    // if stat has succeeded, get ino
+    if (type != FTW_NS)
+        inode = sbuf->st_ino;
+    else
+        return 0;
+
+    // if this ino is in inodefiles, add entry to files hash table and merge
+    // the operations into it
+    HASH_FIND_INT(inodefiles, &inode, finode);
+    if (finode != NULL) {
+        getRelativePath(relpath, config.snapshot, pathname);
+        if (initializeFileop(relpath, &f) != 0)
+            return -1;
+
+        if (mergeOperations(f, finode) != 0)
+            return -1;
+
+        finode->order = fileorder++;
+
+        free(finode->operations);
+        HASH_DEL(inodefiles, finode);
+        free(finode);
+    }
+
+    // if there are no entries in inodefiles left, we are done
+    if (HASH_COUNT(inodefiles) == 0) // HASH_COUNT is cheap
+        return 1;
+
+    return 0;
+}
+
+int matchInodefiles(void) {
+    fileop_t *f;
+    fileop_t *finode;
+    char fpath[PATH_MAX];
+    struct stat st;
+    int64_t inode;
+
+    // first try to match inodefiles to files
+    for (f = files; f != NULL; f = (fileop_t*) (f->hh.next)) {
+        // get ino of the file
+        getAbsolutePath(fpath, config.snapshot, f->relpath);
+
+        if (stat(fpath, &st) != -1) {
+            inode = st.st_ino;
+        } else {
+            // this should not happen: we can't open the file
+            errMsg(LOG_WARNING, "Could not stat file %s ", fpath);
+        }
+
+        // if this ino is in inodefiles, merge the operations in f and
+        // remove the element from inodefiles
+        // TODO: what about order?
+        HASH_FIND_INT(inodefiles, &inode, finode);
+        if (finode != NULL) {
+            if (mergeOperations(f, finode) != 0)
+                return -1;
+
+            free(finode->operations);
+            HASH_DEL(inodefiles, finode);
+            free(finode);
+        }
+
+        // if there are no entries in inodefiles left, we are done
+        if (HASH_COUNT(inodefiles) == 0) // HASH_COUNT is cheap
+            return 0;
+    }
+
+    // the rest must be matched by file tree walk (nftw)
+    int flags = 0;
+    flags |= FTW_MOUNT; // stay in the file system
+    flags |= FTW_PHYS; // do not dereference symlinks
+
+    if (nftw(config.snapshot, matchInode, 10, flags) == -1) {
+        errMsg(LOG_WARNING, "Could not stat file %s ", fpath);
+    }
+
+    // if there are still some entries left in inodefiles, we have a problem
+    if (HASH_COUNT(inodefiles) == 0)
+        return 0;
+    else
+        return -1;
+}
+
+static int cmpOperationType(const void *a, const void *b) {
+    GenericOperation *x;
+    GenericOperation *y;
+
+    x = *((GenericOperation **) a);
+    y = *((GenericOperation **) b);
+
+
+    // if both operations are of the same type
+    if (x->type == y->type) {
+        // write operations are further sorted by offset
+        if (x->type == GENERIC_OPERATION__TYPE__WRITE) {
+            if (x->write_op->offset == y->write_op->offset) {
+                return 0;
+            } else {
+                if (x->write_op->offset < y->write_op->offset)
+                    return -1;
+                else
+                    return 1;
+            }
+        } else {
+            // other operations are sorted by id
+            if (x->has_id && (x->id < y->id))
+                return -1;
+            else
+                return 1;
+        }
+    } else {
+        if (x->type < y->type)
+            return -1;
+        else
+            return 1;
+    }
+}
+
+int optimizeOperations(fileop_t *f) {
+    GenericOperation *op;
+
+    // optimize writes which wrote behind a consequent truncate
+    // iterate in reverse order, find 'first' (i.e. last) truncate
+    // and edit every 'subsequent' (i.e. preceeding) write, if necessary
+    int64_t newsize;
+    int truncfound = 0;
+    for (int i = f->nelem - 1; i >= 0; i--) {
+        op = *(f->operations + i);
+
+        // until we get truncate operation, simply continue
+        if (!truncfound && op->type != GENERIC_OPERATION__TYPE__TRUNCATE) {
+            continue;
+        } else {
+            // when we first get a truncate op, set a flag to not search for it
+            // anymore
+            truncfound = 1;
+            newsize = op->truncate_op->newsize;
+        }
+
+        // after finding truncate op, we are only interested in 
+        if (op->type != GENERIC_OPERATION__TYPE__WRITE)
+            continue;
+
+        // if 'right edge' of the write interval lies beyond truncate, we must
+        // change the interval
+        if (op->write_op->offset + op->write_op->size > newsize) {
+            // write interval is completely beyond the truncate => forget it
+            if (op->write_op->offset >= newsize)
+                *(f->operations + i) = NULL;
+            else
+                op->write_op->size -=
+                    (op->write_op->offset + op->write_op->size - newsize);
+        }
+    }
+
+
+    // now sort operations (write should go at the end, create, link etc. at the
     // beginning...)
-    // remove duplicates
-    return;
+    qsort(f->operations, f->nelem, sizeof (GenericOperation *),
+            cmpOperationType);
+
+    // optimize write intervals (rule out overlapping intervals)
+    // we could also delete all chmods/chowns... but the last one, but this is
+    // not being done now
+    int64_t maxoff = 0;
+    int firstwrite = 0;
+    for (int i = 0; i < f->nelem; i++) {
+        op = *(f->operations + i);
+
+        if (op->type != GENERIC_OPERATION__TYPE__WRITE) {
+            continue;
+        }
+
+        // when we get first write op, try to get newsize from last truncate
+        // if there was a truncate somewhere in the 
+        if (!firstwrite) {
+            firstwrite = 1;
+
+        }
+
+        if (op->write_op->offset + op->write_op->size < maxoff) {
+            *(f->operations + i) = NULL;
+        } else {
+            if (op->write_op->offset < maxoff) {
+
+                op->write_op->offset = maxoff;
+                op->write_op->size -= (maxoff - op->write_op->offset);
+            }
+            maxoff = op->write_op->offset + op->write_op->size;
+        }
+    }
+
+    return 0;
 }
 
 //------------------------------------------------------------------------------
@@ -544,7 +743,7 @@ void optimizeOperations(fileop_t *fileop) {
 
 int transfer(char *host, char *port) {
     int sfd; // server socket
-    fileop_t *fileop; // contains all operations for a file
+    fileop_t *f; // contains all operations for a file
 
     sfd = inetConnect(host, port, SOCK_STREAM);
     if (sfd == -1) {
@@ -565,12 +764,10 @@ int transfer(char *host, char *port) {
 
     // iterate over files in correct order
     HASH_SORT(files, sortByOrder);
-    for (fileop = files; fileop != NULL;
-            fileop = (fileop_t*) (fileop->hh.next)) {
-
-        if (transferFile(sfd, fileop) == -1) {
+    for (f = files; f != NULL; f = (fileop_t*) (f->hh.next)) {
+        if (transferFile(sfd, f) == -1) {
             errMsg(LOG_ERR, "Transfer of file %s has failed.",
-                    fileop->relpath);
+                    f->relpath);
             return -1;
         }
     }
@@ -580,6 +777,7 @@ int transfer(char *host, char *port) {
     conf = (SyncFinish *) recvMessage(sfd, SyncFinishType, NULL);
     if (conf == NULL) {
         errMsg(LOG_ERR, "Could not get transfer confirmation.");
+
         return -1;
     }
     return 0;
@@ -617,6 +815,7 @@ int initiateSync(int sfd, int numfiles) {
             return -2; // special case, which has to be handled in transfer()
         } else {
             if (strlen(response->error_message) > 0) {
+
                 errMsg(LOG_ERR, "Could not initiate sync. "
                         "Response from server: %s", response->error_message);
             }
@@ -714,6 +913,7 @@ int transferChunk(int sfd, fileop_t *fileop, GenericOperation **opstart,
     fchunk.ops = opstart;
 
     if (sendMessage(sfd, FileChunkType, &fchunk) != 0)
+
         return -1;
 
     // wait for ACK?
@@ -780,6 +980,7 @@ int loadWriteData(char *relpath, WriteOperation *writeop, dyndata_t *dyndata) {
     writeop->data = data;
 
     dyndata->offset += writeop->size;
+
     return 0;
 }
 
@@ -789,6 +990,7 @@ int loadWriteData(char *relpath, WriteOperation *writeop, dyndata_t *dyndata) {
 
 int sortByOrder(fileop_t *a, fileop_t *b) {
     if (a->order == b->order)
+
         return 0;
     return (a->order < b->order) ? -1 : 1;
 }
@@ -871,6 +1073,7 @@ int switchLog(void) {
 
     // restore signal mask
     if (sigprocmask(SIG_SETMASK, &origmask, NULL) == -1) {
+
         errMsg(LOG_WARNING, "Could not restore signal mask.");
     }
     return 0;

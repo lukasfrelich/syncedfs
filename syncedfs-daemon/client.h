@@ -37,9 +37,10 @@ int synchronize(void);
 int loadLog(int logfd);
 void printLog(void);
 int addOperation(char *relpath, GenericOperation *genop);
-void optimizeOperations(fileop_t *fileop);
 int mergeOperations(fileop_t *dest, fileop_t *src);
-int initializeFileop(char *relpath, fileop_t *newentry);
+int initializeFileop(char *relpath, fileop_t **newentry);
+int matchInodefiles(void);
+int optimizeOperations(fileop_t *f);
 
 //------------------------------------------------------------------------------
 // Transfer

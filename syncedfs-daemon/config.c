@@ -38,6 +38,8 @@ int readConfig(char *resource) {
 
     int ret = 0;
     ret |= setConfigString(&cfg, "btrfs", str, config.btfsbin, PATH_MAX, 1);
+    ret |= setConfigString(&cfg, "btrfs-suid", str, config.btfsbinsuid,
+            PATH_MAX, 1);
 
     sprintf(config.ident, "syncedfsd %s", config.resource);
 

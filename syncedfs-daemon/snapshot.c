@@ -77,13 +77,13 @@ int deleteSnapshot(char *path) {
     int ret;
     
     char *argv[5];
-    argv[0] = strrchr(config.btfsbin, '/');
+    argv[0] = strrchr(config.btfsbinsuid, '/');
     argv[1] = "subvolume";
     argv[2] = "delete";
     argv[3] = path;
     argv[4] = NULL;
 
-    ret = mexec(config.btfsbin, argv);
+    ret = mexec(config.btfsbinsuid, argv);
     if (ret != 0) {
         if (ret == -1)  // execution failed
             errMsg(LOG_ERR, "Error while executing btrfs binary.");
