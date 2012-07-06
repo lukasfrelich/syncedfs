@@ -1150,40 +1150,40 @@ const ProtobufCMessageDescriptor file_operation__descriptor =
 };
 const ProtobufCEnumValue generic_operation__type__enum_values_by_number[14] =
 {
+  { "UNLINK", "GENERIC_OPERATION__TYPE__UNLINK", 1 },
+  { "RMDIR", "GENERIC_OPERATION__TYPE__RMDIR", 2 },
   { "CREATE", "GENERIC_OPERATION__TYPE__CREATE", 3 },
   { "MKNOD", "GENERIC_OPERATION__TYPE__MKNOD", 4 },
   { "MKDIR", "GENERIC_OPERATION__TYPE__MKDIR", 5 },
   { "SYMLINK", "GENERIC_OPERATION__TYPE__SYMLINK", 6 },
   { "LINK", "GENERIC_OPERATION__TYPE__LINK", 7 },
-  { "WRITE", "GENERIC_OPERATION__TYPE__WRITE", 8 },
-  { "UNLINK", "GENERIC_OPERATION__TYPE__UNLINK", 9 },
-  { "RMDIR", "GENERIC_OPERATION__TYPE__RMDIR", 10 },
-  { "TRUNCATE", "GENERIC_OPERATION__TYPE__TRUNCATE", 11 },
-  { "CHMOD", "GENERIC_OPERATION__TYPE__CHMOD", 12 },
-  { "CHOWN", "GENERIC_OPERATION__TYPE__CHOWN", 13 },
+  { "CHMOD", "GENERIC_OPERATION__TYPE__CHMOD", 8 },
+  { "CHOWN", "GENERIC_OPERATION__TYPE__CHOWN", 9 },
+  { "SETXATTR", "GENERIC_OPERATION__TYPE__SETXATTR", 10 },
+  { "REMOVEXATTR", "GENERIC_OPERATION__TYPE__REMOVEXATTR", 11 },
+  { "TRUNCATE", "GENERIC_OPERATION__TYPE__TRUNCATE", 12 },
+  { "WRITE", "GENERIC_OPERATION__TYPE__WRITE", 13 },
   { "RENAME", "GENERIC_OPERATION__TYPE__RENAME", 14 },
-  { "SETXATTR", "GENERIC_OPERATION__TYPE__SETXATTR", 15 },
-  { "REMOVEXATTR", "GENERIC_OPERATION__TYPE__REMOVEXATTR", 16 },
 };
 static const ProtobufCIntRange generic_operation__type__value_ranges[] = {
-{3, 0},{0, 14}
+{1, 0},{0, 14}
 };
 const ProtobufCEnumValueIndex generic_operation__type__enum_values_by_name[14] =
 {
-  { "CHMOD", 9 },
-  { "CHOWN", 10 },
-  { "CREATE", 0 },
-  { "LINK", 4 },
-  { "MKDIR", 2 },
-  { "MKNOD", 1 },
-  { "REMOVEXATTR", 13 },
-  { "RENAME", 11 },
-  { "RMDIR", 7 },
-  { "SETXATTR", 12 },
-  { "SYMLINK", 3 },
-  { "TRUNCATE", 8 },
-  { "UNLINK", 6 },
-  { "WRITE", 5 },
+  { "CHMOD", 7 },
+  { "CHOWN", 8 },
+  { "CREATE", 2 },
+  { "LINK", 6 },
+  { "MKDIR", 4 },
+  { "MKNOD", 3 },
+  { "REMOVEXATTR", 10 },
+  { "RENAME", 13 },
+  { "RMDIR", 1 },
+  { "SETXATTR", 9 },
+  { "SYMLINK", 5 },
+  { "TRUNCATE", 11 },
+  { "UNLINK", 0 },
+  { "WRITE", 12 },
 };
 const ProtobufCEnumDescriptor generic_operation__type__descriptor =
 {
@@ -1227,80 +1227,8 @@ static const ProtobufCFieldDescriptor generic_operation__field_descriptors[16] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "create_op",
-    3,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_MESSAGE,
-    0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, create_op),
-    &create_operation__descriptor,
-    NULL,
-    0,            /* packed */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "mknod_op",
-    4,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_MESSAGE,
-    0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, mknod_op),
-    &mknod_operation__descriptor,
-    NULL,
-    0,            /* packed */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "mkdir_op",
-    5,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_MESSAGE,
-    0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, mkdir_op),
-    &mkdir_operation__descriptor,
-    NULL,
-    0,            /* packed */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "symlink_op",
-    6,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_MESSAGE,
-    0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, symlink_op),
-    &symlink_operation__descriptor,
-    NULL,
-    0,            /* packed */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "link_op",
-    7,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_MESSAGE,
-    0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, link_op),
-    &link_operation__descriptor,
-    NULL,
-    0,            /* packed */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "write_op",
-    8,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_MESSAGE,
-    0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, write_op),
-    &write_operation__descriptor,
-    NULL,
-    0,            /* packed */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
     "unlink_op",
-    9,
+    3,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
@@ -1312,7 +1240,7 @@ static const ProtobufCFieldDescriptor generic_operation__field_descriptors[16] =
   },
   {
     "rmdir_op",
-    10,
+    4,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
@@ -1323,20 +1251,68 @@ static const ProtobufCFieldDescriptor generic_operation__field_descriptors[16] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "truncate_op",
-    11,
+    "create_op",
+    5,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
-    PROTOBUF_C_OFFSETOF(GenericOperation, truncate_op),
-    &truncate_operation__descriptor,
+    PROTOBUF_C_OFFSETOF(GenericOperation, create_op),
+    &create_operation__descriptor,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "mknod_op",
+    6,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(GenericOperation, mknod_op),
+    &mknod_operation__descriptor,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "mkdir_op",
+    7,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(GenericOperation, mkdir_op),
+    &mkdir_operation__descriptor,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "symlink_op",
+    8,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(GenericOperation, symlink_op),
+    &symlink_operation__descriptor,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "link_op",
+    9,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(GenericOperation, link_op),
+    &link_operation__descriptor,
     NULL,
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
     "chmod_op",
-    12,
+    10,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
@@ -1348,12 +1324,36 @@ static const ProtobufCFieldDescriptor generic_operation__field_descriptors[16] =
   },
   {
     "chown_op",
-    13,
+    11,
     PROTOBUF_C_LABEL_OPTIONAL,
     PROTOBUF_C_TYPE_MESSAGE,
     0,   /* quantifier_offset */
     PROTOBUF_C_OFFSETOF(GenericOperation, chown_op),
     &chown_operation__descriptor,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "truncate_op",
+    12,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(GenericOperation, truncate_op),
+    &truncate_operation__descriptor,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "write_op",
+    13,
+    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_TYPE_MESSAGE,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(GenericOperation, write_op),
+    &write_operation__descriptor,
     NULL,
     0,            /* packed */
     0,NULL,NULL    /* reserved1,reserved2, etc */
@@ -1396,22 +1396,22 @@ static const ProtobufCFieldDescriptor generic_operation__field_descriptors[16] =
   },
 };
 static const unsigned generic_operation__field_indices_by_name[] = {
-  11,   /* field[11] = chmod_op */
-  12,   /* field[12] = chown_op */
-  2,   /* field[2] = create_op */
+  9,   /* field[9] = chmod_op */
+  10,   /* field[10] = chown_op */
+  4,   /* field[4] = create_op */
   0,   /* field[0] = id */
-  6,   /* field[6] = link_op */
-  4,   /* field[4] = mkdir_op */
-  3,   /* field[3] = mknod_op */
+  8,   /* field[8] = link_op */
+  6,   /* field[6] = mkdir_op */
+  5,   /* field[5] = mknod_op */
   15,   /* field[15] = removexattr_op */
   13,   /* field[13] = rename_op */
-  9,   /* field[9] = rmdir_op */
+  3,   /* field[3] = rmdir_op */
   14,   /* field[14] = setxattr_op */
-  5,   /* field[5] = symlink_op */
-  10,   /* field[10] = truncate_op */
+  7,   /* field[7] = symlink_op */
+  11,   /* field[11] = truncate_op */
   1,   /* field[1] = type */
-  8,   /* field[8] = unlink_op */
-  7,   /* field[7] = write_op */
+  2,   /* field[2] = unlink_op */
+  12,   /* field[12] = write_op */
 };
 static const ProtobufCIntRange generic_operation__number_ranges[1 + 1] =
 {
@@ -1999,15 +1999,39 @@ const ProtobufCMessageDescriptor rename_operation__descriptor =
   (ProtobufCMessageInit) rename_operation__init,
   NULL,NULL,NULL    /* reserved[123] */
 };
-static const ProtobufCFieldDescriptor setxattr_operation__field_descriptors[1] =
+static const ProtobufCFieldDescriptor setxattr_operation__field_descriptors[3] =
 {
   {
-    "dummy",
-    15,
-    PROTOBUF_C_LABEL_OPTIONAL,
+    "name",
+    1,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(SetxattrOperation, name),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "data",
+    2,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_BYTES,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(SetxattrOperation, data),
+    NULL,
+    NULL,
+    0,            /* packed */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "flags",
+    3,
+    PROTOBUF_C_LABEL_REQUIRED,
     PROTOBUF_C_TYPE_INT32,
-    PROTOBUF_C_OFFSETOF(SetxattrOperation, has_dummy),
-    PROTOBUF_C_OFFSETOF(SetxattrOperation, dummy),
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(SetxattrOperation, flags),
     NULL,
     NULL,
     0,            /* packed */
@@ -2015,12 +2039,14 @@ static const ProtobufCFieldDescriptor setxattr_operation__field_descriptors[1] =
   },
 };
 static const unsigned setxattr_operation__field_indices_by_name[] = {
-  0,   /* field[0] = dummy */
+  1,   /* field[1] = data */
+  2,   /* field[2] = flags */
+  0,   /* field[0] = name */
 };
 static const ProtobufCIntRange setxattr_operation__number_ranges[1 + 1] =
 {
-  { 15, 0 },
-  { 0, 1 }
+  { 1, 0 },
+  { 0, 3 }
 };
 const ProtobufCMessageDescriptor setxattr_operation__descriptor =
 {
@@ -2030,7 +2056,7 @@ const ProtobufCMessageDescriptor setxattr_operation__descriptor =
   "SetxattrOperation",
   "",
   sizeof(SetxattrOperation),
-  1,
+  3,
   setxattr_operation__field_descriptors,
   setxattr_operation__field_indices_by_name,
   1,  setxattr_operation__number_ranges,
@@ -2040,12 +2066,12 @@ const ProtobufCMessageDescriptor setxattr_operation__descriptor =
 static const ProtobufCFieldDescriptor removexattr_operation__field_descriptors[1] =
 {
   {
-    "dummy",
-    16,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_INT32,
-    PROTOBUF_C_OFFSETOF(RemovexattrOperation, has_dummy),
-    PROTOBUF_C_OFFSETOF(RemovexattrOperation, dummy),
+    "name",
+    1,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_STRING,
+    0,   /* quantifier_offset */
+    PROTOBUF_C_OFFSETOF(RemovexattrOperation, name),
     NULL,
     NULL,
     0,            /* packed */
@@ -2053,11 +2079,11 @@ static const ProtobufCFieldDescriptor removexattr_operation__field_descriptors[1
   },
 };
 static const unsigned removexattr_operation__field_indices_by_name[] = {
-  0,   /* field[0] = dummy */
+  0,   /* field[0] = name */
 };
 static const ProtobufCIntRange removexattr_operation__number_ranges[1 + 1] =
 {
-  { 16, 0 },
+  { 1, 0 },
   { 0, 1 }
 };
 const ProtobufCMessageDescriptor removexattr_operation__descriptor =

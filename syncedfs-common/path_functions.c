@@ -24,6 +24,18 @@ void getAbsolutePath(char *fpath, const char *rootdir, const char *path) {
     fpath[PATH_MAX - 1] = '\0'; // fpath might not have been terminated
 }
 
+void getRelativePath(char *fpath, const char *rootdir, const char *path) {
+    int rdirlen;
+    rdirlen = strlen(rootdir);
+
+    // if rootdir is not a canonical path
+    if (path != NULL && *(path + rdirlen) == '/') {
+        strncpy(fpath, path + rdirlen - 1, PATH_MAX - 1);
+    } else {
+        strncpy(fpath, path + rdirlen, PATH_MAX - 1);
+    }
+}
+
 char *getCanonincalPath(char *path) {
     int len;
 

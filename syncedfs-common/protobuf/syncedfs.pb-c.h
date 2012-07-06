@@ -33,20 +33,20 @@ typedef struct _RemovexattrOperation RemovexattrOperation;
 /* --- enums --- */
 
 typedef enum _GenericOperation__Type {
+  GENERIC_OPERATION__TYPE__UNLINK = 1,
+  GENERIC_OPERATION__TYPE__RMDIR = 2,
   GENERIC_OPERATION__TYPE__CREATE = 3,
   GENERIC_OPERATION__TYPE__MKNOD = 4,
   GENERIC_OPERATION__TYPE__MKDIR = 5,
   GENERIC_OPERATION__TYPE__SYMLINK = 6,
   GENERIC_OPERATION__TYPE__LINK = 7,
-  GENERIC_OPERATION__TYPE__WRITE = 8,
-  GENERIC_OPERATION__TYPE__UNLINK = 9,
-  GENERIC_OPERATION__TYPE__RMDIR = 10,
-  GENERIC_OPERATION__TYPE__TRUNCATE = 11,
-  GENERIC_OPERATION__TYPE__CHMOD = 12,
-  GENERIC_OPERATION__TYPE__CHOWN = 13,
-  GENERIC_OPERATION__TYPE__RENAME = 14,
-  GENERIC_OPERATION__TYPE__SETXATTR = 15,
-  GENERIC_OPERATION__TYPE__REMOVEXATTR = 16
+  GENERIC_OPERATION__TYPE__CHMOD = 8,
+  GENERIC_OPERATION__TYPE__CHOWN = 9,
+  GENERIC_OPERATION__TYPE__SETXATTR = 10,
+  GENERIC_OPERATION__TYPE__REMOVEXATTR = 11,
+  GENERIC_OPERATION__TYPE__TRUNCATE = 12,
+  GENERIC_OPERATION__TYPE__WRITE = 13,
+  GENERIC_OPERATION__TYPE__RENAME = 14
 } GenericOperation__Type;
 
 /* --- messages --- */
@@ -117,17 +117,17 @@ struct  _GenericOperation
   protobuf_c_boolean has_id;
   int32_t id;
   GenericOperation__Type type;
+  UnlinkOperation *unlink_op;
+  RmdirOperation *rmdir_op;
   CreateOperation *create_op;
   MknodOperation *mknod_op;
   MkdirOperation *mkdir_op;
   SymlinkOperation *symlink_op;
   LinkOperation *link_op;
-  WriteOperation *write_op;
-  UnlinkOperation *unlink_op;
-  RmdirOperation *rmdir_op;
-  TruncateOperation *truncate_op;
   ChmodOperation *chmod_op;
   ChownOperation *chown_op;
+  TruncateOperation *truncate_op;
+  WriteOperation *write_op;
   RenameOperation *rename_op;
   SetxattrOperation *setxattr_op;
   RemovexattrOperation *removexattr_op;
@@ -270,23 +270,23 @@ struct  _RenameOperation
 struct  _SetxattrOperation
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_dummy;
-  int32_t dummy;
+  char *name;
+  ProtobufCBinaryData data;
+  int32_t flags;
 };
 #define SETXATTR_OPERATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&setxattr_operation__descriptor) \
-    , 0,0 }
+    , NULL, {0,NULL}, 0 }
 
 
 struct  _RemovexattrOperation
 {
   ProtobufCMessage base;
-  protobuf_c_boolean has_dummy;
-  int32_t dummy;
+  char *name;
 };
 #define REMOVEXATTR_OPERATION__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&removexattr_operation__descriptor) \
-    , 0,0 }
+    , NULL }
 
 
 /* SyncInit methods */

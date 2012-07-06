@@ -126,6 +126,79 @@ int loadLog(int logfd) {
     return 0;
 }
 
+static int cmpWrites(const void *a, const void *b) {
+    GenericOperation *x;
+    GenericOperation *y;
+
+    x = *((GenericOperation **) a);
+    y = *((GenericOperation **) b);
+
+    if (x->type != GENERIC_OPERATION__TYPE__WRITE ||
+            y->type != GENERIC_OPERATION__TYPE__WRITE)
+        return -1;
+
+    if (x->write_op->offset == y->write_op->offset) {
+        return 0;
+    } else {
+        if (x->write_op->offset < y->write_op->offset) {
+            return -1;
+        } else {
+            return 1;
+        }
+    }
+}
+
+int optimizeOperations(fileop_t *f) {
+    // writes only
+
+    qsort(f->operations, f->nelem, sizeof (GenericOperation *),
+            cmpWrites);
+
+    GenericOperation *op;
+    long long maxoff = 0;
+
+    for (int i = 0; i < f->nelem; i++) {
+        op = *(f->operations + i);
+
+        if (op->type != GENERIC_OPERATION__TYPE__WRITE) {
+            continue;
+        }
+
+        if (op->write_op->offset + op->write_op->size < maxoff) {
+            *(f->operations + i) = NULL;
+        } else {
+            if (op->write_op->offset < maxoff) {
+                op->write_op->offset = maxoff;
+                op->write_op->size -= (maxoff - op->write_op->offset);
+            }
+            maxoff = op->write_op->offset + op->write_op->size;
+        }
+    }
+
+
+    return 0;
+}
+
+void writesSize(void) {
+    fileop_t *f;
+    GenericOperation *genop; // current operation
+    long long totalsum = 0;
+
+    // first try to match inodefiles to files
+    for (f = files; f != NULL; f = (fileop_t*) (f->hh.next)) {
+        for (int i = 0; i < f->nelem; i++) {
+            genop = *(f->operations + i);
+            if (genop == NULL) {
+                continue;
+            }
+
+            if (genop->type == GENERIC_OPERATION__TYPE__WRITE)
+                totalsum += genop->write_op->size;
+        }
+    }
+    printf("Total size: %lld\n", totalsum);
+}
+
 void printLog(void) {
     HASH_SORT(files, sortByOrder);
     fileop_t *f;
@@ -133,9 +206,14 @@ void printLog(void) {
 
     for (f = files; f != NULL; f = (fileop_t*) (f->hh.next)) {
         printf("%s\n", f->filename);
+        optimizeOperations(f);
 
         for (int i = 0; i < f->nelem; i++) {
             op = *(f->operations + i);
+            if (op == NULL) {
+                printf("Operation %d, type: empty\n", i);
+                continue;
+            }
 
             switch (op->type) {
                 case GENERIC_OPERATION__TYPE__CREATE:
@@ -216,6 +294,9 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Could not load log.");
         return -1;
     }
-    
-    printLog();
+    if (argc == 3 && strcmp(argv[2], "writes") == 0) {
+        writesSize();
+    } else {
+        printLog();
+    }
 }
