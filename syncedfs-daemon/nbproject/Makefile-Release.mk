@@ -34,6 +34,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/optimization.o \
 	${OBJECTDIR}/_ext/1275677342/message_functions.o \
 	${OBJECTDIR}/_ext/1275677342/path_functions.o \
 	${OBJECTDIR}/client.o \
@@ -76,6 +77,11 @@ LDLIBSOPTIONS=
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-daemon: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.c} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/syncedfs-daemon ${OBJECTFILES} ${LDLIBSOPTIONS} 
+
+${OBJECTDIR}/optimization.o: optimization.c 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} $@.d
+	$(COMPILE.c) -O2 -MMD -MP -MF $@.d -o ${OBJECTDIR}/optimization.o optimization.c
 
 ${OBJECTDIR}/_ext/1275677342/message_functions.o: ../syncedfs-common/message_functions.c 
 	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342

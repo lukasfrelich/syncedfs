@@ -6,6 +6,7 @@
                    projectFiles="true">
       <itemPath>client.h</itemPath>
       <itemPath>config.h</itemPath>
+      <itemPath>optimization.h</itemPath>
       <itemPath>server.h</itemPath>
       <itemPath>snapshot.h</itemPath>
     </logicalFolder>
@@ -19,6 +20,7 @@
       <itemPath>client.c</itemPath>
       <itemPath>config.c</itemPath>
       <itemPath>main.c</itemPath>
+      <itemPath>optimization.c</itemPath>
       <itemPath>server.c</itemPath>
       <itemPath>snapshot.c</itemPath>
     </logicalFolder>
