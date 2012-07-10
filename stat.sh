@@ -8,6 +8,8 @@ wc \
 ./syncedfs-daemon/snapshot.c \
 ./syncedfs-daemon/main.c \
 ./syncedfs-daemon/client.c \
+./syncedfs-daemon/optimization.c \
+./syncedfs-daemon/optimization.h \
 ./fstest/fstest.sh \
 ./syncedfs-common/message_functions.c \
 ./syncedfs-common/path_functions.c \
