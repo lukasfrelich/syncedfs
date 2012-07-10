@@ -45,7 +45,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/988793768/alt_functions.o \
 	${OBJECTDIR}/_ext/988793768/create_pid_file.o \
 	${OBJECTDIR}/main.o \
-	${OBJECTDIR}/_ext/1275677342/logging_functions.o
+	${OBJECTDIR}/_ext/1275677342/logging_functions.o \
+	${OBJECTDIR}/_ext/1260215813/optimization.o
 
 
 # C Compiler Flags
@@ -131,6 +132,11 @@ ${OBJECTDIR}/_ext/1275677342/logging_functions.o: ../syncedfs-common/logging_fun
 	${MKDIR} -p ${OBJECTDIR}/_ext/1275677342
 	${RM} $@.d
 	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1275677342/logging_functions.o ../syncedfs-common/logging_functions.c
+
+${OBJECTDIR}/_ext/1260215813/optimization.o: ../syncedfs-daemon/optimization.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/1260215813
+	${RM} $@.d
+	$(COMPILE.c) -g `pkg-config --cflags libprotobuf-c` `pkg-config --cflags libconfig`    -MMD -MP -MF $@.d -o ${OBJECTDIR}/_ext/1260215813/optimization.o ../syncedfs-daemon/optimization.c
 
 # Subprojects
 .build-subprojects:

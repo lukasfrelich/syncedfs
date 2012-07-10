@@ -13,6 +13,7 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>main.c</itemPath>
+      <itemPath>../syncedfs-daemon/optimization.c</itemPath>
     </logicalFolder>
     <logicalFolder name="syncedfs-common"
                    displayName="syncedfs-common"

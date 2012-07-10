@@ -18,29 +18,31 @@
 #include "../syncedfs-common/lib/inet_sockets.h"
 #include "../syncedfs-common/lib/create_pid_file.h"
 #include "../syncedfs-common/lib/uthash.h"
+#include "../syncedfs-daemon/optimization.h"
 
-typedef struct fileop {
+/*typedef struct fileop {
     char filename[PATH_MAX]; // key
     int order; // files must be transfered in order
     GenericOperation **operations;
     int capacity;
     int nelem;
     UT_hash_handle hh;
-} fileop_t;
+} fileop_t;*/
 
 fileop_t *files = NULL; // Hash map
 
-int sortByOrder(fileop_t *a, fileop_t *b) {
+/*int sortByOrder(fileop_t *a, fileop_t *b) {
     if (a->order == b->order)
         return 0;
     return (a->order < b->order) ? -1 : 1;
-}
+}*/
 
 int addOperation(char *relpath, GenericOperation *genop) {
     static int fileorder = 0;
     static int id = 0;
     fileop_t *f;
 
+    genop->has_id = 1;
     genop->id = id++;
 
     HASH_FIND_STR(files, relpath, f);
@@ -53,7 +55,7 @@ int addOperation(char *relpath, GenericOperation *genop) {
             return -1;
         }
 
-        (void) strcpy(f->filename, relpath);
+        (void) strcpy(f->relpath, relpath);
         f->order = fileorder++;
         f->capacity = VECTOR_INIT_CAPACITY;
         f->operations = malloc(VECTOR_INIT_CAPACITY * sizeof (fileop_t*));
@@ -63,7 +65,7 @@ int addOperation(char *relpath, GenericOperation *genop) {
             return -1;
         }
 
-        HASH_ADD_STR(files, filename, f);
+        HASH_ADD_STR(files, relpath, f);
     }
 
     // extend vector of operations if needed
@@ -126,59 +128,6 @@ int loadLog(int logfd) {
     return 0;
 }
 
-static int cmpWrites(const void *a, const void *b) {
-    GenericOperation *x;
-    GenericOperation *y;
-
-    x = *((GenericOperation **) a);
-    y = *((GenericOperation **) b);
-
-    if (x->type != GENERIC_OPERATION__TYPE__WRITE ||
-            y->type != GENERIC_OPERATION__TYPE__WRITE)
-        return -1;
-
-    if (x->write_op->offset == y->write_op->offset) {
-        return 0;
-    } else {
-        if (x->write_op->offset < y->write_op->offset) {
-            return -1;
-        } else {
-            return 1;
-        }
-    }
-}
-
-int optimizeOperations(fileop_t *f) {
-    // writes only
-
-    qsort(f->operations, f->nelem, sizeof (GenericOperation *),
-            cmpWrites);
-
-    GenericOperation *op;
-    long long maxoff = 0;
-
-    for (int i = 0; i < f->nelem; i++) {
-        op = *(f->operations + i);
-
-        if (op->type != GENERIC_OPERATION__TYPE__WRITE) {
-            continue;
-        }
-
-        if (op->write_op->offset + op->write_op->size < maxoff) {
-            *(f->operations + i) = NULL;
-        } else {
-            if (op->write_op->offset < maxoff) {
-                op->write_op->offset = maxoff;
-                op->write_op->size -= (maxoff - op->write_op->offset);
-            }
-            maxoff = op->write_op->offset + op->write_op->size;
-        }
-    }
-
-
-    return 0;
-}
-
 void writesSize(void) {
     fileop_t *f;
     GenericOperation *genop; // current operation
@@ -199,13 +148,42 @@ void writesSize(void) {
     printf("Total size: %lld\n", totalsum);
 }
 
+void optimizedWritesSize(void) {
+    fileop_t *f;
+    GenericOperation *genop; // current operation
+    long long totalsum = 0;
+
+    // first try to match inodefiles to files
+    for (f = files; f != NULL; f = (fileop_t*) (f->hh.next)) {
+        optimizeOperations(f);
+        for (int i = 0; i < f->nelem; i++) {
+            genop = *(f->operations + i);
+            if (genop == NULL) {
+                continue;
+            }
+
+            if (genop->type == GENERIC_OPERATION__TYPE__WRITE)
+                totalsum += genop->write_op->size;
+        }
+    }
+    printf("Total size: %lld\n", totalsum);
+}
+
+int sortByOrder(fileop_t *a, fileop_t *b) {
+    if (a->order == b->order)
+
+        return 0;
+    return (a->order < b->order) ? -1 : 1;
+}
+
 void printLog(void) {
     HASH_SORT(files, sortByOrder);
     fileop_t *f;
     GenericOperation *op;
 
     for (f = files; f != NULL; f = (fileop_t*) (f->hh.next)) {
-        printf("%s\n", f->filename);
+        printf("%s\n", f->relpath);
+        //qsort(f->operations, f->nelem, sizeof (GenericOperation *),cmpOperationType);
         optimizeOperations(f);
 
         for (int i = 0; i < f->nelem; i++) {
@@ -238,9 +216,9 @@ void printLog(void) {
                             i, op->link_op->newpath);
                     break;
                 case GENERIC_OPERATION__TYPE__WRITE:
-                    printf("Operation %d, type: write, offset: %ld, size: %d\n",
+                    printf("Operation %d, type: write, offset: %ld, size: %d, id: %d\n",
                             i, (long int) op->write_op->offset,
-                            (int) op->write_op->size);
+                            (int) op->write_op->size, (int) op->id);
                     break;
                 case GENERIC_OPERATION__TYPE__UNLINK:
                     printf("Operation %d, type: unlink\n", i);
@@ -249,8 +227,8 @@ void printLog(void) {
                     printf("Operation %d, type: rmdir\n", i);
                     break;
                 case GENERIC_OPERATION__TYPE__TRUNCATE:
-                    printf("Operation %d, type: truncate, newsize: %d\n",
-                            i, (int) op->truncate_op->newsize);
+                    printf("Operation %d, type: truncate, newsize: %d, id: %d\n",
+                            i, (int) op->truncate_op->newsize, (int) op->id);
                     break;
                 case GENERIC_OPERATION__TYPE__CHMOD:
                     printf("Operation %d, type: chmod, mode: %d\n",
@@ -296,7 +274,13 @@ int main(int argc, char** argv) {
     }
     if (argc == 3 && strcmp(argv[2], "writes") == 0) {
         writesSize();
-    } else {
-        printLog();
+        return 0;
     }
+
+    if (argc == 3 && strcmp(argv[2], "optimized-writes") == 0) {
+        optimizedWritesSize();
+        return 0;
+    }
+
+    printLog();
 }
