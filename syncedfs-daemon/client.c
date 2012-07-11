@@ -181,75 +181,6 @@ int loadLog(int logfd) {
     return 0;
 }
 
-void printLog(void) {
-    HASH_SORT(files, sortByOrder);
-    fileop_t *f;
-    GenericOperation *op;
-
-    for (f = files; f != NULL; f = (fileop_t*) (f->hh.next)) {
-        printf("%s\n", f->relpath);
-
-        for (int i = 0; i < f->nelem; i++) {
-            op = *(f->operations + i);
-
-            switch (op->type) {
-                case GENERIC_OPERATION__TYPE__CREATE:
-                    printf("Operation %d, type: create, mode: %d\n",
-                            i, (int) op->create_op->mode);
-                    break;
-                case GENERIC_OPERATION__TYPE__MKNOD:
-                    printf("Operation %d, type: mknod, mode: %d, dev: %ld\n",
-                            i, (int) op->mknod_op->mode,
-                            (long int) op->mknod_op->dev);
-                    break;
-                case GENERIC_OPERATION__TYPE__MKDIR:
-                    printf("Operation %d, type: mkdir, mode: %d\n",
-                            i, (int) op->mkdir_op->mode);
-                    break;
-                case GENERIC_OPERATION__TYPE__SYMLINK:
-                    printf("Operation %d, type: symlink, newpath: %s\n",
-                            i, op->symlink_op->newpath);
-                    break;
-                case GENERIC_OPERATION__TYPE__LINK:
-                    printf("Operation %d, type: link, newpath: %s\n",
-                            i, op->link_op->newpath);
-                    break;
-                case GENERIC_OPERATION__TYPE__WRITE:
-                    printf("Operation %d, type: write, offset: %ld, size: %d\n",
-                            i, (long int) op->write_op->offset,
-                            (int) op->write_op->size);
-                    break;
-                case GENERIC_OPERATION__TYPE__UNLINK:
-                    printf("Operation %d, type: unlink\n", i);
-                    break;
-                case GENERIC_OPERATION__TYPE__RMDIR:
-                    printf("Operation %d, type: rmdir\n", i);
-                    break;
-                case GENERIC_OPERATION__TYPE__TRUNCATE:
-                    printf("Operation %d, type: truncate, newsize: %d\n",
-                            i, (int) op->truncate_op->newsize);
-                    break;
-                case GENERIC_OPERATION__TYPE__CHMOD:
-                    printf("Operation %d, type: chmod, mode: %d\n",
-                            i, (int) op->chmod_op->mode);
-                    break;
-                case GENERIC_OPERATION__TYPE__CHOWN:
-                    printf("Operation %d, type: chown, uid: %d, gid: %d\n",
-                            i, (int) op->chown_op->uid,
-                            (int) op->chown_op->gid);
-                    break;
-                case GENERIC_OPERATION__TYPE__RENAME:
-                    printf("Operation %d, type: rename, newpath: %s\n",
-                            i, op->rename_op->newpath);
-                    break;
-                case GENERIC_OPERATION__TYPE__SETXATTR:
-                case GENERIC_OPERATION__TYPE__REMOVEXATTR:
-                    break;
-            }
-        }
-    }
-}
-
 int addOperation(char *relpath, GenericOperation *genop) {
     static int id = 0;
     fileop_t *f;
@@ -263,6 +194,7 @@ int addOperation(char *relpath, GenericOperation *genop) {
         // we want to add the operation to newpath list
         // so just get newpath entry and let the generic handler do the rest
         HASH_FIND_STR(files, genop->link_op->newpath, f);
+        relpath = genop->link_op->newpath;
         // falls through to the last section to add current operation
     }
 
@@ -283,6 +215,7 @@ int addOperation(char *relpath, GenericOperation *genop) {
             // search for inode number of current file in inodefiles hash table
             HASH_FIND_INT(inodefiles, &genop->unlink_op->inode, finode);
             // if we find it, merge current operations with entry in inodefiles
+            // TODO: not all operations should be kept
             if (finode != NULL) {
                 if (mergeOperations(finode, f) != 0) // f can be NULL here
                     return -1;
@@ -295,6 +228,7 @@ int addOperation(char *relpath, GenericOperation *genop) {
                     if (initializeFileop(f->relpath, &finode) != 0)
                         return -1;
 
+                    // TODO: not all operations should be kept
                     if (mergeOperations(finode, f) != 0)
                         return -1;
 
@@ -330,7 +264,7 @@ int addOperation(char *relpath, GenericOperation *genop) {
         // it and don't add current unlink/rmdir
         if (f != NULL) {
             // save first operation
-            GenericOperation *firstgenop = ((GenericOperation *) f->operations);
+            GenericOperation *firstgenop = *f->operations;
 
             // remove all operations and entry from hash table
             free(f->operations);
@@ -547,7 +481,7 @@ static int matchInode(const char *pathname, const struct stat *sbuf, int type,
         inode = sbuf->st_ino;
     else
         return 0;
-
+    
     // if this ino is in inodefiles, add entry to files hash table and merge
     // the operations into it
     HASH_FIND_INT(inodefiles, &inode, finode);
@@ -560,6 +494,7 @@ static int matchInode(const char *pathname, const struct stat *sbuf, int type,
             return -1;
 
         finode->order = fileorder++;
+        HASH_ADD_STR(files, relpath, f);
 
         free(finode->operations);
         HASH_DEL(inodefiles, finode);
@@ -988,4 +923,11 @@ int generateSyncId(char *id, int maxlength) {
 
     snprintf(id, SYNCID_MAX, "%s_%s_%d", config.resource, stime, rnum);
     return 0;
+}
+
+fileop_t *getFiles(void) {
+    return files;
+}
+fileop_t *getInodeFiles(void) {
+    return inodefiles;
 }

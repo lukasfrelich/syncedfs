@@ -11,7 +11,7 @@
 #include <limits.h>
 
 void getAbsolutePath(char *fpath, const char *rootdir, const char *path);
-void getRelativePath(char *fpath, const char *rootdir, const char *path);
+void getRelativePath(char *relpath, const char *rootdir, const char *path);
 // removes trailing '/'
 char *getCanonincalPath(char *path);
 

@@ -9,17 +9,16 @@
 #include "optimization.h"
 
 int cmpOperationType(const void *a, const void *b) {
-    if (a == NULL)
-        return -1;
-    if (b == NULL)
-        return 1;
-
     GenericOperation *x;
     GenericOperation *y;
 
     x = *((GenericOperation **) a);
     y = *((GenericOperation **) b);
-
+    
+    if (x == NULL)
+        return -1;
+    if (y == NULL)
+        return 1;
 
     // if both operations are of the same type
     if (x->type == y->type) {

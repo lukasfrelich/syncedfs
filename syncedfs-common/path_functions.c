@@ -24,15 +24,17 @@ void getAbsolutePath(char *fpath, const char *rootdir, const char *path) {
     fpath[PATH_MAX - 1] = '\0'; // fpath might not have been terminated
 }
 
-void getRelativePath(char *fpath, const char *rootdir, const char *path) {
+// we want relative paths to begin with /, as paths used by FUSE do
+void getRelativePath(char *relpath, const char *rootdir, const char *path) {
     int rdirlen;
     rdirlen = strlen(rootdir);
-
-    // if rootdir is not a canonical path
+    
+    // if rootdir a canonical path (i.e. doesn't contains / at the end)
+    // *(path + rdirlen) will be '/'
     if (path != NULL && *(path + rdirlen) == '/') {
-        strncpy(fpath, path + rdirlen - 1, PATH_MAX - 1);
+        strncpy(relpath, path + rdirlen, PATH_MAX - 1);
     } else {
-        strncpy(fpath, path + rdirlen, PATH_MAX - 1);
+        strncpy(relpath, path + rdirlen - 1, PATH_MAX - 1);
     }
 }
 

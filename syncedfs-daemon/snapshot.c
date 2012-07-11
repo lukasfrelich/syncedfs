@@ -48,7 +48,7 @@ static int mexec(const char *path, char *const argv[]) {
 
 int createSnapshot(char *source, char *dest, int readonly) {
     int ret;
-    
+
     char *argv[7];
     int i = 0;
     argv[i++] = strrchr(config.btfsbin, '/');
@@ -60,13 +60,15 @@ int createSnapshot(char *source, char *dest, int readonly) {
     argv[i++] = dest;
     argv[i] = NULL;
 
+    errMsg(LOG_INFO, "Trying to create snapshot of subvolume %s to %s",
+            source, dest);
     ret = mexec(config.btfsbin, argv);
     if (ret != 0) {
-        if (ret == -1)  // execution failed
+        if (ret == -1) // execution failed
             errMsg(LOG_ERR, "Error while executing btrfs binary.");
-        else    // command successfully executed, but return non zero value
+        else // command successfully executed, but return non zero value
             errMsg(LOG_ERR, "btrfs failed to create a snapshot.");
-        
+
         return -1;
     }
 
@@ -75,7 +77,7 @@ int createSnapshot(char *source, char *dest, int readonly) {
 
 int deleteSnapshot(char *path) {
     int ret;
-    
+
     char *argv[5];
     argv[0] = strrchr(config.btfsbinsuid, '/');
     argv[1] = "subvolume";
@@ -83,13 +85,14 @@ int deleteSnapshot(char *path) {
     argv[3] = path;
     argv[4] = NULL;
 
+    errMsg(LOG_INFO, "Trying to delete snapshot (subvolume) %s", path);
     ret = mexec(config.btfsbinsuid, argv);
     if (ret != 0) {
-        if (ret == -1)  // execution failed
+        if (ret == -1) // execution failed
             errMsg(LOG_ERR, "Error while executing btrfs binary.");
-        else    // command successfully executed, but return non zero value
+        else // command successfully executed, but return non zero value
             errMsg(LOG_ERR, "btrfs failed to delete a snapshot.");
-        
+
         return -1;
     }
 

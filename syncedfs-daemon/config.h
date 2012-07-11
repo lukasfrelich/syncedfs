@@ -33,8 +33,6 @@ typedef struct configuration_t {
 
 extern configuration_t config;
 
-
 int readConfig(char *resource);
 
 #endif	/* CONFIG_H */
-

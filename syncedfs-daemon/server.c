@@ -459,12 +459,12 @@ int handleSymlink(const char *fpath, SymlinkOperation *symlinkop) {
 }
 
 int handleLink(const char *fpath, LinkOperation *linkop) {
-    char fnewpath[PATH_MAX];
+    char foldpath[PATH_MAX];
 
-    getAbsolutePath(fnewpath, config.rootdir, linkop->newpath);
+    getAbsolutePath(foldpath, config.rootdir, linkop->oldpath);
 
     // eexist error is ok
-    if (link(fnewpath, fpath) == -1) {
+    if (link(foldpath, fpath) == -1) {
         errnoMsg(LOG_ERR, "Could not create link %s", fpath);
         return -1;
     }

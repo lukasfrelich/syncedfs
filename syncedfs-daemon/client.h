@@ -40,7 +40,7 @@ int addOperation(char *relpath, GenericOperation *genop);
 int mergeOperations(fileop_t *dest, fileop_t *src);
 int initializeFileop(char *relpath, fileop_t **newentry);
 int matchInodefiles(void);
-int optimizeOperations(fileop_t *f);
+int optimizeOperations(fileop_t *fileop);
 
 //------------------------------------------------------------------------------
 // Transfer
@@ -62,6 +62,8 @@ int loadWriteData(char *relpath, WriteOperation *writeop, dyndata_t *dyndata);
 int sortByOrder(fileop_t *a, fileop_t *b);
 int switchLog(void);
 int generateSyncId(char *id, int maxlength);
+// used in analyse-log
+fileop_t *getFiles(void);
+fileop_t *getInodeFiles(void);
 
 #endif	/* CLIENT_H */
-
