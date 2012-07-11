@@ -24,8 +24,6 @@
       </nativedebugger>
       <runprofile version="9">
         <runcommandpicklist>
-          <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
-          <runcommandpicklistitem>"${OUTPUT_PATH}" /home/lfr/workspace/fsperf/analyse-log/htop_removed.log</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" /home/lfr/workspace/fsperf/analyse-log/logs/htop_removed.log</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" </runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" /media/btrfs/syncedfs/primary/r0.log optimized-writes</runcommandpicklistitem>
@@ -34,8 +32,10 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}" /home/lfr/workspace/fsperf/analyse-log/logs/ubuntu-install.log writes</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" /home/lfr/workspace/fsperf/analyse-log/logs/ubuntu-install.log optimized-writes</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" /home/lfr/workspace/fsperf/analyse-log/logs/ubuntu-install.log</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" /media/btrfs/syncedfs/primary/r0.log</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" /media/btrfs/syncedfs/primary/r0.sync</runcommandpicklistitem>
         </runcommandpicklist>
-        <runcommand>"${OUTPUT_PATH}" /home/lfr/workspace/fsperf/analyse-log/logs/ubuntu-install.log</runcommand>
+        <runcommand>"${OUTPUT_PATH}" /media/btrfs/syncedfs/primary/r0.sync</runcommand>
         <rundir></rundir>
         <buildfirst>true</buildfirst>
         <terminal-type>0</terminal-type>

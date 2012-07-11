@@ -13,7 +13,6 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>main.c</itemPath>
-      <itemPath>../syncedfs-daemon/optimization.c</itemPath>
     </logicalFolder>
     <logicalFolder name="syncedfs-common"
                    displayName="syncedfs-common"
@@ -48,6 +47,33 @@
       <itemPath>../syncedfs-common/message_functions.h</itemPath>
       <itemPath>../syncedfs-common/path_functions.c</itemPath>
       <itemPath>../syncedfs-common/path_functions.h</itemPath>
+      <itemPath>../syncedfs-common/syncid.c</itemPath>
+      <itemPath>../syncedfs-common/syncid.h</itemPath>
+    </logicalFolder>
+    <logicalFolder name="syncedfs-daemon"
+                   displayName="syncedfs-daemon"
+                   projectFiles="true">
+      <logicalFolder name="dist" displayName="dist" projectFiles="true">
+        <logicalFolder name="Debug" displayName="Debug" projectFiles="true">
+          <logicalFolder name="GNU-Linux-x86"
+                         displayName="GNU-Linux-x86"
+                         projectFiles="true">
+            <itemPath>../syncedfs-daemon/dist/Debug/GNU-Linux-x86/core</itemPath>
+            <itemPath>../syncedfs-daemon/dist/Debug/GNU-Linux-x86/syncedfs-daemon</itemPath>
+          </logicalFolder>
+        </logicalFolder>
+      </logicalFolder>
+      <itemPath>../syncedfs-daemon/Makefile</itemPath>
+      <itemPath>../syncedfs-daemon/client.c</itemPath>
+      <itemPath>../syncedfs-daemon/client.h</itemPath>
+      <itemPath>../syncedfs-daemon/config.c</itemPath>
+      <itemPath>../syncedfs-daemon/config.h</itemPath>
+      <itemPath>../syncedfs-daemon/optimization.c</itemPath>
+      <itemPath>../syncedfs-daemon/optimization.h</itemPath>
+      <itemPath>../syncedfs-daemon/server.c</itemPath>
+      <itemPath>../syncedfs-daemon/server.h</itemPath>
+      <itemPath>../syncedfs-daemon/snapshot.c</itemPath>
+      <itemPath>../syncedfs-daemon/snapshot.h</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -63,6 +89,7 @@
   </logicalFolder>
   <sourceRootList>
     <Elem>../syncedfs-common</Elem>
+    <Elem>../syncedfs-daemon</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>

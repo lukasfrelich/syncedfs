@@ -11,6 +11,7 @@
             <make-dep-projects/>
             <sourceRootList>
                 <sourceRootElem>../syncedfs-common</sourceRootElem>
+                <sourceRootElem>../syncedfs-daemon</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
