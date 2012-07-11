@@ -1,0 +1,11 @@
+#!/bin/bash
+# File created previous epoch and deleted now -> it should be deleted in the secondary node
+
+cd $WRITEDIR
+
+touch test.txt
+
+sync
+
+date > test.txt
+rm test.txt

@@ -1,0 +1,14 @@
+#!/bin/bash
+# In first we only create a directory test
+# In second epoch we remove it, create a file with the same name and delete it
+
+cd $WRITEDIR
+
+mkdir test
+
+sync
+
+rmdir test
+touch test
+date > test
+rm test
