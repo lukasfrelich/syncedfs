@@ -70,13 +70,13 @@ convert_size $2
 if [ -n "$1" ]; then
 	case "$1" in
 		seqwrite )
-			./fswrite seqwrite $COUNT $4 $3
+			fswrite64 seqwrite $COUNT $4 $3
 			;;
 		ranwrite )
-			./fswrite ranwrite $COUNT $4 $3
+			fswrite64 ranwrite $COUNT $4 $3
 			;;
 		append )
-			./fswrite append $COUNT $4 $3
+			fswrite64 append $COUNT $4 $3
 			;;
 		create )
 			create $COUNT $3

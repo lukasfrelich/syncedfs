@@ -4,4 +4,4 @@ mkdir -p /var/run/syncedfs/fs
 mkdir -p /var/run/syncedfs/client
 mkdir -p /var/run/syncedfs/server
 
-chown -R lfr.interns /var/run/syncedfs
+chown -R lfr.lfr /var/run/syncedfs
