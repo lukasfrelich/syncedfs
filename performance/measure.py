@@ -35,18 +35,6 @@ eth_devices = []
 
 stats = []  # all gathered statistics
 
-def start_test(testcmd):
-    try:
-        pid = os.fork();
-    except OSError, e:
-        raise RuntimeError('Fork failed: %s [%d]' % (e.strerror, e.errno))
-    if pid != 0:
-        try:
-            os.system(testcmd)
-        except Exception:
-            os._exit(255)
-
-
 def start_measurements():
     signal.signal(signal.SIGALRM, gather_stats)
     signal.signal(signal.SIGINT, end_measurements)
@@ -167,14 +155,15 @@ def usage():
     sys.exit(1)
 
 if __name__ == '__main__':
+#   measurements performance, on average one measurement takes 0.01s
 #	t = timeit.Timer("gather_stats(None, None)",
 #        "from __main__ import gather_stats")
 #	print t.timeit(10)
 
-    if (len(sys.argv) < 5):
+    if (len(sys.argv) < 4):
         usage()
 
-    entities_lists = sys.argv[2:]
+    entities_lists = sys.argv[1:]
 
     def parse_csv(csv):
         if csv != '-':
@@ -187,8 +176,6 @@ if __name__ == '__main__':
     executables = parse_csv(entities_lists[1])
     eth_devices = parse_csv(entities_lists[2])
 
-    testcmd = sys.argv[1]
     start_measurements()
     while True:
         time.sleep(5);
-    start_test()

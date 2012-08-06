@@ -5,6 +5,7 @@ import sys
 import cPickle as pickle
 import glob
 
+# reversed dictionaries (for column names in output)
 a_dev_stats_rev = {'0': 'rcompleted', '1': 'rmerged', '2': 'rsectors', '3': 'rtime',
              '4': 'wcompleted', '5': 'wmerged', '6': 'wsectors',
              '7': 'wtime', '8': 'inprogress',
@@ -21,11 +22,16 @@ a_eth_stats_rev = {'0': 'rbytes', '1': 'rpackets',  # important
              '10': 'terrs', '11': 'tdrop', '12': 'tfifo', '13': 'tcolls',
              '14': 'tcarrier', '15': 'tcompressed'}
 
-
 a_dev_stats = {'rcompleted': '0', 'rmerged': '1', 'rsectors': '2', 'rtime': '3',
-             'wcompleted': '4', 'wmerged': '5', 'wsectors': '6',
-             'wtime': '7', 'inprogress': '8',
-             'iotime': '9', 'iowtime': '10'}
+               'wcompleted': '4', 'wmerged': '5', 'wsectors': '6',
+               'wtime': '7', 'inprogress': '8',
+               'iotime': '9', 'iowtime': '10'}
+#a_dev_stats = {'rcompleted': [0, False, 1], 'rmerged': [1, False, 1],
+#               'rsectors': [2, False, 512], 'rtime': [3, False, 1],
+#               'wcompleted': [4, False, 1], 'wmerged': [5, False, 1],
+#               'wsectors': [6, False, 512], 'wtime': [7, False, 1],
+#               'inprogress': [8, False, 1], 'iotime': [9, False, 1],
+#               'iowtime': [10, False, 1]}
 
 # Achtung: 0 is pid
 a_proc_stats = {'rchar': '1', 'wchar': '2', 'syscr': '3', 'syscw': '4',
@@ -53,7 +59,7 @@ def print_computed_stats(computed_stats):
         header_part = ''
         for entity in entities:
             for stat in stats:
-                header_part += entity + '-' + stats_rev_dict[str(stat)] + ','
+                header_part += entity + '-' + stats_rev_dict[str(stat[0])] + ','
 
         return header_part
 
@@ -81,13 +87,14 @@ def print_computed_stats(computed_stats):
         print(line[:-1])
 
 
-def analyse(stats, rates):
+def analyse(stats):
     print(len(stats))
     sdevs = set()
     sprocs = set()
     seths = set()
 
-    # get all values first
+    # get all values first, need mainly for processes (might not be present
+    # already in the first record)
     for rec in stats:
         sdevs.update(rec[1].keys())
         sprocs.update(rec[2].keys())
@@ -119,34 +126,19 @@ def analyse(stats, rates):
 
     computed_stats = []
 
-    if rates:
-        for rec in stats:
-            time_span = rec[0] - last_time
-            last_time = rec[0]
+    for rec in stats:
+        time_span = rec[0] - last_time
+        last_time = rec[0]
 
-            out_rec = [last_time - first_time]
-            if len(dev_stats) > 0:
-                out_rec.append(process_record(rec[1], devs, dev_stats, base_dev, time_span))
-            if len(proc_stats) > 0:
-                out_rec.append(process_record(rec[2], procs, proc_stats, base_proc, time_span))
-            if len(eth_stats) > 0:
-                out_rec.append(process_record(rec[3], eths, eth_stats, base_eth, time_span))
+        out_rec = [last_time - first_time]
+        if len(dev_stats) > 0:
+            out_rec.append(process_record(rec[1], devs, dev_stats, base_dev, time_span))
+        if len(proc_stats) > 0:
+            out_rec.append(process_record(rec[2], procs, proc_stats, base_proc, time_span))
+        if len(eth_stats) > 0:
+            out_rec.append(process_record(rec[3], eths, eth_stats, base_eth, time_span))
 
-            computed_stats.append(out_rec)
-    else:
-        for rec in stats:
-            time_span = rec[0] - last_time
-            last_time = rec[0]
-
-            out_rec = [last_time - first_time]
-            if len(dev_stats) > 0:
-                out_rec.append(process_record_dummy(rec[1], devs, dev_stats))
-            if len(proc_stats) > 0:
-                out_rec.append(process_record_dummy(rec[2], procs, proc_stats))
-            if len(eth_stats) > 0:
-                out_rec.append(process_record_dummy(rec[3], eths, eth_stats))
-
-            computed_stats.append(out_rec)
+        computed_stats.append(out_rec)
 
     return computed_stats
 
@@ -161,39 +153,48 @@ def process_record(record_dict, entities, stats, base, time_span):
             # only set the base
             if time_span == 0:
                 try:
-                    base[i][j] = record_dict[entity][stat]
+                    base[i][j] = record_dict[entity][stat[0]] * stat[2]
                 except KeyError:
                     pass
                 out_sub.append(0)
             else:
                 try:
-                    # otherwise try to compute the rate
-                    out_sub.append((record_dict[entity][stat] - base[i][j]) / time_span)
-                    base[i][j] = record_dict[entity][stat]
+                    if stat[1] == True:
+                        # absolute value
+                        out_sub.append((record_dict[entity][stat[0]] * stat[2] - base[i][j]))
+                    else:
+                        # otherwise try to compute the rate
+                        out_sub.append((record_dict[entity][stat[0]] * stat[2] - base[i][j]) / time_span)
+                        base[i][j] = record_dict[entity][stat[0]] * stat[2]
                 except KeyError:
                     # stat is always there, only entity might be missing
-                    # assign -1 as result, to indicate, that the entity was missing
-                    out_sub.append(-1)
-                    # and reset base
-                    base[i][j] = 0
+                    if stat[1] == True:
+                        # output -1 as result, to indicate, that the entity was missing
+                        out_sub.append(-1)
+                        # but don't reset base
+                    else:
+                        # assign -1 as result, to indicate, that the entity was missing
+                        out_sub.append(-1)
+                        # and reset base
+                        base[i][j] = 0
             j += 1
         i += 1
         out.append(out_sub)
 
     return out
 
-def process_record_dummy(record_dict, entities, stats):
-    out = []
-    for entity in entities:     # sda1, sda2 or eth0, eth2...
-        out_sub = []
-        for stat in stats:      # wsectors, wtime  or rbytes, wbytes
-                try:
-                    out_sub.append(record_dict[entity][stat])
-                except Exception:
-                    out_sub.append(-1)
-        out.append(out_sub)
-
-    return out
+#def process_record_dummy(record_dict, entities, stats):
+#    out = []
+#    for entity in entities:     # sda1, sda2 or eth0, eth2...
+#        out_sub = []
+#        for stat in stats:      # wsectors, wtime  or rbytes, wbytes
+#                try:
+#                    out_sub.append(record_dict[entity][stat])
+#                except Exception:
+#                    out_sub.append(-1)
+#        out.append(out_sub)
+#
+#    return out
 
 def usage():
     def print_keys(spaces, dict):
@@ -254,12 +255,36 @@ if __name__ == '__main__':
         else:
             return []
 
+    def parse_stat(stat, dict):
+        # name: [index, absolute, factor]
+        absolute = False
+        factor = 1
+        #out = []
+        parts = stat.split('-')
+        if len(parts) == 1:
+            # we got just index
+            index = parts[0]
+        elif len(parts) == 2:
+            # we got index and absolute flag or factor
+            if parts[0] == 'a':
+                absolute = True
+                index = parts[1]
+            else:
+                index = parts[0]
+                factor = int(parts[1])
+        elif len(parts) == 3:
+            # we got both absolute flag and factor
+            absolute = True
+            index = parts[1]
+            factor = int(parts[2])
+
+        return [int(dict[index]), absolute, factor]
+
     # get command-line options translated to numbers
-    dev_stats = [int(a_dev_stats[stat]) for stat in parse_csv(stat_lists[0])]
-    proc_stats = [int(a_proc_stats[stat]) for stat in parse_csv(stat_lists[1])]
-    eth_stats = [int(a_eth_stats[stat]) for stat in parse_csv(stat_lists[2])]
+    dev_stats = [parse_stat(stat, a_dev_stats) for stat in parse_csv(stat_lists[0])]
+    proc_stats = [parse_stat(stat, a_proc_stats) for stat in parse_csv(stat_lists[1])]
+    eth_stats = [parse_stat(stat, a_eth_stats) for stat in parse_csv(stat_lists[2])]
 
     stats = pickle.load(open(filename, 'rb'))
 
-    # TODO: only supports computing rates now
-    print_computed_stats(analyse(stats, True));
+    print_computed_stats(analyse(stats));
