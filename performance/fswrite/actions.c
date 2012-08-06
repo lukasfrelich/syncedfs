@@ -3,8 +3,16 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #define max(m,n) ((m) > (n) ? (m) : (n))
+
+int syncFile(FILE *f) {
+    int fno;
+    fno = fileno(f);
+
+    return fsync(fno);
+}
 
 int seqwrite(long count, int mode, const char* srcpath, const char* dstpath) {
     long size;
@@ -76,6 +84,12 @@ int seqwrite(long count, int mode, const char* srcpath, const char* dstpath) {
         return -2;
     }
 
+    if (syncFile(dstfile) != 0) {
+        free(data);
+        perror("sync");
+        return -2;
+    }
+
     free(data);
     fclose(srcfile);
     fclose(dstfile);
@@ -98,24 +112,24 @@ int ranwrite(long count, const char* srcpath, const char* dstpath) {
         perror("dst stat");
         return -1;
     }
-    
+
 
     srcsize = srcstat.st_size;
     if (srcsize < BLOCK_SIZE) {
         perror("src file must be at least BLOCK_SIZE long");
         return -1;
     }
-    
+
     dstsize = dststat.st_size;
     if (dstsize < count) {
         perror("dstfile is smaller than count");
         return -1;
     }
-    
-    
+
+
     /*write blocks in random order*/
     long numblocks = count / BLOCK_SIZE;
-    long* blocks = (long*) malloc(numblocks * sizeof(long));
+    long* blocks = (long*) malloc(numblocks * sizeof (long));
     long gap = (dstsize == count) ? 0 : (dstsize - count) / numblocks;
     printf("gap: %ld\n", gap);
     if (blocks == NULL) {
@@ -134,8 +148,8 @@ int ranwrite(long count, const char* srcpath, const char* dstpath) {
         blocks[i] = blocks[rnd];
         blocks[rnd] = tmp;
     }
-    
-    
+
+
     srcfile = fopen(srcpath, "rb");
     if (srcfile == NULL) {
         perror("open source");
@@ -146,7 +160,7 @@ int ranwrite(long count, const char* srcpath, const char* dstpath) {
         perror("open destination");
         return -1;
     }
-    
+
     long offset;
     for (long i = 0; i < numblocks; i++) {
         if (srcsize - ftell(srcfile) < BLOCK_SIZE) {
@@ -157,17 +171,22 @@ int ranwrite(long count, const char* srcpath, const char* dstpath) {
             perror("read");
             return -1;
         }
-        
+
         offset = blocks[i] * (BLOCK_SIZE + gap);
         if (fseek(dstfile, offset, SEEK_SET) != 0) {
             perror("seek");
             return -1;
         }
-        
+
         if (BLOCK_SIZE != fwrite(&data, sizeof (char), BLOCK_SIZE, dstfile)) {
             perror("write");
             return -1;
         }
+    }
+
+    if (syncFile(dstfile) != 0) {
+        perror("sync");
+        return -2;
     }
     return 0;
 }

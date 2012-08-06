@@ -39,7 +39,7 @@ OBJECTFILES= \
 
 
 # C Compiler Flags
-CFLAGS=-Wall -pedantic -std=c99
+CFLAGS=-std=c99 -D_XOPEN_SOURCE=600 -D_BSD_SOURCE -D_FILE_OFFSET_BITS=64 -Wall -pedantic -std=c99
 
 # CC Compiler Flags
 CCFLAGS=

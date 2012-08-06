@@ -24,8 +24,6 @@
       </nativedebugger>
       <runprofile version="9">
         <runcommandpicklist>
-          <runcommandpicklistitem>"${OUTPUT_PATH}" seqwrite 100M /home/lfr/workspace/fstest/data.txt</runcommandpicklistitem>
-          <runcommandpicklistitem>"${OUTPUT_PATH}" seqwrite 52428800 /home/lfr/workspace/fstest/data.txt /home/lfr/workspace/fstest/data.txt</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" seqwrite 52428804 /home/lfr/workspace/fstest/data.txt.in /home/lfr/workspace/fstest/data.txt.out</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" seqwrite 52428800 /home/lfr/workspace/fstest/data.txt.in /home/lfr/workspace/fstest/data.txt.out</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" seqwrite 52428800 /dev/urandom /home/lfr/workspace/fstest/data.txt.out</runcommandpicklistitem>
@@ -34,8 +32,10 @@
           <runcommandpicklistitem>"${OUTPUT_PATH}" ranwrite 54288000 /home/lfr/workspace/fstest/data.bin.in /home/lfr/workspace/fstest/data.bin.out</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" ranwrite 5428800 /home/lfr/workspace/fstest/data.bin.in /home/lfr/workspace/fstest/data.bin.out</runcommandpicklistitem>
           <runcommandpicklistitem>"${OUTPUT_PATH}" ranwrite 44288000 /home/lfr/workspace/fstest/data.bin.in /home/lfr/workspace/fstest/data.bin.out</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" seqwrite 2147483648 /home/lfr/Downloads/data.in.bin /home/lfr/data1.out</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" seqwrite 214748364 /home/lfr/Downloads/data.in.bin /home/lfr/data1.out</runcommandpicklistitem>
         </runcommandpicklist>
-        <runcommand>"${OUTPUT_PATH}" ranwrite 44288000 /home/lfr/workspace/fstest/data.bin.in /home/lfr/workspace/fstest/data.bin.out</runcommand>
+        <runcommand>"${OUTPUT_PATH}" seqwrite 214748364 /home/lfr/Downloads/data.in.bin /home/lfr/data1.out</runcommand>
         <rundir></rundir>
         <buildfirst>true</buildfirst>
         <terminal-type>0</terminal-type>
@@ -67,8 +67,9 @@
       <runprofile version="9">
         <runcommandpicklist>
           <runcommandpicklistitem>"${OUTPUT_PATH}"</runcommandpicklistitem>
+          <runcommandpicklistitem>"${OUTPUT_PATH}" seqwrite 2147483648 /home/lfr/Downloads/data.in.bin /home/lfr/data1.out</runcommandpicklistitem>
         </runcommandpicklist>
-        <runcommand>"${OUTPUT_PATH}"</runcommand>
+        <runcommand>"${OUTPUT_PATH}" seqwrite 2147483648 /home/lfr/Downloads/data.in.bin /home/lfr/data1.out</runcommand>
         <rundir></rundir>
         <buildfirst>true</buildfirst>
         <terminal-type>0</terminal-type>
