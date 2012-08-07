@@ -1,4 +1,6 @@
 #!/bin/bash
+#
+# stops resources and deamons
 
 function stop_gluster {
         /etc/init.d/glusterd start
@@ -9,13 +11,13 @@ function stop_gluster {
 }
 
 function stop_syncedfs {
-        fusermount -u /media/virtual
         killall syncedfs-daemon
 }
 
-#function stop_drbd {
-#
-#}
+function stop_drbd {
+		drbdadm down r0
+		drbdadm invalidate r0
+}
 
 #function stop_native {
 #       # nothing for now
