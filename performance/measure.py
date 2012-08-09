@@ -29,11 +29,25 @@ def monotonic_time():
         raise OSError(errno_, os.strerror(errno_))
     return t.tv_sec + t.tv_nsec * 1e-9
 
+filename = ''
+
 block_devices = []
 executables = []
 eth_devices = []
 
 stats = []  # all gathered statistics
+
+# for automated measurements end
+process_name = 'fswrite64'  # process for which start and finish we want to wait
+eth_name = 'eth2'           # eth device, which we will monitor to see when the
+                            # transfer has finished
+process_started = False
+process_finished = False
+
+traffic_threshold = 4096
+traffic_baseline = -1
+number_measurements = 0
+
 
 def start_measurements():
     signal.signal(signal.SIGALRM, gather_stats)
@@ -44,22 +58,24 @@ def start_measurements():
 def end_measurements(signum, frame):
     signal.setitimer(signal.ITIMER_REAL, 0, 0)
 
-    # dump stats
-    filename = 'stats.log'
+    global filename
+    if not filename:
+        # dump stats
+        filename = 'stats.log'
 
-    if os.path.exists(filename):
-        # if filename exists, create new file 'stats.log.x', where x is the
-        # lowest unused number
-        pattern = re.compile('\.([0-9]+)$')
-        maxnum = 0
-        for path in glob.glob(filename + '*'):
-            number = 0
-            if (pattern.search(path)):
-                number = int(pattern.search(path).group(1))
+        if os.path.exists(filename):
+            # if filename exists, create new file 'stats.log.x', where x is the
+            # lowest unused number
+            pattern = re.compile('\.([0-9]+)$')
+            maxnum = 0
+            for path in glob.glob(filename + '*'):
+                number = 0
+                if (pattern.search(path)):
+                    number = int(pattern.search(path).group(1))
 
-            if number > maxnum:
-                maxnum = number
-        filename += '.' + str(maxnum + 1);
+                if number > maxnum:
+                    maxnum = number
+            filename += '.' + str(maxnum + 1);
 
     # if saving fails, try home directory
     try:
@@ -71,8 +87,49 @@ def end_measurements(signum, frame):
 
 
 def gather_stats(signum, frame):
-    stats.append([monotonic_time(), block_dev_io_stats(), process_io_stats(),
-                  net_stats()])
+    block_stat = block_dev_io_stats()
+    proc_stat = process_io_stats()
+    net_stat = net_stats()
+    stats.append([monotonic_time(), block_stat, proc_stat, net_stat])
+
+    global process_started
+    global process_finished
+    # has the process started (we assume, that at the beginning of measurements
+    # process does not exist
+    if (not process_started) and (process_name in proc_stat):
+        print 'started'
+        process_started = True
+
+    # has the process finished?
+    if (process_started) and (not process_finished) and (process_name not in proc_stat):
+        print 'finished'
+        process_finished = True
+
+    # if the process had finished, start traffic monitoring
+    if process_finished:
+        if check_network_traffic(net_stat[eth_name]):
+            end_measurements(None, None)
+
+def check_network_traffic(stats):
+    global traffic_baseline
+    global number_measurements
+    curr_traffic = stats[8] # transmitted bytes
+    # first time only assign
+    if traffic_baseline == -1:
+        traffic_baseline = curr_traffic
+        print 'baseline: ' + str(traffic_baseline)
+        return False
+    else:
+        number_measurements += 1
+        if number_measurements >= 50:   # 5 seconds
+            if (curr_traffic - traffic_baseline) < traffic_threshold:
+                print 'exit, traffic diff: ' + str(curr_traffic - traffic_baseline)
+                return True
+            else:
+                # reset baseline and measurements counter
+                traffic_baseline = curr_traffic
+                number_measurements = 0
+                return False
 
 
 def block_dev_io_stats():
@@ -149,7 +206,7 @@ def filter_equal(line, keywords):
 
 
 def usage():
-    print('Usage: measure.py test-command devs procs eths')
+    print('Usage: measure.py [output-file] devs procs eths')
     print('       test-command will not by interpreted by this script')
     print('       comma-separated list or - for no stats')
     sys.exit(1)
@@ -160,10 +217,15 @@ if __name__ == '__main__':
 #        "from __main__ import gather_stats")
 #	print t.timeit(10)
 
-    if (len(sys.argv) < 4):
+    if len(sys.argv) < 4:
         usage()
 
-    entities_lists = sys.argv[1:]
+    # output file was defined
+    if len(sys.argv) == 5:
+        filename = sys.argv[1]
+        entities_lists = sys.argv[2:]
+    else:
+        entities_lists = sys.argv[1:]
 
     def parse_csv(csv):
         if csv != '-':
@@ -178,4 +240,4 @@ if __name__ == '__main__':
 
     start_measurements()
     while True:
-        time.sleep(5);
+        time.sleep(5)

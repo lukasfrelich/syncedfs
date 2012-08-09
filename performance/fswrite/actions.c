@@ -14,6 +14,40 @@ int syncFile(FILE *f) {
     return fsync(fno);
 }
 
+int writeChunk(char *data, long count, long size, FILE *f) {
+    // size is greater than or equal to count
+    int iter = count / MAX_WRITE_SIZE;
+    int rem = count % MAX_WRITE_SIZE;
+
+    for (int i = 0; i < iter; i++) {
+        if (MAX_WRITE_SIZE != fwrite(data + (i * MAX_WRITE_SIZE),
+                sizeof (char), MAX_WRITE_SIZE, f)) {
+            free(data);
+            perror("write");
+            return -2;
+        }
+        if (syncFile(f) != 0) {
+            free(data);
+            perror("sync");
+            return -2;
+        }
+    }
+
+    // reminder
+    if (rem != fwrite(data, sizeof (char), rem, f)) {
+        free(data);
+        perror("write");
+        return -2;
+    }
+    if (syncFile(f) != 0) {
+        free(data);
+        perror("sync");
+        return -2;
+    }
+
+    return 0;
+}
+
 int seqwrite(long count, int mode, const char* srcpath, const char* dstpath) {
     long size;
     FILE *srcfile;
@@ -70,19 +104,15 @@ int seqwrite(long count, int mode, const char* srcpath, const char* dstpath) {
         return -1;
     }
 
+    // only flush the data at the end, but write small chunks
     for (int i = 0; i < iter; i++) {
-        if (size != fwrite(data, sizeof (char), size, dstfile)) {
-            free(data);
-            perror("write");
+        if (writeChunk(data, size, size, dstfile) != 0)
             return -2;
-        }
     }
 
-    if (rem != fwrite(data, sizeof (char), rem, dstfile)) {
-        free(data);
-        perror("write");
+    // remainder
+    if (writeChunk(data, rem, size, dstfile) != 0)
         return -2;
-    }
 
     if (syncFile(dstfile) != 0) {
         free(data);
