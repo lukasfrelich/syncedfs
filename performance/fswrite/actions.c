@@ -4,29 +4,29 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <limits.h> 
 
 #define max(m,n) ((m) > (n) ? (m) : (n))
+#define min(m,n) ((m) < (n) ? (m) : (n))
 
-int syncFile(FILE *f) {
-    int fno;
-    fno = fileno(f);
-
-    return fsync(fno);
+int syncFile(int fd) {
+    return fsync(fd);
 }
 
-int writeChunk(char *data, long count, long size, FILE *f) {
+int writeChunk(char *data, long count, long size, int fd) {
     // size is greater than or equal to count
     int iter = count / MAX_WRITE_SIZE;
     int rem = count % MAX_WRITE_SIZE;
 
     for (int i = 0; i < iter; i++) {
-        if (MAX_WRITE_SIZE != fwrite(data + (i * MAX_WRITE_SIZE),
-                sizeof (char), MAX_WRITE_SIZE, f)) {
+        if (MAX_WRITE_SIZE != write(fd, data + (i * MAX_WRITE_SIZE),
+                MAX_WRITE_SIZE)) {
             free(data);
             perror("write");
             return -2;
         }
-        if (syncFile(f) != 0) {
+        if (syncFile(fd) != 0) {
             free(data);
             perror("sync");
             return -2;
@@ -34,12 +34,12 @@ int writeChunk(char *data, long count, long size, FILE *f) {
     }
 
     // reminder
-    if (rem != fwrite(data, sizeof (char), rem, f)) {
+    if (rem != write(fd, data, rem)) {
         free(data);
         perror("write");
         return -2;
     }
-    if (syncFile(f) != 0) {
+    if (syncFile(fd) != 0) {
         free(data);
         perror("sync");
         return -2;
@@ -49,8 +49,8 @@ int writeChunk(char *data, long count, long size, FILE *f) {
 }
 
 int seqwrite(long count, int mode, const char* srcpath, const char* dstpath) {
-    long size;
-    FILE *srcfile;
+    long srcsize;
+    int srcfd, dstfd;
     struct stat srcstat;
     char* data;
 
@@ -59,80 +59,82 @@ int seqwrite(long count, int mode, const char* srcpath, const char* dstpath) {
         return -1;
     }
 
-    /*if srcfile is a character */
+    // if srcfile is a character device (i.e. /dev/urandom)
     if (S_ISCHR(srcstat.st_mode)) {
-        size = max(MAX_SRC_SIZE, count);
+        srcsize = max(MAX_SRC_SIZE, count);
     } else {
-        size = srcstat.st_size;
+        srcsize = srcstat.st_size;
 
-        if (size < 1) {
+        if (srcsize < 1) {
             perror("file empty");
             return -1;
         }
     }
+    srcsize = min(srcsize, MAX_READ_SIZE);
 
-    srcfile = fopen(srcpath, "rb");
-    if (srcfile == NULL) {
+    srcfd = open(srcpath, O_RDONLY);
+    if (srcfd == -1) {
         perror("open source");
         return -1;
     }
 
-    data = (char *) malloc(size + 1);
+    data = (char *) malloc(srcsize + 1);
     if (data == NULL) {
         perror("malloc");
         return -2;
     }
 
-    if (size != fread(data, sizeof (char), size, srcfile)) {
+    long a;
+    a = read(srcfd, data, srcsize);
+    if (a != srcsize) {
         free(data);
+        printf("returned bytes %ld, SSIZE_MAX is %ld", a, SSIZE_MAX);
         perror("read");
         return -2;
     }
 
 
-    int iter = count / size;
-    int rem = count % size;
-    FILE *dstfile;
+    int iter = count / srcsize;
+    int rem = count % srcsize;
 
     if (mode == MODE_WRITE)
-        dstfile = fopen(dstpath, "wb");
+        dstfd = open(dstpath, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if (mode == MODE_APPEND)
-        dstfile = fopen(dstpath, "ab");
+        dstfd = open(dstpath, O_WRONLY | O_APPEND);
 
-    if (dstfile == NULL) {
-        perror("open target");
+    if (dstfd == -1) {
+        perror("open destination");
         return -1;
     }
 
     // only flush the data at the end, but write small chunks
     for (int i = 0; i < iter; i++) {
-        if (writeChunk(data, size, size, dstfile) != 0)
+        if (writeChunk(data, srcsize, srcsize, dstfd) != 0)
             return -2;
     }
 
     // remainder
-    if (writeChunk(data, rem, size, dstfile) != 0)
+    if (writeChunk(data, rem, srcsize, dstfd) != 0)
         return -2;
 
-    if (syncFile(dstfile) != 0) {
+    if (syncFile(dstfd) != 0) {
         free(data);
         perror("sync");
         return -2;
     }
 
     free(data);
-    fclose(srcfile);
-    fclose(dstfile);
+    close(srcfd);
+    close(dstfd);
 
     return 0;
 }
 
 int ranwrite(long count, const char* srcpath, const char* dstpath) {
     long srcsize, dstsize;
-    FILE* srcfile;
-    FILE* dstfile;
     struct stat srcstat, dststat;
-    char data[BLOCK_SIZE];
+    int srcfd, dstfd;
+    char *data;
 
     if (stat(srcpath, &srcstat) == -1) {
         perror("src stat");
@@ -143,19 +145,18 @@ int ranwrite(long count, const char* srcpath, const char* dstpath) {
         return -1;
     }
 
-
     srcsize = srcstat.st_size;
     if (srcsize < BLOCK_SIZE) {
         perror("src file must be at least BLOCK_SIZE long");
         return -1;
     }
+    srcsize = min(srcsize, MAX_READ_SIZE);
 
     dstsize = dststat.st_size;
     if (dstsize < count) {
         perror("dstfile is smaller than count");
         return -1;
     }
-
 
     /*write blocks in random order*/
     long numblocks = count / BLOCK_SIZE;
@@ -180,43 +181,62 @@ int ranwrite(long count, const char* srcpath, const char* dstpath) {
     }
 
 
-    srcfile = fopen(srcpath, "rb");
-    if (srcfile == NULL) {
+    // preload all the data in memory
+    srcfd = open(srcpath, O_RDONLY);
+    if (srcfd == -1) {
         perror("open source");
         return -1;
     }
-    dstfile = fopen(dstpath, "r+b");
-    if (dstfile == NULL) {
+    data = (char *) malloc(srcsize + 1);
+    if (data == NULL) {
+        perror("malloc");
+        return -2;
+    }
+    if (srcsize != read(srcfd, data, srcsize)) {
+        free(data);
+        perror("read");
+        return -2;
+    }
+
+    dstfd = open(dstpath, O_RDWR);
+    if (dstfd == -1) {
         perror("open destination");
         return -1;
     }
 
-    long offset;
+    long dst_offset;
+    long src_offset = 0;
+    long unsynced_data = 0;
     for (long i = 0; i < numblocks; i++) {
-        if (srcsize - ftell(srcfile) < BLOCK_SIZE) {
+        if (srcsize - src_offset < BLOCK_SIZE) {
             printf("rewind\n");
-            rewind(srcfile);
-        }
-        if (BLOCK_SIZE != fread(&data, sizeof (char), BLOCK_SIZE, srcfile)) {
-            perror("read");
-            return -1;
+            src_offset = 0;
         }
 
-        offset = blocks[i] * (BLOCK_SIZE + gap);
-        if (fseek(dstfile, offset, SEEK_SET) != 0) {
-            perror("seek");
-            return -1;
-        }
-
-        if (BLOCK_SIZE != fwrite(&data, sizeof (char), BLOCK_SIZE, dstfile)) {
+        dst_offset = blocks[i] * (BLOCK_SIZE + gap);
+        if (pwrite(dstfd, data + src_offset, BLOCK_SIZE, dst_offset) != BLOCK_SIZE) {
             perror("write");
             return -1;
         }
+        src_offset += BLOCK_SIZE;
+        unsynced_data += BLOCK_SIZE;
+
+        if (unsynced_data >= MAX_WRITE_SIZE) {
+            printf("sync\n");
+            if (syncFile(dstfd) != 0) {
+                perror("sync");
+                return -2;
+            }
+            unsynced_data = 0;
+        }
     }
 
-    if (syncFile(dstfile) != 0) {
+    if (syncFile(dstfd) != 0) {
         perror("sync");
         return -2;
     }
+    free(data);
+    close(srcfd);
+    close(dstfd);
     return 0;
 }
