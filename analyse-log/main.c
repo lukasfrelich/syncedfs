@@ -192,7 +192,8 @@ int main(int argc, char** argv) {
     int logfd;
 
     if (argc < 2) {
-        fprintf(stderr, "usage: analyse-log logfile");
+        fprintf(stderr,
+                "usage: analyse-log logfile [pure|writes|optimized-writes]\n");
         return (EXIT_FAILURE);
     }
 

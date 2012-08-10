@@ -109,7 +109,7 @@ def gather_stats(signum, frame):
     if not process_finished and process is not None:
         if process.poll() is not None:
             process_finished = True
-            #print 'process finished'
+            print 'process finished'
 
     # if the process had finished, start traffic monitoring
     if process_finished:

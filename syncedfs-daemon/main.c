@@ -22,7 +22,7 @@
  */
 int main(int argc, char** argv) {
     if (argc < 3)
-        stderrExit("usage: syncedfsd server|client [host] port\n");
+        stderrExit("usage: syncedfsd resource server|client\n");
 
     // TODO: this app probably will have to run as root
     // but it can drop root privileges most of the time
