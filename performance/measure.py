@@ -6,6 +6,7 @@ import time, signal
 import ctypes, os
 import glob
 import cPickle as pickle
+import subprocess
 import timeit
 
 # clock_gettime is not directly available
@@ -29,6 +30,7 @@ def monotonic_time():
         raise OSError(errno_, os.strerror(errno_))
     return t.tv_sec + t.tv_nsec * 1e-9
 
+
 filename = ''
 
 block_devices = []
@@ -38,10 +40,11 @@ eth_devices = []
 stats = []  # all gathered statistics
 
 # for automated measurements end
-process_name = 'fswrite64'  # process for which start and finish we want to wait
 eth_name = 'eth2'           # eth device, which we will monitor to see when the
                             # transfer has finished
-process_started = False
+#process_started = False
+process = None
+blacklisted_process = ''
 process_finished = False
 
 traffic_threshold = 4096
@@ -49,10 +52,18 @@ traffic_baseline = -1
 number_measurements = 0
 
 
-def start_measurements():
+def start_test(cmd):
+    global process
+    print cmd
+    process = subprocess.Popen(cmd, shell=True)
+    print 'process spawned'
+
+def start_measurements(cmd):
     signal.signal(signal.SIGALRM, gather_stats)
     signal.signal(signal.SIGINT, end_measurements)
     signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)
+    time.sleep(1)   # wait for first measurement
+    start_test(cmd)
 
 
 def end_measurements(signum, frame):
@@ -92,23 +103,24 @@ def gather_stats(signum, frame):
     net_stat = net_stats()
     stats.append([monotonic_time(), block_stat, proc_stat, net_stat])
 
-    global process_started
     global process_finished
-    # has the process started (we assume, that at the beginning of measurements
-    # process does not exist
-    if (not process_started) and (process_name in proc_stat):
-        print 'started'
-        process_started = True
-
-    # has the process finished?
-    if (process_started) and (not process_finished) and (process_name not in proc_stat):
-        print 'finished'
-        process_finished = True
+    global number_measurements
+    global process
+    if not process_finished and process is not None:
+        if process.poll() is not None:
+            process_finished = True
+            #print 'process finished'
 
     # if the process had finished, start traffic monitoring
     if process_finished:
-        if check_network_traffic(net_stat[eth_name]):
-            end_measurements(None, None)
+        #print 'waiting for traffic'
+
+        if blacklisted_process not in proc_stat:
+            if check_network_traffic(net_stat[eth_name]):
+                end_measurements(None, None)
+        else:
+            #print 'blacklisted process still in memory'
+            number_measurements = 0
 
 def check_network_traffic(stats):
     global traffic_baseline
@@ -117,13 +129,13 @@ def check_network_traffic(stats):
     # first time only assign
     if traffic_baseline == -1:
         traffic_baseline = curr_traffic
-        print 'baseline: ' + str(traffic_baseline)
+        #print 'baseline: ' + str(traffic_baseline)
         return False
     else:
         number_measurements += 1
         if number_measurements >= 50:   # 5 seconds
             if (curr_traffic - traffic_baseline) < traffic_threshold:
-                print 'exit, traffic diff: ' + str(curr_traffic - traffic_baseline)
+                #print 'exit, traffic diff: ' + str(curr_traffic - traffic_baseline)
                 return True
             else:
                 # reset baseline and measurements counter
@@ -206,8 +218,9 @@ def filter_equal(line, keywords):
 
 
 def usage():
-    print('Usage: measure.py [output-file] devs procs eths')
-    print('       test-command will not by interpreted by this script')
+    print('Usage: measure.py [output-file] test-cmd blacklist-process devs procs eths')
+    print('       test-cmd will be executed by shell')
+    print('       blacklist-process measurement will not finish if this process is in the memory, - for none')
     print('       comma-separated list or - for no stats')
     sys.exit(1)
 
@@ -217,15 +230,19 @@ if __name__ == '__main__':
 #        "from __main__ import gather_stats")
 #	print t.timeit(10)
 
-    if len(sys.argv) < 4:
+    if len(sys.argv) < 6:
         usage()
 
     # output file was defined
-    if len(sys.argv) == 5:
+    if len(sys.argv) == 7:
         filename = sys.argv[1]
-        entities_lists = sys.argv[2:]
+        cmd = sys.argv[2]
+        blacklisted_process = sys.argv[3]
+        entities_lists = sys.argv[4:]
     else:
-        entities_lists = sys.argv[1:]
+        cmd = sys.argv[1]
+        blacklisted_process = sys.argv[2]
+        entities_lists = sys.argv[3:]
 
     def parse_csv(csv):
         if csv != '-':
@@ -238,6 +255,6 @@ if __name__ == '__main__':
     executables = parse_csv(entities_lists[1])
     eth_devices = parse_csv(entities_lists[2])
 
-    start_measurements()
+    start_measurements(cmd)
     while True:
         time.sleep(5)

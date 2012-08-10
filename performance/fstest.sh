@@ -60,6 +60,8 @@ function convert_size {
 	esac
 }
 
+USER=lfr
+
 if [ $# -lt 3 ]; then
 	usage
 	exit 1
@@ -77,6 +79,12 @@ if [ -n "$1" ]; then
 			;;
 		append )
 			fswrite64 append $COUNT $4 $3
+			;;
+		truncate )
+			truncate -s $COUNT $3
+			;;
+		read )
+			cmp $4 $3
 			;;
 		create )
 			create $COUNT $3
