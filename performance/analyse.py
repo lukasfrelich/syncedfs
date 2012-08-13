@@ -59,7 +59,11 @@ def print_computed_stats(computed_stats):
         header_part = ''
         for entity in entities:
             for stat in stats:
-                header_part += entity + '-' + stats_rev_dict[str(stat[0])] + ','
+                if stat[1]: # if absolute
+                    header_part += entity + '-a-' + stats_rev_dict[str(stat[0])] + '/' + str(stat[2]) + ','
+                else:
+                    header_part += entity + '-' + stats_rev_dict[str(stat[0])] + '/' + str(stat[2]) + ','
+                    #header_part += entity + '-' + stats_rev_dict[str(stat[0])] + ','
 
         return header_part
 
@@ -88,7 +92,7 @@ def print_computed_stats(computed_stats):
 
 
 def analyse(stats):
-    print(len(stats))
+    #print(len(stats))
     sdevs = set()
     sprocs = set()
     seths = set()
@@ -153,7 +157,7 @@ def process_record(record_dict, entities, stats, base, time_span):
             # only set the base
             if time_span == 0:
                 try:
-                    base[i][j] = record_dict[entity][stat[0]] * stat[2]
+                    base[i][j] = record_dict[entity][stat[0]] / stat[2]
                 except KeyError:
                     pass
                 out_sub.append(0)
@@ -161,11 +165,11 @@ def process_record(record_dict, entities, stats, base, time_span):
                 try:
                     if stat[1] == True:
                         # absolute value
-                        out_sub.append((record_dict[entity][stat[0]] * stat[2] - base[i][j]))
+                        out_sub.append((record_dict[entity][stat[0]] / stat[2] - base[i][j]))
                     else:
                         # otherwise try to compute the rate
-                        out_sub.append((record_dict[entity][stat[0]] * stat[2] - base[i][j]) / time_span)
-                        base[i][j] = record_dict[entity][stat[0]] * stat[2]
+                        out_sub.append((record_dict[entity][stat[0]] / stat[2] - base[i][j]) / time_span)
+                        base[i][j] = record_dict[entity][stat[0]] / stat[2]
                 except KeyError:
                     # stat is always there, only entity might be missing
                     if stat[1] == True:
@@ -256,29 +260,29 @@ if __name__ == '__main__':
             return []
 
     def parse_stat(stat, dict):
-        # name: [index, absolute, factor]
+        # name: [index, absolute, divisor]
         absolute = False
-        factor = 1
+        divisor = 1
         #out = []
         parts = stat.split('-')
         if len(parts) == 1:
             # we got just index
             index = parts[0]
         elif len(parts) == 2:
-            # we got index and absolute flag or factor
+            # we got index and absolute flag or divisor
             if parts[0] == 'a':
                 absolute = True
                 index = parts[1]
             else:
                 index = parts[0]
-                factor = int(parts[1])
+                divisor = int(parts[1])
         elif len(parts) == 3:
-            # we got both absolute flag and factor
+            # we got both absolute flag and divisor
             absolute = True
             index = parts[1]
-            factor = int(parts[2])
+            divisor = int(parts[2])
 
-        return [int(dict[index]), absolute, factor]
+        return [int(dict[index]), absolute, divisor]
 
     # get command-line options translated to numbers
     dev_stats = [parse_stat(stat, a_dev_stats) for stat in parse_csv(stat_lists[0])]
