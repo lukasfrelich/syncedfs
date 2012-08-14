@@ -25,7 +25,15 @@ def output_average(lines):
     
     print(out[:-1])
 
+def usage():
+    print('Usage: average.py input-file')
+    print('       output is passed to stdout')
+    sys.exit(1)
+
 if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        usage()
+
     lines = open(sys.argv[1]).read().splitlines()
     # output header
     print lines[0]
