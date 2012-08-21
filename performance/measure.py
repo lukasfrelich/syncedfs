@@ -175,16 +175,16 @@ def process_io_stats():
                         iostats.append(long(0))
                 f.close()
 
-            # if we get multiple processes with same name, sum-up the stats
-            if filename in filtered_procs:
-                oldiostats = filtered_procs[filename]
-                for i in range(1, 7):
-                    try:
-                        iostats[i] += oldiostats[i]
-                    except IndexError:
-                        pass
+                # if we get multiple processes with same name, sum-up the stats
+                if filename in filtered_procs:
+                    oldiostats = filtered_procs[filename]
+                    for i in range(1, 7):
+                        try:
+                            iostats[i] += oldiostats[i]
+                        except IndexError:
+                            pass
 
-            filtered_procs[filename] = iostats
+                filtered_procs[filename] = iostats
         except IOError:    # process might have disappear in the meantime
             pass
 
