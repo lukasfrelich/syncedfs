@@ -80,8 +80,9 @@ if __name__ == '__main__':
         print column_names
 
     with open(sys.argv[2] + '.plot', mode='w') as plot:
-        plot.write('set terminal png size 1280, 700\n')
-        plot.write('set output \"' + sys.argv[2] + '.png\"\n')
+        #plot.write('set terminal svg size 1280, 700 dynamic enhanced fname \'TheSans\' fsize 14 mousing name \"' + sys.argv[2].replace('-', '_') + '\" butt solid\n')
+        plot.write('set terminal pdf size 13.7cm,7.7cm font \'TheSans,10\'\n')
+        plot.write('set output \"' + sys.argv[2] + '.pdf\"\n')
         plot.write('set xlabel "time [seconds]"\n')
         plot.write('set ylabel "data rate [MB/s]"\n')
         plot_str = 'plot '
@@ -89,3 +90,15 @@ if __name__ == '__main__':
             plot_str = plot_str + '\"' + sys.argv[2] + '.data\" using 1:' + str(i) + ' title \"' + column_names[i] + '\" with lines, '
 
         plot.write(plot_str[:-2] + '\n')
+
+    # png version
+    #with open(sys.argv[2] + '.plot', mode='w') as plot:
+    #   plot.write('set terminal png size 1280, 700\n')
+    #    plot.write('set output \"' + sys.argv[2] + '.png\"\n')
+    #    plot.write('set xlabel "time [seconds]"\n')
+    #    plot.write('set ylabel "data rate [MB/s]"\n')
+    #    plot_str = 'plot '
+    #    for i in range(2, len(column_names)):
+    #        plot_str = plot_str + '\"' + sys.argv[2] + '.data\" using 1:' + str(i) + ' title \"' + column_names[i] + '\" with lines, '
+
+    #    plot.write(plot_str[:-2] + '\n')
