@@ -40,7 +40,7 @@ eth_devices = []
 stats = []  # all gathered statistics
 
 # for automated measurements end
-eth_name = 'eth0'           # eth device, which we will monitor to see when the
+eth_name = 'eth2'           # eth device, which we will monitor to see when the
                             # transfer has finished
 #process_started = False
 process = None
