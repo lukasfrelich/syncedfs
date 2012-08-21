@@ -40,7 +40,7 @@ eth_devices = []
 stats = []  # all gathered statistics
 
 # for automated measurements end
-eth_name = 'eth2'           # eth device, which we will monitor to see when the
+eth_name = 'eth0'           # eth device, which we will monitor to see when the
                             # transfer has finished
 #process_started = False
 process = None
@@ -183,7 +183,8 @@ def process_io_stats():
                         iostats[i] += oldiostats[i]
                     except IndexError:
                         pass
-                filtered_procs[filename] = iostats
+
+            filtered_procs[filename] = iostats
         except IOError:    # process might have disappear in the meantime
             pass
 
