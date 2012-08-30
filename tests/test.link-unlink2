@@ -1,0 +1,13 @@
+#!/bin/bash
+# A more complicated case of link-unlink combination, when multiple links of a file exist.
+
+cd $WRITEDIR
+
+date > test
+
+sync
+
+ln test.link
+date > test
+rm test
+date > test

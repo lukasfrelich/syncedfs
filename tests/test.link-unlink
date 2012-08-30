@@ -1,0 +1,11 @@
+#!/bin/bash
+# Some operations made on a file, which is later deleted should be kept if there were other links for that file.
+
+cd $WRITEDIR
+
+touch test
+ln test test2
+date > test
+rm test
+ln test2 test
+rm test

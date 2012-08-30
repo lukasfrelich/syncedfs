@@ -1,0 +1,17 @@
+#!/bin/bash
+# Standard operation.
+
+cd $WRITEDIR
+touch test.txt
+
+mkdir test
+touch test/testdir.txt
+
+ln test.txt test.link
+
+date > test.txt
+date > test2.txt
+
+truncate -s 2 test2.txt
+
+chmod 600 test2.txt

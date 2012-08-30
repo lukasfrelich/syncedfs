@@ -1,0 +1,131 @@
+message SyncInit {
+	required string sync_id = 1;
+	required string resource = 2;
+	required int32 number_files = 3;
+}
+
+message SyncInitResponse {
+	required bool continue = 1;
+	optional bool already_synced = 2;
+	optional string error_message = 3;
+}
+
+message SyncFinish {
+	optional int64 transferred_bytes = 1;
+}
+
+message FileChunk {
+	required string relative_path = 1;
+	repeated GenericOperation ops = 2;
+	required bool last_chunk = 3 [default = false];
+}
+
+message FileOperation {
+	required string relative_path = 1;
+	required GenericOperation op = 2;
+}
+
+message GenericOperation {
+	optional int32 id = 1;
+
+	enum Type {
+		UNLINK = 1;
+		RMDIR = 2;
+		CREATE = 3;		
+		MKNOD = 4;
+		MKDIR = 5;
+		SYMLINK = 6;
+		LINK = 7;
+		CHMOD = 8;
+		CHOWN = 9;
+		SETXATTR = 10;
+		REMOVEXATTR = 11;
+		TRUNCATE = 12;
+		WRITE = 13;
+		RENAME = 14;
+	}
+
+	required Type type = 2;
+
+	optional UnlinkOperation unlink_op = 3;
+	optional RmdirOperation rmdir_op = 4;
+	optional CreateOperation create_op = 5;
+	optional MknodOperation mknod_op = 6;
+	optional MkdirOperation mkdir_op = 7;
+	optional SymlinkOperation symlink_op = 8;
+	optional LinkOperation link_op = 9;
+	optional ChmodOperation chmod_op = 10;
+	optional ChownOperation chown_op = 11;
+	optional TruncateOperation truncate_op = 12;
+	optional WriteOperation write_op = 13;
+	optional RenameOperation rename_op = 14;
+	optional SetxattrOperation setxattr_op = 15;
+	optional RemovexattrOperation removexattr_op = 16;
+}
+
+message UnlinkOperation {
+	required bool last_link = 1;
+	required int64 inode = 2;
+}
+
+message RmdirOperation {
+}
+
+message CreateOperation {
+	required int32 mode = 1;
+}
+
+message MknodOperation {
+	required int32 mode = 1;
+	required int64 dev = 2;
+}
+
+message MkdirOperation {
+	required int32 mode = 1;
+}
+
+message SymlinkOperation {
+	required string oldpath = 1;
+	required string newpath = 2;
+}
+
+message LinkOperation {
+	required string oldpath = 1;
+	required string newpath = 2;
+}
+
+message ChmodOperation {
+	required int32 mode = 1;
+}
+
+message ChownOperation {
+	required int32 uid = 1;
+	required int32 gid = 2;
+}
+
+message TruncateOperation {
+	required int64 newsize = 1;
+}
+
+message WriteOperation {
+	required int64 offset = 1;
+	required int32 size = 2;
+	optional bytes data = 3;
+}
+
+message RenameOperation {
+	required string oldpath = 1;
+	required string newpath = 2;
+	required bool last_link = 3;
+	required int64 inode = 4;
+}
+
+message SetxattrOperation {
+	required string name = 1;
+	required bytes data = 2;
+	required int32 flags = 3;
+}
+
+message RemovexattrOperation {
+	required string name = 1;
+}
